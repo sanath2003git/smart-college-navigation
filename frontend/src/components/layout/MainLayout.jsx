@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SearchBar from "../search/SearchBar";
+import Sidebar from "../sidebar/Sidebar";
 
 export default function MainLayout({ children }) {
   return (
@@ -10,9 +11,15 @@ export default function MainLayout({ children }) {
 
       <SearchBar />
 
-      <main className="flex-1">
-        {children}
-      </main>
+      <div className="flex flex-1">
+
+        <Sidebar />
+
+        <main className="flex-1">
+          {children}
+        </main>
+
+      </div>
 
       <Footer />
 
