@@ -1,7 +1,12 @@
-import CampusPage from "./pages/Campus/CampusPage";
+import MainLayout from "./components/layout/MainLayout";
+import AppRoutes from "./routes/AppRoutes";
 
-function App() {
-  return <CampusPage />;
+export default function App() {
+  return (
+
+      <MainLayout>
+        <AppRoutes />
+      </MainLayout>
+
+  );
 }
-
-export default App;
