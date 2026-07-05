@@ -57,3 +57,16 @@ build/
 
 
 docs/
+
+# Python
+*.sqlite3
+db.sqlite3
+
+# Django collected static files
+staticfiles/
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
