@@ -6,14 +6,9 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0;
 }
 
 body {
-  font-family: Inter, Arial, sans-serif;
-  background-color: #f8fafc;
-}
-
-* {
-  box-sizing: border-box;
+  background: #f8fafc;
+  font-family: Inter, system-ui, sans-serif;
 }

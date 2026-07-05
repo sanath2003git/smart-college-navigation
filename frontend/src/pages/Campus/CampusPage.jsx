@@ -41,20 +41,26 @@ export default function CampusPage() {
   }, []);
 
   return (
+  <div style={{ height: "100%", width: "100%" }}>
     <MapContainer
       center={center}
       zoom={18}
-      style={{ height: "100vh", width: "100%" }}
+      maxZoom={19}
+      style={{
+        height: "calc(100vh - 170px)",
+        width: "100%",
+      }}
     >
       <TileLayer
-  attribution="© OpenStreetMap contributors"
-  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-/>
+        attribution="© OpenStreetMap contributors"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-<BuildingLayer />
-<WalkwayLayer />
-<EntranceLayer />
-<CurrentLocation />
+      <BuildingLayer />
+      <WalkwayLayer />
+      <EntranceLayer />
+      <CurrentLocation />
     </MapContainer>
-  );
+  </div>
+);
 }
