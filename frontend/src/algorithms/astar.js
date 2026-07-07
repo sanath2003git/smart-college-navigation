@@ -1,11 +1,5 @@
-function heuristic(a, b) {
-  const [lat1, lng1] = a.split(",").map(Number);
-  const [lat2, lng2] = b.split(",").map(Number);
-
-  return Math.sqrt(
-    Math.pow(lat1 - lat2, 2) +
-    Math.pow(lng1 - lng2, 2)
-  );
+function heuristic() {
+  return 0;
 }
 
 export function aStar(graph, start, goal) {
