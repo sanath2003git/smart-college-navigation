@@ -1,15 +1,56 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 
-export default function SearchBar({ onSearch }) {
+import { useNavigation } from "../../hooks/useNavigation";
+import { loadGraph } from "../../utils/loadGraph";
+import { navigateToRoom } from "../../services/navigationService";
+
+export default function SearchBar() {
   const [query, setQuery] = useState("");
 
-  const handleSearch = () => {
+  const {
+    graph,
+    setGraph,
+    setRoute,
+  } = useNavigation();
+
+  const handleSearch = async () => {
     const room = query.trim().toUpperCase();
 
     if (!room) return;
 
-    onSearch(room);
+    try {
+      let navigationGraph = graph;
+
+      // Load graph only once
+      if (!navigationGraph) {
+        navigationGraph = await loadGraph();
+        setGraph(navigationGraph);
+      }
+
+      // TODO: Replace with user's live location
+      // const currentLat = 8.912525104666102;
+      // const currentLng = 76.63148951153599;
+      
+  const currentLat = 8.912412762684593;
+  const currentLng = 76.631837011277696;
+
+      const path = await navigateToRoom(
+        navigationGraph,
+        currentLat,
+        currentLng,
+        room
+      );
+
+      setRoute(path);
+
+      console.log("Search:", room);
+      console.log("Route:", path);
+
+    } catch (err) {
+      console.error(err);
+      alert("Room not found.");
+    }
   };
 
   const handleKeyDown = (e) => {

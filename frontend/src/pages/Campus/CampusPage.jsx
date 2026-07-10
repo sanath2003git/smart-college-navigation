@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
@@ -8,9 +8,7 @@ import RouteLayer from "../../components/map/RouteLayer";
 import CurrentLocation from "../../components/map/CurrentLocation";
 
 import { loadGraph } from "../../utils/loadGraph";
-import { testGraph } from "../../utils/testGraph";
-import { navigateToRoom } from "../../services/navigationService";
-import { findRoom } from "../../services/roomService";
+import { useNavigation } from "../../hooks/useNavigation";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -20,7 +18,11 @@ const CAMPUS_BOUNDS = [
 export default function CampusPage() {
   const navigate = useNavigate();
 
-  const [route, setRoute] = useState([]);
+  const {
+    graph,
+    setGraph,
+    route,
+  } = useNavigation();
 
   const center = [8.9138, 76.6323];
 
@@ -41,49 +43,20 @@ export default function CampusPage() {
       try {
         console.log("CampusPage Loaded");
 
-        // -----------------------------
-        // Load Navigation Graph
-        // -----------------------------
-        const graph = await loadGraph();
+        // Load graph only once
+        if (!graph) {
+          const loadedGraph = await loadGraph();
 
-        console.log("Navigation Graph");
-        console.log(graph);
+          console.log("Navigation Graph");
+          console.log(loadedGraph);
 
-        console.log(
-          "Number of Nodes:",
-          Object.keys(graph).length
-        );
+          console.log(
+            "Number of Nodes:",
+            Object.keys(loadedGraph).length
+          );
 
-        // -----------------------------
-        // Debug Test (keep for now)
-        // -----------------------------
-        const shortestPath = testGraph(graph);
-
-        console.log("Shortest Route:");
-        console.log(shortestPath);
-
-        // -----------------------------
-        // Test Room Lookup
-        // -----------------------------
-        const room = await findRoom("H107");
-
-        console.log("Room Search Result:");
-        console.log(room);
-
-        // -----------------------------
-        // Navigate to H107
-        // -----------------------------
-        const path = await navigateToRoom(
-          graph,
-          8.912525104666102,      // Current latitude (example)
-          76.63148951153599,      // Current longitude (example)
-          "H107"
-        );
-
-        console.log("Navigation Route:");
-        console.log(path);
-
-        setRoute(path);
+          setGraph(loadedGraph);
+        }
 
       } catch (err) {
         console.error("Navigation Error:", err);
@@ -91,7 +64,7 @@ export default function CampusPage() {
     }
 
     initializeNavigation();
-  }, []);
+  }, [graph, setGraph]);
 
   return (
     <div style={{ height: "100%", width: "100%" }}>
@@ -142,7 +115,7 @@ export default function CampusPage() {
           url="/data/walkways.geojson"
           interactive={false}
           style={{
-            color: "#1976d2",
+            color: "#25eb92",
             weight: 4,
           }}
         />
@@ -188,7 +161,7 @@ export default function CampusPage() {
           }}
         />
 
-        {/* Calculated Route */}
+        {/* Navigation Route */}
         <RouteLayer path={route} />
 
         {/* Current Location */}

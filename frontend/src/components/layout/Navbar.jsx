@@ -30,7 +30,7 @@ export default function Navbar() {
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-8">
 
-          <NavLink to="/campus" className={navLinkClass}>
+          <NavLink to="/" className={navLinkClass}>
             Campus
           </NavLink>
 
