@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
-import { loadGraph } from "../../utils/loadGraph";
-import { navigateToRoom } from "../../services/navigationService";
+import { loadGraph } from "../../navigation/loadGraph";
+import { navigateToRoom } from "../../navigation/navigationService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");

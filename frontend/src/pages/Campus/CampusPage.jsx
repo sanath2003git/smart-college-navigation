@@ -7,8 +7,9 @@ import GeoJsonLayer from "../../components/map/GeoJsonLayer";
 import RouteLayer from "../../components/map/RouteLayer";
 import CurrentLocation from "../../components/map/CurrentLocation";
 
-import { loadGraph } from "../../utils/loadGraph";
+import { loadGraph } from "../../navigation/loadGraph";
 import { useNavigation } from "../../hooks/useNavigation";
+import LocateButton from "../../components/controls/LocateButton";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -93,7 +94,7 @@ export default function CampusPage() {
             color: "#1b5e20",
             weight: 3,
             fillColor: "#a5d6a7",
-            fillOpacity: 0.15,
+            fillOpacity: 95,
           }}
         />
 
@@ -166,6 +167,7 @@ export default function CampusPage() {
 
         {/* Current Location */}
         <CurrentLocation />
+        <LocateButton />
       </MapContainer>
     </div>
   );

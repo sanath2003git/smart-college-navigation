@@ -43,5 +43,12 @@ export async function loadGraph() {
   console.log("Graph Built");
   console.log(graph);
 
+  console.log(
+  "Neighbours of H101:",
+  graph["8.9126217,76.6315978"]
+);
+
   return graph;
+
+  
 }

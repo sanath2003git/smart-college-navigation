@@ -5,10 +5,9 @@ export function findNearestNode(graph, lat, lng) {
   Object.keys(graph).forEach((node) => {
     const [nodeLat, nodeLng] = node.split(",").map(Number);
 
-    const distance = Math.sqrt(
-      Math.pow(nodeLat - lat, 2) +
-      Math.pow(nodeLng - lng, 2)
-    );
+    const distance =
+      (nodeLat - lat) ** 2 +
+      (nodeLng - lng) ** 2;
 
     if (distance < minDistance) {
       minDistance = distance;

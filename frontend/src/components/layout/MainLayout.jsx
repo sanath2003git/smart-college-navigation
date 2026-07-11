@@ -1,6 +1,6 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import SearchBar from "../search/SearchBar";
+import SearchBar from "../controls/SearchBar";
 import Sidebar from "../sidebar/Sidebar";
 
 export default function MainLayout({ children }) {

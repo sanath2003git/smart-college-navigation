@@ -1,13 +1,11 @@
-export async function findRoom(roomNo) {
+export async function findRooms(roomNo) {
   const response = await fetch("/data/doors.geojson");
 
   const geojson = await response.json();
 
-  const room = geojson.features.find(
+  return geojson.features.filter(
     (feature) =>
       feature.properties.room_no.toUpperCase() ===
       roomNo.toUpperCase()
   );
-
-  return room || null;
 }
