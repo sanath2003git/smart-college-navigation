@@ -6,10 +6,17 @@ import "leaflet/dist/leaflet.css";
 import App from "./App";
 import "./index.css";
 
+import { NavigationProvider } from "./context/NavigationProvider";
+import { LocationProvider } from "./context/LocationContext";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <NavigationProvider>
+        <LocationProvider>
+          <App />
+        </LocationProvider>
+      </NavigationProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

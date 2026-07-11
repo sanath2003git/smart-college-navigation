@@ -1,6 +1,6 @@
-import { Marker, Popup } from "react-leaflet";
+import { Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
-import { demoLocation } from "../../data/demoLocation";
+import { useLocation } from "../../hooks/useLocation";
 
 const userIcon = L.divIcon({
   className: "",
@@ -11,7 +11,7 @@ const userIcon = L.divIcon({
       background:#2563eb;
       border:3px solid white;
       border-radius:50%;
-      box-shadow:0 0 10px rgba(37,99,235,0.8);
+      box-shadow:0 0 10px rgba(37,99,235,.8);
     "></div>
   `,
   iconSize: [18, 18],
@@ -19,16 +19,50 @@ const userIcon = L.divIcon({
 });
 
 export default function CurrentLocation() {
+  const { location } = useLocation();
+
+  if (!location) return null;
+
   return (
-    <Marker
-      position={[demoLocation.lat, demoLocation.lng]}
-      icon={userIcon}
-    >
-      <Popup>
-        <b>You are here (Demo)</b>
-        <br />
-        {demoLocation.name}
-      </Popup>
-    </Marker>
+    <>
+      <Circle
+        center={[location.lat, location.lng]}
+        radius={location.accuracy}
+        pathOptions={{
+          color: "#2563eb",
+          fillColor: "#2563eb",
+          fillOpacity: 0.15,
+        }}
+      />
+
+      <Marker
+        position={[location.lat, location.lng]}
+        icon={userIcon}
+      >
+        <Popup>
+          <b>Your Current Location</b>
+
+          <br />
+
+          Latitude:
+          <br />
+          {location.lat}
+
+          <br />
+          <br />
+
+          Longitude:
+          <br />
+          {location.lng}
+
+          <br />
+          <br />
+
+          Accuracy:
+          <br />
+          {Math.round(location.accuracy)} m
+        </Popup>
+      </Marker>
+    </>
   );
 }

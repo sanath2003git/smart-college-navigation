@@ -3,8 +3,7 @@
 "name": "walkways",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "id": 1, "name": "Chemical - Mechanical Walkway", "type": "pedestrian", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631479608831654, 8.912506359796561 ], [ 76.63139508123453, 8.912535155318535 ], [ 76.631517500513112, 8.912912376446906 ], [ 76.631606035884232, 8.912880341461632 ] ] } },
-{ "type": "Feature", "properties": { "id": 2, "name": "Chemical to Workshop Path", "type": "pedestrian", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631832536313937, 8.912388157032565 ], [ 76.632027403769783, 8.912323985459411 ], [ 76.632153624735508, 8.912741829705119 ], [ 76.632208246673898, 8.91281766874909 ], [ 76.632283536372725, 8.913023309154481 ], [ 76.632339634579708, 8.913069979301289 ], [ 76.632507191066338, 8.913600122581702 ], [ 76.632648912852389, 8.91355636938273 ], [ 76.632705011059429, 8.9137722184468 ], [ 76.632740256972326, 8.913762556287027 ] ] } },
+{ "type": "Feature", "properties": { "id": 1, "name": "Mechanical-Chemical Walkway", "type": "Walkway", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631631641809747, 8.912952142010484 ], [ 76.631631623231087, 8.912952148763097 ], [ 76.63155368067973, 8.912977943834608 ], [ 76.631412896949342, 8.912553012902466 ], [ 76.631489511535989, 8.912525104666102 ] ] } },
 { "type": "Feature", "properties": { "id": 2, "name": "Main Gate to Main Block", "type": "pedestrian", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.632003602236921, 8.915049535715331 ], [ 76.632038439099048, 8.915000518977937 ], [ 76.632083502691572, 8.914945244776815 ] ] } }
 ]
 }
