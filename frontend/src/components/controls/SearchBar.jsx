@@ -5,14 +5,16 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { loadGraph } from "../../navigation/loadGraph";
 import { navigateToRoom } from "../../navigation/navigationService";
 
+
 export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-    graph,
-    setGraph,
-    setRoute,
-  } = useNavigation();
+  graph,
+  setGraph,
+  setRoute,
+  currentLocation,
+} = useNavigation();
 
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
@@ -28,12 +30,14 @@ export default function SearchBar() {
         setGraph(navigationGraph);
       }
 
-      // TODO: Replace with user's live location
-      // const currentLat = 8.912525104666102;
-      // const currentLng = 76.63148951153599;
       
-  const currentLat = 8.912412762684593;
-  const currentLng = 76.631837011277696;
+  if (!currentLocation) {
+  alert("Waiting for your current location...");
+  return;
+}
+
+const currentLat = currentLocation.lat;
+const currentLng = currentLocation.lng;
 
       const path = await navigateToRoom(
         navigationGraph,

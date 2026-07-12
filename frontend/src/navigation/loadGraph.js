@@ -1,34 +1,42 @@
 import { buildGraph } from "./graph";
+import { connectFloorTransitions } from "./graphConnector.js";
 
 export async function loadGraph() {
   console.log("Loading navigation data...");
 
-  // Load both GeoJSON files
-  const [walkwaysRes, indoorRes] = await Promise.all([
+  const [
+    walkwaysRes,
+    indoorGFRes,
+    indoorFFRes,
+  ] = await Promise.all([
     fetch("/data/walkways.geojson"),
     fetch("/data/indoor_paths.geojson"),
+    fetch("/data/indoor_paths_ff.geojson"),
   ]);
 
-  if (!walkwaysRes.ok) {
+  if (!walkwaysRes.ok)
     throw new Error("Could not load walkways.geojson");
-  }
 
-  if (!indoorRes.ok) {
+  if (!indoorGFRes.ok)
     throw new Error("Could not load indoor_paths.geojson");
-  }
+
+  if (!indoorFFRes.ok)
+    throw new Error("Could not load indoor_paths_ff.geojson");
 
   const walkways = await walkwaysRes.json();
-  const indoor = await indoorRes.json();
+  const indoorGF = await indoorGFRes.json();
+  const indoorFF = await indoorFFRes.json();
 
   console.log("Walkways Loaded:", walkways.features.length);
-  console.log("Indoor Paths Loaded:", indoor.features.length);
+  console.log("Indoor GF Loaded:", indoorGF.features.length);
+  console.log("Indoor FF Loaded:", indoorFF.features.length);
 
-  // Merge both FeatureCollections
   const mergedGeoJSON = {
     type: "FeatureCollection",
     features: [
       ...walkways.features,
-      ...indoor.features,
+      ...indoorGF.features,
+      ...indoorFF.features,
     ],
   };
 
@@ -37,18 +45,23 @@ export async function loadGraph() {
     mergedGeoJSON.features.length
   );
 
-  // Build one graph
+  // Build graph
   const graph = buildGraph(mergedGeoJSON);
+
+  // Connect Ground Floor ↔ First Floor stairs
+  await connectFloorTransitions(graph);
 
   console.log("Graph Built");
   console.log(graph);
 
-  console.log(
-  "Neighbours of H101:",
-  graph["8.9126217,76.6315978"]
-);
+  // Print every graph node (temporary)
+  console.log("========== GRAPH NODES ==========");
+
+  Object.keys(graph).forEach((node) => {
+    console.log(node);
+  });
+
+  console.log("=================================");
 
   return graph;
-
-  
 }

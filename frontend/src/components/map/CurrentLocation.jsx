@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
+
 import { useLocation } from "../../hooks/useLocation";
+import { useNavigation } from "../../hooks/useNavigation";
 
 const userIcon = L.divIcon({
   className: "",
@@ -20,6 +23,14 @@ const userIcon = L.divIcon({
 
 export default function CurrentLocation() {
   const { location } = useLocation();
+
+  const { setCurrentLocation } = useNavigation();
+
+  useEffect(() => {
+    if (location) {
+      setCurrentLocation(location);
+    }
+  }, [location, setCurrentLocation]);
 
   if (!location) return null;
 
@@ -42,6 +53,7 @@ export default function CurrentLocation() {
         <Popup>
           <b>Your Current Location</b>
 
+          <br />
           <br />
 
           Latitude:

@@ -1,17 +1,23 @@
 import { aStar } from "../navigation/astar";
 import { findNearestNode } from "./findNearestNode";
+
 import { findRooms } from "../services/roomService";
+import { findStairs } from "../services/stairService";
 
 export async function navigateToRoom(
   graph,
   startLat,
   startLng,
-  roomNo
+  destinationName
 ) {
-  const rooms = await findRooms(roomNo);
+  let destinations = await findRooms(destinationName);
 
-  if (rooms.length === 0) {
-    console.error("Room not found:", roomNo);
+  if (destinations.length === 0) {
+    destinations = await findStairs(destinationName);
+  }
+
+  if (destinations.length === 0) {
+    console.error("Destination not found:", destinationName);
     return [];
   }
 
@@ -24,9 +30,9 @@ export async function navigateToRoom(
   let bestRoute = [];
   let shortestDistance = Infinity;
 
-  for (const room of rooms) {
-    const goalLng = room.geometry.coordinates[0];
-    const goalLat = room.geometry.coordinates[1];
+  for (const destination of destinations) {
+    const goalLng = destination.geometry.coordinates[0];
+    const goalLat = destination.geometry.coordinates[1];
 
     const goalNode = findNearestNode(
       graph,
