@@ -23,7 +23,6 @@ const userIcon = L.divIcon({
 
 export default function CurrentLocation() {
   const { location } = useLocation();
-
   const { setCurrentLocation } = useNavigation();
 
   useEffect(() => {
@@ -34,11 +33,14 @@ export default function CurrentLocation() {
 
   if (!location) return null;
 
+  // Use a fixed display radius for the prototype
+  const displayAccuracyRadius = 5;
+
   return (
     <>
       <Circle
         center={[location.lat, location.lng]}
-        radius={location.accuracy}
+        radius={displayAccuracyRadius}
         pathOptions={{
           color: "#2563eb",
           fillColor: "#2563eb",
@@ -70,9 +72,16 @@ export default function CurrentLocation() {
           <br />
           <br />
 
-          Accuracy:
+          Actual GPS Accuracy:
           <br />
           {Math.round(location.accuracy)} m
+
+          <br />
+          <br />
+
+          Display Radius:
+          <br />
+          {displayAccuracyRadius} m
         </Popup>
       </Marker>
     </>

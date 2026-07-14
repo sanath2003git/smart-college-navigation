@@ -18,7 +18,7 @@ export async function navigateToRoom(
 
   if (destinations.length === 0) {
     console.error("Destination not found:", destinationName);
-    return [];
+    return null;
   }
 
   const startNode = findNearestNode(
@@ -28,6 +28,7 @@ export async function navigateToRoom(
   );
 
   let bestRoute = [];
+  let bestDestination = null;
   let shortestDistance = Infinity;
 
   for (const destination of destinations) {
@@ -52,8 +53,12 @@ export async function navigateToRoom(
     ) {
       shortestDistance = route.length;
       bestRoute = route;
+      bestDestination = destination;
     }
   }
 
-  return bestRoute;
+  return {
+    route: bestRoute,
+    destination: bestDestination,
+  };
 }
