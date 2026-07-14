@@ -1,6 +1,6 @@
 let stairs = [];
 
-export async function findStairs(search) {
+async function loadStairs() {
   if (stairs.length === 0) {
     const [gfResponse, ffResponse] = await Promise.all([
       fetch("/data/stairs.geojson"),
@@ -16,9 +16,16 @@ export async function findStairs(search) {
     ];
   }
 
+  return stairs;
+}
+
+// Existing function used by navigationService.js
+export async function findStairs(search) {
+  const allStairs = await loadStairs();
+
   const query = search.trim().toUpperCase();
 
-  return stairs.filter((stair) => {
+  return allStairs.filter((stair) => {
     const p = stair.properties;
 
     return (
@@ -26,4 +33,26 @@ export async function findStairs(search) {
       p.name.toUpperCase().includes(query)
     );
   });
+}
+
+// New function for floor-transition logic
+const STAIR_MAPPING = {
+  "Chemical Block": {
+    1: "CHEM_STAIR_02_GF",
+  },
+};
+
+export function getTargetStair(building, floor) {
+  return STAIR_MAPPING[building]?.[floor] ?? null;
+}
+
+// Helper to retrieve a stair feature by ID
+export async function findStairById(id) {
+  const allStairs = await loadStairs();
+
+  return (
+    allStairs.find(
+      (stair) => stair.properties.id === id
+    ) || null
+  );
 }

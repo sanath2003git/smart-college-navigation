@@ -3,13 +3,18 @@ import { MapContainer, TileLayer } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 
-import GeoJsonLayer from "../../components/map/GeoJsonLayer";
-import RouteLayer from "../../components/map/RouteLayer";
-import CurrentLocation from "../../components/map/CurrentLocation";
+import PermanentLayers from "../../components/layers/PermanentLayers";
+import OutdoorLayers from "../../components/layers/OutdoorLayers";
+import GroundFloorLayers from "../../components/layers/GroundFloorLayers";
+import FirstFloorLayers from "../../components/layers/FirstFloorLayers";
 
 import { loadGraph } from "../../navigation/loadGraph";
+
 import { useNavigation } from "../../hooks/useNavigation";
-import LocateButton from "../../components/controls/LocateButton";
+import { useNavigationStage } from "../../hooks/useNavigationStage";
+import { useFloorTransition } from "../../hooks/useFloorTransition";
+
+import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -22,10 +27,16 @@ export default function CampusPage() {
   const {
     graph,
     setGraph,
-    route,
+    navigationStage,
   } = useNavigation();
 
   const center = [8.9138, 76.6323];
+
+  // Automatic Outdoor → Ground Floor
+  useNavigationStage();
+
+  // Automatic Ground Floor → First Floor
+  useFloorTransition();
 
   const handleBuildingClick = (feature, layer) => {
     layer.on({
@@ -44,7 +55,6 @@ export default function CampusPage() {
       try {
         console.log("CampusPage Loaded");
 
-        // Load graph only once
         if (!graph) {
           const loadedGraph = await loadGraph();
 
@@ -58,7 +68,6 @@ export default function CampusPage() {
 
           setGraph(loadedGraph);
         }
-
       } catch (err) {
         console.error("Navigation Error:", err);
       }
@@ -86,88 +95,27 @@ export default function CampusPage() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Campus Boundary */}
-        <GeoJsonLayer
-          url="/data/campus_outline.geojson"
-          interactive={false}
-          style={{
-            color: "#1b5e20",
-            weight: 3,
-            fillColor: "#a5d6a7",
-            fillOpacity: 95,
-          }}
-        />
+        {/* Always Visible */}
+        <PermanentLayers />
 
-        {/* Buildings */}
-        <GeoJsonLayer
-          url="/data/buildings.geojson"
-          interactive={true}
-          onEachFeature={handleBuildingClick}
-          style={{
-            color: "#d32f2f",
-            weight: 2,
-            fillColor: "#ef9a9a",
-            fillOpacity: 0.5,
-          }}
-        />
+        {/* Outdoor */}
+        {navigationStage === NAVIGATION_STAGE.OUTDOOR && (
+          <OutdoorLayers
+            handleBuildingClick={handleBuildingClick}
+          />
+        )}
 
-        {/* Outdoor Walkways */}
-        <GeoJsonLayer
-          url="/data/walkways.geojson"
-          interactive={false}
-          style={{
-            color: "#25eb92",
-            weight: 4,
-          }}
-        />
+        {/* Ground Floor */}
+        {navigationStage ===
+          NAVIGATION_STAGE.GROUND_FLOOR && (
+          <GroundFloorLayers />
+        )}
 
-        {/* Indoor Navigation Paths */}
-        <GeoJsonLayer
-          url="/data/indoor_paths.geojson"
-          interactive={false}
-          style={{
-            color: "#ff9800",
-            weight: 3,
-            dashArray: "6,4",
-          }}
-        />
-
-        {/* Entrances */}
-        <GeoJsonLayer
-          url="/data/entrances.geojson"
-          interactive={false}
-        />
-
-        {/* Chemical Ground Floor */}
-        <GeoJsonLayer
-          url="/data/chemical_gf.geojson"
-          interactive={false}
-          style={{
-            color: "#00acc1",
-            weight: 1,
-            fillColor: "#80deea",
-            fillOpacity: 0.35,
-          }}
-        />
-
-        {/* Mechanical Ground Floor */}
-        <GeoJsonLayer
-          url="/data/mechanical_gf.geojson"
-          interactive={false}
-          style={{
-            color: "#8e24aa",
-            weight: 1,
-            fillColor: "#ce93d8",
-            fillOpacity: 0.35,
-          }}
-        />
-
-        {/* Navigation Route */}
-        <RouteLayer path={route} />
-
-        {/* Current Location */}
-        <CurrentLocation />
-        <LocateButton />
+        {/* First Floor */}
+        {navigationStage ===
+          NAVIGATION_STAGE.FIRST_FLOOR && (
+          <FirstFloorLayers />
+        )}
       </MapContainer>
     </div>
   );

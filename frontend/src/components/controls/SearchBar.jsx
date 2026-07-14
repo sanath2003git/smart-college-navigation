@@ -5,16 +5,29 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { loadGraph } from "../../navigation/loadGraph";
 import { navigateToRoom } from "../../navigation/navigationService";
 
+import { findNearestEntrance } from "../../services/entranceService";
+import {
+  getTargetStair,
+  findStairById,
+} from "../../services/stairService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-  graph,
-  setGraph,
-  setRoute,
-  currentLocation,
-} = useNavigation();
+    graph,
+    setGraph,
+    setRoute,
+
+    currentLocation,
+
+    setDestination,
+    setSelectedBuilding,
+    setCurrentFloor,
+
+    setTargetEntrance,
+    setTargetStair,
+  } = useNavigation();
 
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
@@ -24,33 +37,79 @@ export default function SearchBar() {
     try {
       let navigationGraph = graph;
 
-      // Load graph only once
       if (!navigationGraph) {
         navigationGraph = await loadGraph();
         setGraph(navigationGraph);
       }
 
-      
-  if (!currentLocation) {
-  alert("Waiting for your current location...");
-  return;
-}
+      if (!currentLocation) {
+        alert("Waiting for your current location...");
+        return;
+      }
 
-const currentLat = currentLocation.lat;
-const currentLng = currentLocation.lng;
+      const currentLat = currentLocation.lat;
+      const currentLng = currentLocation.lng;
 
-      const path = await navigateToRoom(
+      const result = await navigateToRoom(
         navigationGraph,
         currentLat,
         currentLng,
         room
       );
 
-      setRoute(path);
+      if (!result) {
+        alert("Destination not found.");
+        return;
+      }
+
+      // Route
+      setRoute(result.route);
+
+      // Destination
+      setDestination(result.destination);
+
+      // Building
+      setSelectedBuilding(
+        result.destination.properties.building
+      );
+
+      // Floor
+      const floor = result.destination.properties.floor;
+
+      setCurrentFloor(floor);
+
+      // Target Entrance
+      const entrance = await findNearestEntrance(
+        result.destination.properties.building,
+        currentLat,
+        currentLng
+      );
+
+      setTargetEntrance(entrance);
+
+      console.log("Target Entrance:", entrance);
+
+      // Target Stair (Only for First Floor)
+      if (floor === 1) {
+        const stairId = getTargetStair(
+          result.destination.properties.building,
+          floor
+        );
+
+        if (stairId) {
+          const stair = await findStairById(stairId);
+
+          setTargetStair(stair);
+
+          console.log("Target Stair:", stair);
+        }
+      } else {
+        setTargetStair(null);
+      }
 
       console.log("Search:", room);
-      console.log("Route:", path);
-
+      console.log("Route:", result.route);
+      console.log("Destination:", result.destination);
     } catch (err) {
       console.error(err);
       alert("Room not found.");
@@ -67,7 +126,6 @@ const currentLng = currentLocation.lng;
     <div className="w-full bg-slate-100 px-6 py-4 border-b">
       <div className="max-w-screen-2xl mx-auto">
         <div className="flex items-center bg-white rounded-xl shadow-md px-4 py-3">
-
           <Search
             size={20}
             className="text-gray-400 mr-3"
@@ -88,7 +146,6 @@ const currentLng = currentLocation.lng;
           >
             Search
           </button>
-
         </div>
       </div>
     </div>

@@ -1,5 +1,7 @@
 import { findNearestNode } from "./findNearestNode";
 
+const stairGraphNodes = {};
+
 export async function connectFloorTransitions(graph) {
   const [gfResponse, ffResponse] = await Promise.all([
     fetch("/data/stairs.geojson"),
@@ -25,6 +27,8 @@ export async function connectFloorTransitions(graph) {
       lng
     );
 
+    stairGraphNodes[stair.properties.id] = nearestNode;
+
     console.log(
       stair.properties.id,
       "→",
@@ -35,4 +39,8 @@ export async function connectFloorTransitions(graph) {
   console.log("=======================================");
 
   return graph;
+}
+
+export function findConnectedStairNode(stairId) {
+  return stairGraphNodes[stairId] ?? null;
 }
