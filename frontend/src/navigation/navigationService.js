@@ -22,10 +22,11 @@ export async function navigateToRoom(
   }
 
   const startNode = findNearestNode(
-    graph,
-    startLat,
-    startLng
-  );
+  graph,
+  startLat,
+  startLng,
+  null
+);
 
   let bestRoute = [];
   let bestDestination = null;
@@ -36,11 +37,11 @@ export async function navigateToRoom(
     const goalLat = destination.geometry.coordinates[1];
 
     const goalNode = findNearestNode(
-      graph,
-      goalLat,
-      goalLng
-    );
-
+  graph,
+  goalLat,
+  goalLng,
+  null
+);
     const route = aStar(
       graph,
       startNode,

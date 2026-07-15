@@ -1,6 +1,34 @@
 import { buildGraph } from "./graph";
 import { connectFloorTransitions } from "./graphConnector.js";
 
+// Node metadata
+export const nodeMetadata = {};
+
+// ------------------------------------
+// Store all floors a node belongs to
+// ------------------------------------
+function addNodeMetadata(features, floor) {
+  features.forEach((feature) => {
+    if (feature.geometry.type !== "LineString") return;
+
+    feature.geometry.coordinates.forEach(([lng, lat]) => {
+      const node = `${lat.toFixed(7)},${lng.toFixed(7)}`;
+
+      // Create metadata if it doesn't exist
+      if (!nodeMetadata[node]) {
+        nodeMetadata[node] = {
+          floors: [],
+        };
+      }
+
+      // Avoid duplicates
+      if (!nodeMetadata[node].floors.includes(floor)) {
+        nodeMetadata[node].floors.push(floor);
+      }
+    });
+  });
+}
+
 export async function loadGraph() {
   console.log("Loading navigation data...");
 
@@ -31,6 +59,30 @@ export async function loadGraph() {
   console.log("Indoor GF Loaded:", indoorGF.features.length);
   console.log("Indoor FF Loaded:", indoorFF.features.length);
 
+  // ------------------------------------
+  // Build node metadata
+  // ------------------------------------
+
+  addNodeMetadata(walkways.features, null);
+  addNodeMetadata(indoorGF.features, 0);
+  addNodeMetadata(indoorFF.features, 1);
+
+  console.log("========== NODE METADATA ==========");
+
+  Object.entries(nodeMetadata).forEach(([node, data]) => {
+    console.log(
+      node,
+      "→ Floors:",
+      data.floors.join(", ")
+    );
+  });
+
+  console.log("===================================");
+
+  // ------------------------------------
+  // Merge navigation paths
+  // ------------------------------------
+
   const mergedGeoJSON = {
     type: "FeatureCollection",
     features: [
@@ -45,16 +97,17 @@ export async function loadGraph() {
     mergedGeoJSON.features.length
   );
 
+  // ------------------------------------
   // Build graph
+  // ------------------------------------
+
   const graph = buildGraph(mergedGeoJSON);
 
-  // Connect Ground Floor ↔ First Floor stairs
   await connectFloorTransitions(graph);
 
   console.log("Graph Built");
   console.log(graph);
 
-  // Print every graph node (temporary)
   console.log("========== GRAPH NODES ==========");
 
   Object.keys(graph).forEach((node) => {

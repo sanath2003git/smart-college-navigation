@@ -2,6 +2,7 @@ import { aStar } from "./astar";
 import { findNearestNode } from "./findNearestNode";
 import { findRooms } from "../services/roomService";
 import { findConnectedStairNode } from "./graphConnector";
+import { filterGraphByFloor } from "./graphFilter";
 
 export async function navigateOnFloor(
   graph,
@@ -41,10 +42,11 @@ export async function navigateOnFloor(
   const [lng, lat] = destination.geometry.coordinates;
 
   const goalNode = findNearestNode(
-    graph,
-    lat,
-    lng
-  );
+  graph,
+  lat,
+  lng,
+  1
+);
 
   if (!goalNode) {
     console.error("Goal node not found.");
@@ -52,13 +54,19 @@ export async function navigateOnFloor(
   }
 
   console.log("Goal Node:", goalNode);
+  const floorGraph = filterGraphByFloor(
+  graph,
+  1
+);
+
+console.log("Filtered First Floor Graph:", floorGraph);
 
   // Calculate First Floor route
   const route = aStar(
-    graph,
-    startNode,
-    goalNode
-  );
+  floorGraph,
+  startNode,
+  goalNode
+);
 
   console.log("First Floor Route:", route);
   console.log("===================================");

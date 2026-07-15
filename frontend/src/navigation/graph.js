@@ -6,6 +6,12 @@ export function buildGraph(geojson) {
 
     const coords = feature.geometry.coordinates;
 
+    // Floor metadata
+    const floor =
+      feature.properties?.floor ??
+      feature.properties?.level ??
+      0;
+
     for (let i = 0; i < coords.length - 1; i++) {
       const a = coords[i];
       const b = coords[i + 1];
@@ -18,19 +24,49 @@ export function buildGraph(geojson) {
         (a[1] - b[1]) ** 2
       );
 
-      if (!graph[nodeA]) graph[nodeA] = [];
-      if (!graph[nodeB]) graph[nodeB] = [];
+      // --------------------
+      // Create node objects
+      // --------------------
 
-      // Avoid duplicate edges
-      if (!graph[nodeA].some(edge => edge.node === nodeB)) {
-        graph[nodeA].push({
+      if (!graph[nodeA]) {
+        graph[nodeA] = {
+          lat: a[1],
+          lng: a[0],
+          floor,
+          neighbors: [],
+        };
+      }
+
+      if (!graph[nodeB]) {
+        graph[nodeB] = {
+          lat: b[1],
+          lng: b[0],
+          floor,
+          neighbors: [],
+        };
+      }
+
+      // --------------------
+      // Add neighbors
+      // --------------------
+
+      if (
+        !graph[nodeA].neighbors.some(
+          (edge) => edge.node === nodeB
+        )
+      ) {
+        graph[nodeA].neighbors.push({
           node: nodeB,
           cost: distance,
         });
       }
 
-      if (!graph[nodeB].some(edge => edge.node === nodeA)) {
-        graph[nodeB].push({
+      if (
+        !graph[nodeB].neighbors.some(
+          (edge) => edge.node === nodeA
+        )
+      ) {
+        graph[nodeB].neighbors.push({
           node: nodeA,
           cost: distance,
         });
