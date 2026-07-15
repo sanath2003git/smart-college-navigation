@@ -1,15 +1,24 @@
-import { aStar } from "../navigation/astar";
+import { aStar } from "./astar";
 import { findNearestNode } from "./findNearestNode";
 
 import { findRooms } from "../services/roomService";
 import { findStairs } from "../services/stairService";
 
+import { getOutdoorGraph } from "./graphManager";
+
 export async function navigateToRoom(
-  graph,
   startLat,
   startLng,
   destinationName
 ) {
+  // Use the Outdoor Graph managed by V2
+  const graph = getOutdoorGraph();
+
+  if (!graph) {
+    console.error("Outdoor graph not loaded.");
+    return null;
+  }
+
   let destinations = await findRooms(destinationName);
 
   if (destinations.length === 0) {
@@ -22,11 +31,11 @@ export async function navigateToRoom(
   }
 
   const startNode = findNearestNode(
-  graph,
-  startLat,
-  startLng,
-  null
-);
+    graph,
+    startLat,
+    startLng,
+    null
+  );
 
   let bestRoute = [];
   let bestDestination = null;
@@ -37,11 +46,12 @@ export async function navigateToRoom(
     const goalLat = destination.geometry.coordinates[1];
 
     const goalNode = findNearestNode(
-  graph,
-  goalLat,
-  goalLng,
-  null
-);
+      graph,
+      goalLat,
+      goalLng,
+      null
+    );
+
     const route = aStar(
       graph,
       startNode,

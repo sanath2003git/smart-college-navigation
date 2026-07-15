@@ -8,7 +8,7 @@ import OutdoorLayers from "../../components/layers/OutdoorLayers";
 import GroundFloorLayers from "../../components/layers/GroundFloorLayers";
 import FirstFloorLayers from "../../components/layers/FirstFloorLayers";
 
-import { loadGraph } from "../../navigation/loadGraph";
+import { loadGraphs } from "../../navigation/loadGraphs";
 
 import { useNavigation } from "../../hooks/useNavigation";
 import { useNavigationStage } from "../../hooks/useNavigationStage";
@@ -24,11 +24,7 @@ const CAMPUS_BOUNDS = [
 export default function CampusPage() {
   const navigate = useNavigate();
 
-  const {
-    graph,
-    setGraph,
-    navigationStage,
-  } = useNavigation();
+  const { navigationStage } = useNavigation();
 
   const center = [8.9138, 76.6323];
 
@@ -55,26 +51,34 @@ export default function CampusPage() {
       try {
         console.log("CampusPage Loaded");
 
-        if (!graph) {
-          const loadedGraph = await loadGraph();
+        const graphs = await loadGraphs();
 
-          console.log("Navigation Graph");
-          console.log(loadedGraph);
+        console.log("========== NAVIGATION ENGINE V2 ==========");
 
-          console.log(
-            "Number of Nodes:",
-            Object.keys(loadedGraph).length
-          );
+        console.log(
+          "Outdoor Graph Nodes:",
+          Object.keys(graphs.outdoor).length
+        );
 
-          setGraph(loadedGraph);
-        }
+        console.log(
+          "Ground Floor Graph Nodes:",
+          Object.keys(graphs.groundFloor).length
+        );
+
+        console.log(
+          "First Floor Graph Nodes:",
+          Object.keys(graphs.firstFloor).length
+        );
+
+        console.log("Navigation Engine V2 Ready");
+        console.log("==========================================");
       } catch (err) {
         console.error("Navigation Error:", err);
       }
     }
 
     initializeNavigation();
-  }, [graph, setGraph]);
+  }, []);
 
   return (
     <div style={{ height: "100%", width: "100%" }}>
@@ -98,22 +102,15 @@ export default function CampusPage() {
         {/* Always Visible */}
         <PermanentLayers />
 
-        {/* Outdoor */}
         {navigationStage === NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers
-            handleBuildingClick={handleBuildingClick}
-          />
+          <OutdoorLayers handleBuildingClick={handleBuildingClick} />
         )}
 
-        {/* Ground Floor */}
-        {navigationStage ===
-          NAVIGATION_STAGE.GROUND_FLOOR && (
+        {navigationStage === NAVIGATION_STAGE.GROUND_FLOOR && (
           <GroundFloorLayers />
         )}
 
-        {/* First Floor */}
-        {navigationStage ===
-          NAVIGATION_STAGE.FIRST_FLOOR && (
+        {navigationStage === NAVIGATION_STAGE.FIRST_FLOOR && (
           <FirstFloorLayers />
         )}
       </MapContainer>

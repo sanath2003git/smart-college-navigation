@@ -2,17 +2,26 @@ import { aStar } from "./astar";
 import { findNearestNode } from "./findNearestNode";
 import { findRooms } from "../services/roomService";
 import { findConnectedStairNode } from "./graphConnector";
-import { filterGraphByFloor } from "./graphFilter";
+
+import { getFirstFloorGraph } from "./graphManager";
 
 export async function navigateOnFloor(
-  graph,
   stairId,
   destinationRoom
 ) {
+  console.log("========== FLOOR NAVIGATION ==========");
+
+  // Get the dedicated First Floor graph
+  const graph = getFirstFloorGraph();
+
+  if (!graph) {
+    console.error("First Floor graph not loaded.");
+    return null;
+  }
+
   // Search destination room
   const rooms = await findRooms(destinationRoom);
 
-  console.log("========== FLOOR NAVIGATION ==========");
   console.log("Searching Room:", destinationRoom);
   console.log("Rooms Found:", rooms);
 
@@ -21,12 +30,11 @@ export async function navigateOnFloor(
     return null;
   }
 
-  // First matching room
   const destination = rooms[0];
 
   console.log("Destination:", destination);
 
-  // First Floor stair node
+  // Convert GF stair id → F1 stair id
   const startNode = findConnectedStairNode(
     stairId.replace("_GF", "_F1")
   );
@@ -38,15 +46,15 @@ export async function navigateOnFloor(
 
   console.log("Start Node:", startNode);
 
-  // Destination graph node
+  // Destination coordinates
   const [lng, lat] = destination.geometry.coordinates;
 
   const goalNode = findNearestNode(
-  graph,
-  lat,
-  lng,
-  1
-);
+    graph,
+    lat,
+    lng,
+    null
+  );
 
   if (!goalNode) {
     console.error("Goal node not found.");
@@ -54,19 +62,13 @@ export async function navigateOnFloor(
   }
 
   console.log("Goal Node:", goalNode);
-  const floorGraph = filterGraphByFloor(
-  graph,
-  1
-);
-
-console.log("Filtered First Floor Graph:", floorGraph);
 
   // Calculate First Floor route
   const route = aStar(
-  floorGraph,
-  startNode,
-  goalNode
-);
+    graph,
+    startNode,
+    goalNode
+  );
 
   console.log("First Floor Route:", route);
   console.log("===================================");
