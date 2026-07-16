@@ -12,29 +12,28 @@ import { findNearestNode } from "./findNearestNode";
 import { findRooms } from "../services/roomService";
 import { findStairs } from "../services/stairService";
 
-export async function navigate({
-  stage,
-  start,
-  destination,
-}) {
+export async function navigate(options) {
+  const { stage } = options;
+
   switch (stage) {
     case NAVIGATION_STAGE.OUTDOOR:
-      return navigateOutdoor(start, destination);
+      return navigateOutdoor(options);
 
     case NAVIGATION_STAGE.GROUND_FLOOR:
-      console.warn("Ground Floor routing not implemented yet.");
-      return null;
+      return navigateGroundFloor(options);
 
     case NAVIGATION_STAGE.FIRST_FLOOR:
-      console.warn("First Floor routing not implemented yet.");
-      return null;
+      return navigateFirstFloor(options);
 
     default:
+      console.error("Unknown navigation stage:", stage);
       return null;
   }
 }
 
-async function navigateOutdoor(start, destinationName) {
+async function navigateOutdoor(options) {
+  const { start, destination: destinationName } = options;
+
   const graph = getOutdoorGraph();
 
   if (!graph) {
@@ -65,8 +64,7 @@ async function navigateOutdoor(start, destinationName) {
   let shortestDistance = Infinity;
 
   for (const destination of destinations) {
-    const [goalLng, goalLat] =
-      destination.geometry.coordinates;
+    const [goalLng, goalLat] = destination.geometry.coordinates;
 
     const goalNode = findNearestNode(
       graph,
@@ -82,7 +80,7 @@ async function navigateOutdoor(start, destinationName) {
     );
 
     if (
-      route.length &&
+      route.length > 0 &&
       route.length < shortestDistance
     ) {
       shortestDistance = route.length;
@@ -95,4 +93,22 @@ async function navigateOutdoor(start, destinationName) {
     route: bestRoute,
     destination: bestDestination,
   };
+}
+
+async function navigateGroundFloor(options) {
+  console.warn(
+    "Ground Floor routing not implemented yet.",
+    options
+  );
+
+  return null;
+}
+
+async function navigateFirstFloor(options) {
+  console.warn(
+    "First Floor routing not implemented yet.",
+    options
+  );
+
+  return null;
 }
