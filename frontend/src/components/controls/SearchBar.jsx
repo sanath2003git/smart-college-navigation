@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
-import { navigateToRoom } from "../../navigation/navigationService";
+
+import { navigate } from "../../navigation/navigationRouter";
+import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
 import { findNearestEntrance } from "../../services/entranceService";
 import {
@@ -15,13 +17,10 @@ export default function SearchBar() {
 
   const {
     setRoute,
-
     currentLocation,
-
     setDestination,
     setSelectedBuilding,
     setCurrentFloor,
-
     setTargetEntrance,
     setTargetStair,
   } = useNavigation();
@@ -41,11 +40,14 @@ export default function SearchBar() {
       const currentLng = currentLocation.lng;
 
       // Navigation Engine V2
-      const result = await navigateToRoom(
-        currentLat,
-        currentLng,
-        room
-      );
+      const result = await navigate({
+        stage: NAVIGATION_STAGE.OUTDOOR,
+        start: {
+          lat: currentLat,
+          lng: currentLng,
+        },
+        destination: room,
+      });
 
       if (!result) {
         alert("Destination not found.");
