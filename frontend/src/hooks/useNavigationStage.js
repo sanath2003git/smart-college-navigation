@@ -4,23 +4,30 @@ import { useNavigation } from "./useNavigation";
 
 import { shouldEnterBuilding } from "../navigation/navigationStageManager";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
+import { navigate } from "../navigation/navigationRouter";
 
 export function useNavigationStage() {
   const {
-    currentLocation,
+  currentLocation,
 
-    destination,
+  destination,
+  setDestination,
 
-    targetEntrance,
+  // route,
+  setRoute,
 
-    currentFloor,
+  targetEntrance,
+  targetStair,
 
-    navigationStage,
+  currentFloor,
 
-    setNavigationStage,
-  } = useNavigation();
+  navigationStage,
+  setNavigationStage,
+} = useNavigation();
 
   useEffect(() => {
+  async function handleStageTransition() {
+
     // Wait until everything is available
     if (!currentLocation) return;
     if (!destination) return;
@@ -41,7 +48,7 @@ export function useNavigationStage() {
     console.log("Destination:");
     console.log(
       destination.properties.room_no ??
-        destination.properties.id
+      destination.properties.id
     );
 
     console.log("========== TARGET ENTRANCE ==========");
@@ -54,30 +61,52 @@ export function useNavigationStage() {
 
     const reachedEntrance = shouldEnterBuilding(
       currentLocation,
-      {
-        lat,
-        lng,
-      },
-      5 // meters
+      { lat, lng },
+      5
     );
 
     console.log("Reached Entrance:", reachedEntrance);
 
     if (reachedEntrance) {
       console.log(
-        "✅ Building entrance reached. Switching to Ground Floor..."
+        "✅ Building entrance reached. Calculating Ground Floor route..."
       );
+
+      if (!targetStair) {
+        console.error("Target stair not available.");
+        return;
+      }
+
+      const result = await navigate({
+        stage: NAVIGATION_STAGE.GROUND_FLOOR,
+        start: currentLocation,
+        stairId: targetStair.properties.id,
+      });
+
+      if (!result) {
+        console.error("Failed to calculate Ground Floor route.");
+        return;
+      }
+
+      setRoute(result.route);
+      setDestination(result.destination);
 
       setNavigationStage(
         NAVIGATION_STAGE.GROUND_FLOOR
       );
     }
-  }, [
-    currentLocation,
-    destination,
-    targetEntrance,
-    currentFloor,
-    navigationStage,
-    setNavigationStage,
-  ]);
-}
+  }
+
+  handleStageTransition();
+
+}, [
+  currentLocation,
+  destination,
+  targetEntrance,
+  targetStair,
+  currentFloor,
+  navigationStage,
+  setNavigationStage,
+  setRoute,
+  setDestination,
+]);}

@@ -10,7 +10,10 @@ import { aStar } from "./astar";
 import { findNearestNode } from "./findNearestNode";
 
 import { findRooms } from "../services/roomService";
-import { findStairs } from "../services/stairService";
+import {
+  findStairs,
+  findStairById,
+} from "../services/stairService";
 
 export async function navigate(options) {
   const { stage } = options;
@@ -96,12 +99,76 @@ async function navigateOutdoor(options) {
 }
 
 async function navigateGroundFloor(options) {
-  console.warn(
-    "Ground Floor routing not implemented yet.",
-    options
+  const { start, stairId } = options;
+
+  console.log("========== GROUND FLOOR ROUTING ==========");
+  console.log("Stair ID:", stairId);
+
+  const graph = getGroundFloorGraph();
+
+  console.log("Ground Floor Graph:", graph);
+
+  if (!graph) {
+    console.error("Ground Floor graph not loaded.");
+    return null;
+  }
+
+  const stair = await findStairById(stairId);
+
+  console.log("Target Stair:", stair);
+
+  if (!stair) {
+    console.error("Target stair not found.");
+    return null;
+  }
+
+  const startNode = findNearestNode(
+    graph,
+    start.lat,
+    start.lng
   );
 
-  return null;
+  console.log("Start Node:", startNode);
+
+  if (!startNode) {
+    console.error("Unable to locate start node.");
+    return null;
+  }
+
+  const [goalLng, goalLat] = stair.geometry.coordinates;
+
+  const goalNode = findNearestNode(
+    graph,
+    goalLat,
+    goalLng
+  );
+
+  console.log("Goal Node:", goalNode);
+
+  if (!goalNode) {
+    console.error("Unable to locate destination node.");
+    return null;
+  }
+
+  const route = aStar(
+    graph,
+    startNode,
+    goalNode
+  );
+
+  console.log("Ground Floor Route:", route);
+
+  if (!route || route.length === 0) {
+    console.error("No Ground Floor route found.");
+    return null;
+  }
+
+  console.log("Ground Floor routing successful.");
+
+  return {
+    route,
+    destination: stair,
+  };
 }
 
 async function navigateFirstFloor(options) {
