@@ -23,6 +23,9 @@ export function NavigationProvider({ children }) {
     NAVIGATION_STAGE.OUTDOOR
   );
 
+  // Current Building
+  const [currentBuilding, setCurrentBuilding] = useState(null);
+
   // Destination Building
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
@@ -56,7 +59,11 @@ export function NavigationProvider({ children }) {
         navigationStage,
         setNavigationStage,
 
-        // Building
+        // Current Building
+        currentBuilding,
+        setCurrentBuilding,
+
+        // Destination Building
         selectedBuilding,
         setSelectedBuilding,
 
