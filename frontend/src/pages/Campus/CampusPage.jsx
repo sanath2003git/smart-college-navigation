@@ -100,10 +100,10 @@ export default function CampusPage() {
         />
 
         {/* Always Visible */}
-        <PermanentLayers />
+        <PermanentLayers handleBuildingClick={handleBuildingClick} />
 
         {navigationStage === NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers handleBuildingClick={handleBuildingClick} />
+          <OutdoorLayers/>
         )}
 
         {navigationStage === NAVIGATION_STAGE.GROUND_FLOOR && (

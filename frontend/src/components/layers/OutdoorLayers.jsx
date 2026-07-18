@@ -1,22 +1,8 @@
 import GeoJsonLayer from "../map/GeoJsonLayer";
 
-export default function OutdoorLayers({
-  handleBuildingClick,
-}) {
+export default function OutdoorLayers() {
   return (
     <>
-      {/* Buildings */}
-      <GeoJsonLayer
-        url="/data/buildings.geojson"
-        interactive={true}
-        onEachFeature={handleBuildingClick}
-        style={{
-          color: "#d32f2f",
-          weight: 2,
-          fillColor: "#ef9a9a",
-          fillOpacity: 0.5,
-        }}
-      />
 
       {/* Outdoor Walkways */}
       <GeoJsonLayer
