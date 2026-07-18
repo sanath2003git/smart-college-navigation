@@ -24,7 +24,10 @@ const CAMPUS_BOUNDS = [
 export default function CampusPage() {
   const navigate = useNavigate();
 
-  const { navigationStage } = useNavigation();
+  const {
+  navigationStage,
+  selectedBuilding,
+} = useNavigation();
 
   const center = [8.9138, 76.6323];
 
@@ -107,12 +110,16 @@ export default function CampusPage() {
         )}
 
         {navigationStage === NAVIGATION_STAGE.GROUND_FLOOR && (
-          <GroundFloorLayers />
-        )}
+  <GroundFloorLayers
+    building={selectedBuilding}
+  />
+)}
 
-        {navigationStage === NAVIGATION_STAGE.FIRST_FLOOR && (
-          <FirstFloorLayers />
-        )}
+{navigationStage === NAVIGATION_STAGE.FIRST_FLOOR && (
+  <FirstFloorLayers
+    building={selectedBuilding}
+  />
+)}
       </MapContainer>
     </div>
   );
