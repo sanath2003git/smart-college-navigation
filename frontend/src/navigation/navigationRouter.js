@@ -99,26 +99,14 @@ async function navigateOutdoor(options) {
 }
 
 async function navigateGroundFloor(options) {
-  const { start, stairId } = options;
+  const { start, stairId, destination } = options;
 
   console.log("========== GROUND FLOOR ROUTING ==========");
-  console.log("Stair ID:", stairId);
 
   const graph = getGroundFloorGraph();
 
-  console.log("Ground Floor Graph:", graph);
-
   if (!graph) {
     console.error("Ground Floor graph not loaded.");
-    return null;
-  }
-
-  const stair = await findStairById(stairId);
-
-  console.log("Target Stair:", stair);
-
-  if (!stair) {
-    console.error("Target stair not found.");
     return null;
   }
 
@@ -135,7 +123,35 @@ async function navigateGroundFloor(options) {
     return null;
   }
 
-  const [goalLng, goalLat] = stair.geometry.coordinates;
+  let targetFeature = null;
+
+  // -------------------------------
+  // Ground Floor Room Navigation
+  // -------------------------------
+  if (destination) {
+    console.log("Routing to Ground Floor room...");
+
+    targetFeature = destination;
+  }
+
+  // -------------------------------
+  // Stair Navigation
+  // -------------------------------
+  else {
+    console.log("Routing to Stair:", stairId);
+
+    targetFeature = await findStairById(stairId);
+
+    if (!targetFeature) {
+      console.error("Target stair not found.");
+      return null;
+    }
+  }
+
+  console.log("Target:", targetFeature);
+
+  const [goalLng, goalLat] =
+    targetFeature.geometry.coordinates;
 
   const goalNode = findNearestNode(
     graph,
@@ -167,7 +183,7 @@ async function navigateGroundFloor(options) {
 
   return {
     route,
-    destination: stair,
+    destination: targetFeature,
   };
 }
 

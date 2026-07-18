@@ -9,28 +9,31 @@ import { navigateOnFloor } from "../navigation/floorNavigationService";
 
 export function useFloorTransition() {
   const {
-    graph,
+  currentLocation,
 
-    currentLocation,
+  destination,
 
-    destination,
+  currentFloor,
 
-    currentFloor,
+  navigationStage,
+  setNavigationStage,
 
-    navigationStage,
-    setNavigationStage,
+  targetStair,
 
-    targetStair,
-
-    setRoute,
-  } = useNavigation();
-
+  setRoute,
+} = useNavigation();
   useEffect(() => {
     async function transitionToFirstFloor() {
-      if (!graph) return;
-      if (!currentLocation) return;
-      if (!destination) return;
-      if (!targetStair) return;
+  console.log("========== useFloorTransition ==========");
+console.log("currentLocation:", currentLocation);
+console.log("destination:", destination);
+console.log("targetStair:", targetStair);
+console.log("currentFloor:", currentFloor);
+console.log("navigationStage:", navigationStage);
+
+if (!currentLocation) return;
+if (!destination) return;
+if (!targetStair) return;
 
       // Only for First Floor destinations
       if (currentFloor !== 1) return;
@@ -69,34 +72,49 @@ export function useFloorTransition() {
 
       if (!reachedStair) return;
 
-      console.log(
-        "✅ Stair reached. Switching to First Floor..."
-      );
+     console.log(
+  "✅ Stair reached. Switching to First Floor..."
+);
 
-      setNavigationStage(
-        NAVIGATION_STAGE.FIRST_FLOOR
-      );
+console.log("Changing stage...");
 
-      // Generate the new First Floor route
-      const result = await navigateOnFloor(
-  graph,
+setNavigationStage(
+  NAVIGATION_STAGE.FIRST_FLOOR
+);
+
+console.log("Stage changed.");
+console.log("Destination properties:");
+console.log(destination.properties);
+
+console.log("room_no:", destination.properties.room_no);
+console.log("roomNumber:", destination.properties.roomNumber);
+console.log("room:", destination.properties.room);
+console.log("name:", destination.properties.name);
+console.log("id:", destination.properties.id);
+// Generate the new First Floor route
+const result = await navigateOnFloor(
   targetStair.properties.id,
   destination.properties.room_no
 );
 
-      if (!result) return;
+console.log("navigateOnFloor Result:");
+console.log(result);
 
-      console.log(
-        "========== FIRST FLOOR ROUTE =========="
-      );
-      console.log(result.route);
+if (!result) {
+  console.error("First Floor route generation failed.");
+  return;
+}
 
-      setRoute(result.route);
+console.log(
+  "========== FIRST FLOOR ROUTE =========="
+);
+console.log(result.route);
+
+setRoute(result.route);
     }
 
     transitionToFirstFloor();
   }, [
-    graph,
     currentLocation,
     destination,
     currentFloor,

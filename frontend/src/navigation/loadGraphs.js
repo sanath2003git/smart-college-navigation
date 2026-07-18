@@ -1,5 +1,6 @@
 import { buildGraph } from "./graph";
 import { setGraphs } from "./graphManager";
+import { connectFloorTransitions } from "./graphConnector";
 
 export async function loadGraphs() {
   console.log("========== LOADING NAVIGATION ENGINE V2 ==========");
@@ -59,12 +60,15 @@ export async function loadGraphs() {
   // ----------------------------
 
   setGraphs({
-    outdoor: outdoorGraph,
-    groundFloor: groundFloorGraph,
-    firstFloor: firstFloorGraph,
-  });
+  outdoor: outdoorGraph,
+  groundFloor: groundFloorGraph,
+  firstFloor: firstFloorGraph,
+});
 
-  console.log("Navigation Engine V2 Ready");
+// Build stair lookup table
+await connectFloorTransitions(firstFloorGraph);
+
+console.log("Navigation Engine V2 Ready");
 
   console.log("==============================================");
 

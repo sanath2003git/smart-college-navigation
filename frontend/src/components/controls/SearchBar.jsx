@@ -16,14 +16,15 @@ export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-    setRoute,
-    currentLocation,
-    setDestination,
-    setSelectedBuilding,
-    setCurrentFloor,
-    setTargetEntrance,
-    setTargetStair,
-  } = useNavigation();
+  setRoute,
+  currentLocation,
+  setDestination,
+  setSelectedBuilding,
+  setCurrentFloor,
+  setTargetEntrance,
+  setTargetStair,
+  setNavigationStage,
+} = useNavigation();
 
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
@@ -38,6 +39,12 @@ export default function SearchBar() {
 
       const currentLat = currentLocation.lat;
       const currentLng = currentLocation.lng;
+
+      // Reset previous navigation
+      setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
+      setRoute([]);
+      setTargetStair(null);
+
 
       // Navigation Engine V2
       const result = await navigate({
