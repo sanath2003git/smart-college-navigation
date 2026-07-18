@@ -1,6 +1,8 @@
 import GeoJsonLayer from "../map/GeoJsonLayer";
 
-export default function GroundFloorLayers() {
+export default function GroundFloorLayers({
+  building,
+}) { console.log("GroundFloorLayers building:", building);
   return (
     <>
       {/* Indoor Navigation Paths */}
@@ -14,29 +16,32 @@ export default function GroundFloorLayers() {
         }}
       />
 
-      {/* Chemical Ground Floor */}
-      <GeoJsonLayer
-        url="/data/chemical_gf.geojson"
-        interactive={false}
-        style={{
-          color: "#00acc1",
-          weight: 1,
-          fillColor: "#80deea",
-          fillOpacity: 0.35,
-        }}
-      />
+      {building === "Chemical Block" && (
+  <GeoJsonLayer
+    url="/data/chemical_gf.geojson"
+    interactive={false}
+    style={{
+      color: "#00acc1",
+      weight: 1,
+      fillColor: "#80deea",
+      fillOpacity: 0.35,
+    }}
+  />
+)}
 
-      {/* Mechanical Ground Floor */}
-      <GeoJsonLayer
-        url="/data/mechanical_gf.geojson"
-        interactive={false}
-        style={{
-          color: "#8e24aa",
-          weight: 1,
-          fillColor: "#ce93d8",
-          fillOpacity: 0.35,
-        }}
-      />
+{building === "Mechanical Block" && (
+  <GeoJsonLayer
+    url="/data/mechanical_gf.geojson"
+    interactive={false}
+    style={{
+      color: "#8e24aa",
+      weight: 1,
+      fillColor: "#ce93d8",
+      fillOpacity: 0.35,
+    }}
+  />
+)}
+
     </>
   );
 }
