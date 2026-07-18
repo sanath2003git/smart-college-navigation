@@ -1,6 +1,8 @@
 import GeoJsonLayer from "../map/GeoJsonLayer";
 
-export default function FirstFloorLayers() {
+export default function FirstFloorLayers({
+  building,
+}) {
   return (
     <>
       {/* Indoor Navigation Paths */}
@@ -15,16 +17,18 @@ export default function FirstFloorLayers() {
       />
 
       {/* Chemical First Floor */}
-      <GeoJsonLayer
-        url="/data/rooms_ff.geojson"
-        interactive={false}
-        style={{
-          color: "#00acc1",
-          weight: 1,
-          fillColor: "#80deea",
-          fillOpacity: 0.35,
-        }}
-      />
+      {building === "Chemical Block" && (
+  <GeoJsonLayer
+    url="/data/chemical_ff.geojson"
+    interactive={false}
+    style={{
+      color: "#00acc1",
+      weight: 1,
+      fillColor: "#80deea",
+      fillOpacity: 0.35,
+    }}
+  />
+)}
     </>
   );
 }
