@@ -15,6 +15,7 @@ import { useNavigationStage } from "../../hooks/useNavigationStage";
 import { useFloorTransition } from "../../hooks/useFloorTransition";
 
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
+import useCurrentBuilding from "../../hooks/useCurrentBuilding";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -30,7 +31,8 @@ export default function CampusPage() {
 } = useNavigation();
 
   const center = [8.9138, 76.6323];
-
+  // Automatic Building Detection
+  useCurrentBuilding();
   // Automatic Outdoor → Ground Floor
   useNavigationStage();
 

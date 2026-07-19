@@ -7,7 +7,7 @@ export default function FirstFloorLayers({
     <>
       {/* Indoor Navigation Paths */}
       <GeoJsonLayer
-        url="/data/indoor_paths_ff.geojson"
+        url="/data/chemical_ff_paths.geojson"
         interactive={false}
         style={{
           color: "#ff9800",

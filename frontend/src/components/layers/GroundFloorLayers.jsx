@@ -7,7 +7,7 @@ export default function GroundFloorLayers({
     <>
       {/* Indoor Navigation Paths */}
       <GeoJsonLayer
-        url="/data/indoor_paths.geojson"
+        url="/data/chemical_gf_paths.geojson"
         interactive={false}
         style={{
           color: "#ff9800",

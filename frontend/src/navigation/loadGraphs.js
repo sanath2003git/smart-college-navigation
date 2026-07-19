@@ -11,18 +11,18 @@ export async function loadGraphs() {
     indoorFFRes,
   ] = await Promise.all([
     fetch("/data/walkways.geojson"),
-    fetch("/data/indoor_paths.geojson"),
-    fetch("/data/indoor_paths_ff.geojson"),
+    fetch("/data/chemical_gf_paths.geojson"),
+    fetch("/data/chemical_ff_paths.geojson"),
   ]);
 
   if (!walkwaysRes.ok)
     throw new Error("Failed to load walkways.geojson");
 
   if (!indoorGFRes.ok)
-    throw new Error("Failed to load indoor_paths.geojson");
+    throw new Error("Failed to load chemical_gf_paths.geojson");
 
   if (!indoorFFRes.ok)
-    throw new Error("Failed to load indoor_paths_ff.geojson");
+    throw new Error("Failed to load chemical_ff_paths.geojson");
 
   const walkways = await walkwaysRes.json();
   const indoorGF = await indoorGFRes.json();
