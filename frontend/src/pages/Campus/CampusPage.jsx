@@ -8,13 +8,14 @@ import OutdoorLayers from "../../components/layers/OutdoorLayers";
 import GroundFloorLayers from "../../components/layers/GroundFloorLayers";
 import FirstFloorLayers from "../../components/layers/FirstFloorLayers";
 
-import { loadGraph } from "../../navigation/loadGraph";
+import { loadGraphs } from "../../navigation/loadGraphs";
 
 import { useNavigation } from "../../hooks/useNavigation";
 import { useNavigationStage } from "../../hooks/useNavigationStage";
 import { useFloorTransition } from "../../hooks/useFloorTransition";
 
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
+import useCurrentBuilding from "../../hooks/useCurrentBuilding";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -25,13 +26,13 @@ export default function CampusPage() {
   const navigate = useNavigate();
 
   const {
-    graph,
-    setGraph,
-    navigationStage,
-  } = useNavigation();
+  navigationStage,
+  selectedBuilding,
+} = useNavigation();
 
   const center = [8.9138, 76.6323];
-
+  // Automatic Building Detection
+  useCurrentBuilding();
   // Automatic Outdoor → Ground Floor
   useNavigationStage();
 
@@ -55,26 +56,34 @@ export default function CampusPage() {
       try {
         console.log("CampusPage Loaded");
 
-        if (!graph) {
-          const loadedGraph = await loadGraph();
+        const graphs = await loadGraphs();
 
-          console.log("Navigation Graph");
-          console.log(loadedGraph);
+        console.log("========== NAVIGATION ENGINE V2 ==========");
 
-          console.log(
-            "Number of Nodes:",
-            Object.keys(loadedGraph).length
-          );
+        console.log(
+          "Outdoor Graph Nodes:",
+          Object.keys(graphs.outdoor).length
+        );
 
-          setGraph(loadedGraph);
-        }
+        console.log(
+          "Ground Floor Graph Nodes:",
+          Object.keys(graphs.groundFloor).length
+        );
+
+        console.log(
+          "First Floor Graph Nodes:",
+          Object.keys(graphs.firstFloor).length
+        );
+
+        console.log("Navigation Engine V2 Ready");
+        console.log("==========================================");
       } catch (err) {
         console.error("Navigation Error:", err);
       }
     }
 
     initializeNavigation();
-  }, [graph, setGraph]);
+  }, []);
 
   return (
     <div style={{ height: "100%", width: "100%" }}>
@@ -96,26 +105,23 @@ export default function CampusPage() {
         />
 
         {/* Always Visible */}
-        <PermanentLayers />
+        <PermanentLayers handleBuildingClick={handleBuildingClick} />
 
-        {/* Outdoor */}
         {navigationStage === NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers
-            handleBuildingClick={handleBuildingClick}
-          />
+          <OutdoorLayers/>
         )}
 
-        {/* Ground Floor */}
-        {navigationStage ===
-          NAVIGATION_STAGE.GROUND_FLOOR && (
-          <GroundFloorLayers />
-        )}
+        {navigationStage === NAVIGATION_STAGE.GROUND_FLOOR && (
+  <GroundFloorLayers
+    building={selectedBuilding}
+  />
+)}
 
-        {/* First Floor */}
-        {navigationStage ===
-          NAVIGATION_STAGE.FIRST_FLOOR && (
-          <FirstFloorLayers />
-        )}
+{navigationStage === NAVIGATION_STAGE.FIRST_FLOOR && (
+  <FirstFloorLayers
+    building={selectedBuilding}
+  />
+)}
       </MapContainer>
     </div>
   );

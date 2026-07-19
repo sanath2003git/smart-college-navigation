@@ -5,7 +5,9 @@ import LocateButton from "../controls/LocateButton";
 
 import { useNavigation } from "../../hooks/useNavigation";
 
-export default function PermanentLayers() {
+export default function PermanentLayers({
+  handleBuildingClick,
+}) {
   const { route } = useNavigation();
 
   return (
@@ -21,6 +23,19 @@ export default function PermanentLayers() {
           fillOpacity: 1,
         }}
       />
+
+      {/* Buildings */}
+<GeoJsonLayer
+  url="/data/buildings.geojson"
+  interactive={true}
+  onEachFeature={handleBuildingClick}
+  style={{
+    color: "#d32f2f",
+    weight: 2,
+    fillColor: "#ef9a9a",
+    fillOpacity: 0.5,
+  }}
+/>
 
       {/* Navigation Route */}
       <RouteLayer path={route} />

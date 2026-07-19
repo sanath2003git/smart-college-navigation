@@ -1,17 +1,20 @@
-export function findNearestNode(graph, lat, lng) {
+export function findNearestNode(graph, lat, lng, floor = null) {
   let nearest = null;
   let minDistance = Infinity;
 
-  Object.keys(graph).forEach((node) => {
-    const [nodeLat, nodeLng] = node.split(",").map(Number);
+  Object.entries(graph).forEach(([nodeId, node]) => {
+    // Ignore nodes from other floors
+    if (floor !== null && node.floor !== floor) {
+      return;
+    }
 
     const distance =
-      (nodeLat - lat) ** 2 +
-      (nodeLng - lng) ** 2;
+      (node.lat - lat) ** 2 +
+      (node.lng - lng) ** 2;
 
     if (distance < minDistance) {
       minDistance = distance;
-      nearest = node;
+      nearest = nodeId;
     }
   });
 

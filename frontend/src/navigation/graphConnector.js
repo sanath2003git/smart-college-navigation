@@ -42,5 +42,9 @@ export async function connectFloorTransitions(graph) {
 }
 
 export function findConnectedStairNode(stairId) {
+  console.log("========== STAIR LOOKUP ==========");
+  console.log("Requested Stair:", stairId);
+  console.log("Available Stair Nodes:", stairGraphNodes);
+
   return stairGraphNodes[stairId] ?? null;
 }

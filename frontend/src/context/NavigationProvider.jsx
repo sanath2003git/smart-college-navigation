@@ -3,9 +3,6 @@ import NavigationContext from "./NavigationContext";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
 
 export function NavigationProvider({ children }) {
-  // Navigation Graph
-  const [graph, setGraph] = useState(null);
-
   // Current Navigation Route
   const [route, setRoute] = useState([]);
 
@@ -18,13 +15,16 @@ export function NavigationProvider({ children }) {
   // Target Building Entrance
   const [targetEntrance, setTargetEntrance] = useState(null);
 
-  // ⭐ Target Staircase
+  // Target Staircase
   const [targetStair, setTargetStair] = useState(null);
 
   // Navigation Stage
   const [navigationStage, setNavigationStage] = useState(
     NAVIGATION_STAGE.OUTDOOR
   );
+
+  // Current Building
+  const [currentBuilding, setCurrentBuilding] = useState(null);
 
   // Destination Building
   const [selectedBuilding, setSelectedBuilding] = useState(null);
@@ -35,10 +35,6 @@ export function NavigationProvider({ children }) {
   return (
     <NavigationContext.Provider
       value={{
-        // Graph
-        graph,
-        setGraph,
-
         // Route
         route,
         setRoute,
@@ -55,7 +51,7 @@ export function NavigationProvider({ children }) {
         targetEntrance,
         setTargetEntrance,
 
-        // ⭐ Target Stair
+        // Target Stair
         targetStair,
         setTargetStair,
 
@@ -63,7 +59,11 @@ export function NavigationProvider({ children }) {
         navigationStage,
         setNavigationStage,
 
-        // Building
+        // Current Building
+        currentBuilding,
+        setCurrentBuilding,
+
+        // Destination Building
         selectedBuilding,
         setSelectedBuilding,
 

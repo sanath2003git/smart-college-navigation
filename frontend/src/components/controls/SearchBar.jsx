@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
-import { loadGraph } from "../../navigation/loadGraph";
-import { navigateToRoom } from "../../navigation/navigationService";
+
+import { navigate } from "../../navigation/navigationRouter";
+import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
 import { findNearestEntrance } from "../../services/entranceService";
 import {
@@ -15,19 +16,15 @@ export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-    graph,
-    setGraph,
-    setRoute,
-
-    currentLocation,
-
-    setDestination,
-    setSelectedBuilding,
-    setCurrentFloor,
-
-    setTargetEntrance,
-    setTargetStair,
-  } = useNavigation();
+  setRoute,
+  currentLocation,
+  setDestination,
+  setSelectedBuilding,
+  setCurrentFloor,
+  setTargetEntrance,
+  setTargetStair,
+  setNavigationStage,
+} = useNavigation();
 
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
@@ -35,13 +32,6 @@ export default function SearchBar() {
     if (!room) return;
 
     try {
-      let navigationGraph = graph;
-
-      if (!navigationGraph) {
-        navigationGraph = await loadGraph();
-        setGraph(navigationGraph);
-      }
-
       if (!currentLocation) {
         alert("Waiting for your current location...");
         return;
@@ -50,12 +40,21 @@ export default function SearchBar() {
       const currentLat = currentLocation.lat;
       const currentLng = currentLocation.lng;
 
-      const result = await navigateToRoom(
-        navigationGraph,
-        currentLat,
-        currentLng,
-        room
-      );
+      // Reset previous navigation
+      setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
+      setRoute([]);
+      setTargetStair(null);
+
+
+      // Navigation Engine V2
+      const result = await navigate({
+        stage: NAVIGATION_STAGE.OUTDOOR,
+        start: {
+          lat: currentLat,
+          lng: currentLng,
+        },
+        destination: room,
+      });
 
       if (!result) {
         alert("Destination not found.");
@@ -75,7 +74,6 @@ export default function SearchBar() {
 
       // Floor
       const floor = result.destination.properties.floor;
-
       setCurrentFloor(floor);
 
       // Target Entrance
@@ -89,7 +87,7 @@ export default function SearchBar() {
 
       console.log("Target Entrance:", entrance);
 
-      // Target Stair (Only for First Floor)
+      // Target Stair (only for first floor)
       if (floor === 1) {
         const stairId = getTargetStair(
           result.destination.properties.building,

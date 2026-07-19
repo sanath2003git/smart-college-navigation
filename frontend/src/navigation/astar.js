@@ -25,6 +25,7 @@ export function aStar(graph, start, goal) {
     );
 
     if (current === goal) {
+
       const path = [current];
 
       while (cameFrom[current]) {
@@ -37,7 +38,8 @@ export function aStar(graph, start, goal) {
 
     openSet.splice(openSet.indexOf(current), 1);
 
-    graph[current].forEach((neighbor) => {
+    // NEW: Iterate over the node's neighbors
+    graph[current].neighbors.forEach((neighbor) => {
 
       const tentative =
         gScore[current] + neighbor.cost;
@@ -52,8 +54,9 @@ export function aStar(graph, start, goal) {
           tentative +
           heuristic(neighbor.node, goal);
 
-        if (!openSet.includes(neighbor.node))
+        if (!openSet.includes(neighbor.node)) {
           openSet.push(neighbor.node);
+        }
       }
     });
   }
