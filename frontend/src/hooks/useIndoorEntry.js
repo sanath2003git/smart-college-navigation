@@ -7,6 +7,8 @@ export default function useIndoorEntry() {
     navigationStage,
     currentFloor,
     destination,
+    setNavigationStage,
+    setSelectedBuilding,
   } = useNavigation();
 
   const previousBuilding = useRef(null);
@@ -56,6 +58,21 @@ export default function useIndoorEntry() {
       "Indoor Entry: Exploration mode."
     );
 
+    if (
+  enteredBuilding &&
+  navigationStage === "OUTDOOR"
+) {
+  console.log(
+    "Entering Ground Floor..."
+  );
+
+  // Tell the renderer which building's indoor layers to display
+  setSelectedBuilding(currentBuilding);
+
+  // Switch to indoor mode
+  setNavigationStage("GROUND_FLOOR");
+}
+
     // Save for the next render
     previousBuilding.current = currentBuilding;
 
@@ -64,5 +81,7 @@ export default function useIndoorEntry() {
     navigationStage,
     currentFloor,
     destination,
+    setNavigationStage,
+    setSelectedBuilding,
   ]);
 }
