@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "mechanical_gf_doors",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 1, "id": "DOOR_M101", "room_no": "M101", "room_name": "Refrigeration", "building": "Mechanical Block", "floor": 0, "type": "Door", "accessible": true }, "geometry": { "type": "Point", "coordinates": [ 76.631641160272466, 8.912788284720321 ] } },
+{ "type": "Feature", "properties": { "fid": 2, "id": "DOOR_M102", "room_no": "M102", "room_name": null, "building": "Mechanical Block", "floor": 0, "type": "Door", "accessible": true }, "geometry": { "type": "Point", "coordinates": [ 76.631640470661324, 8.91276872526724 ] } },
+{ "type": "Feature", "properties": { "fid": 3, "id": "DOOR_M115", "room_no": "M115", "room_name": null, "building": "Mechanical Block", "floor": 0, "type": "Door", "accessible": true }, "geometry": { "type": "Point", "coordinates": [ 76.631714471571968, 8.913007574232495 ] } },
+{ "type": "Feature", "properties": { "fid": 4, "id": "DOOR_M114A", "room_no": "M114A", "room_name": null, "building": "Mechanical Block", "floor": 0, "type": "Door", "accessible": true }, "geometry": { "type": "Point", "coordinates": [ 76.63173609307087, 8.913071912047943 ] } }
+]
+}

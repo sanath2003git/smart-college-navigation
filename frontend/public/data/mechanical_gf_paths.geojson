@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "mechanical_gf_paths",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 1, "id": 1, "type": "Entrance", "floor": 0, "building": "Mechanical Block", "accessible": true, "path_id": "MECH_PATH_001" }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631631623231087, 8.912952148763097 ], [ 76.63169841645167, 8.912930473027961 ] ] } },
+{ "type": "Feature", "properties": { "fid": 2, "id": 2, "type": "DoorConnector", "floor": 0, "building": "Mechanical Block", "accessible": true, "path_id": "MECH_PATH_002" }, "geometry": { "type": "LineString", "coordinates": [ [ 76.63169841645167, 8.912930473027961 ], [ 76.631648015371283, 8.912785746369524 ], [ 76.631641160272466, 8.912788284720321 ] ] } },
+{ "type": "Feature", "properties": { "fid": 3, "id": 3, "type": "DoorConnector", "floor": 0, "building": "Mechanical Block", "accessible": true, "path_id": "MECH_PATH_003" }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631648015371283, 8.91278574636952 ], [ 76.631640470661324, 8.91276872526724 ] ] } },
+{ "type": "Feature", "properties": { "fid": 4, "id": 5, "type": "DoorConnector", "floor": 0, "building": "Mechanical Block", "accessible": true, "path_id": "MECH_PATH_005" }, "geometry": { "type": "LineString", "coordinates": [ [ 76.63169841645167, 8.912930473027961 ], [ 76.63172338033381, 8.913005029160376 ], [ 76.631714471571968, 8.913007574232495 ] ] } },
+{ "type": "Feature", "properties": { "fid": 5, "id": 4, "type": "DoorConnector", "floor": 0, "building": "Mechanical Block", "accessible": true, "path_id": "MECH_PATH_004" }, "geometry": { "type": "LineString", "coordinates": [ [ 76.63172338033381, 8.913005029160376 ], [ 76.631744827531747, 8.913069534186208 ], [ 76.63173609307087, 8.913071912047943 ] ] } }
+]
+}
