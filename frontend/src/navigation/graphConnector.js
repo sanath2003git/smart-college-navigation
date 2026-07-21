@@ -4,8 +4,8 @@ const stairGraphNodes = {};
 
 export async function connectFloorTransitions(graph) {
   const [gfResponse, ffResponse] = await Promise.all([
-    fetch("/data/stairs.geojson"),
-    fetch("/data/stairs_ff.geojson"),
+    fetch("/data/chemical/ground_floor/stairs.geojson"),
+    fetch("/data/chemical/first_floor/stairs.geojson"),
   ]);
 
   const gf = await gfResponse.json();

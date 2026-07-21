@@ -3,8 +3,8 @@ let stairs = [];
 async function loadStairs() {
   if (stairs.length === 0) {
     const [gfResponse, ffResponse] = await Promise.all([
-      fetch("/data/stairs.geojson"),
-      fetch("/data/stairs_ff.geojson"),
+      fetch("/data/chemical/ground_floor/stairs.geojson"),
+      fetch("/data/chemical/first_floor/stairs.geojson"),
     ]);
 
     const gfData = await gfResponse.json();
