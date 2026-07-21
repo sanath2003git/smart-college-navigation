@@ -5,7 +5,7 @@ export async function loadBuildings() {
     return buildings;
   }
 
-  const response = await fetch("/data/buildings.geojson");
+  const response = await fetch("/data/campus/buildings.geojson");
 
   buildings = await response.json();
 

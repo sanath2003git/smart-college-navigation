@@ -6,7 +6,7 @@ export default function OutdoorLayers() {
 
       {/* Outdoor Walkways */}
       <GeoJsonLayer
-        url="/data/walkways.geojson"
+        url="/data/campus/walkways.geojson"
         interactive={false}
         style={{
           color: "#25eb92",
@@ -16,7 +16,7 @@ export default function OutdoorLayers() {
 
       {/* Entrances */}
       <GeoJsonLayer
-        url="/data/entrances.geojson"
+        url="/data/campus/entrances.geojson"
         interactive={false}
       />
     </>

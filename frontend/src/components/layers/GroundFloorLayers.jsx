@@ -12,7 +12,7 @@ export default function GroundFloorLayers({
         <>
           {/* Indoor Navigation Paths */}
           <GeoJsonLayer
-            url="/data/chemical_gf_paths.geojson"
+            url="/data/chemical/ground_floor/paths.geojson"
             interactive={false}
             style={{
               color: "#ff9800",
@@ -23,7 +23,7 @@ export default function GroundFloorLayers({
 
           {/* Rooms */}
           <GeoJsonLayer
-            url="/data/chemical_gf.geojson"
+            url="/data/chemical/ground_floor/rooms.geojson"
             interactive={false}
             style={{
               color: "#00acc1",
@@ -40,7 +40,7 @@ export default function GroundFloorLayers({
         <>
           {/* Indoor Navigation Paths */}
           <GeoJsonLayer
-            url="/data/mechanical_gf_paths.geojson"
+            url="/data/mechanical/ground_floor/paths.geojson"
             interactive={false}
             style={{
               color: "#ff9800",
@@ -51,7 +51,7 @@ export default function GroundFloorLayers({
 
           {/* Rooms */}
           <GeoJsonLayer
-            url="/data/mechanical_gf.geojson"
+            url="/data/mechanical/ground_floor/rooms.geojson"
             interactive={false}
             style={{
               color: "#8e24aa",

@@ -14,7 +14,7 @@ export default function PermanentLayers({
     <>
       {/* Campus Boundary */}
       <GeoJsonLayer
-        url="/data/campus_outline.geojson"
+        url="/data/campus/campus_outline.geojson"
         interactive={false}
         style={{
           color: "#1b5e20",
@@ -26,7 +26,7 @@ export default function PermanentLayers({
 
       {/* Buildings */}
 <GeoJsonLayer
-  url="/data/buildings.geojson"
+  url="/data/campus/buildings.geojson"
   interactive={true}
   onEachFeature={handleBuildingClick}
   style={{

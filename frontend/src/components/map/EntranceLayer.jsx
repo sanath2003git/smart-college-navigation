@@ -6,7 +6,7 @@ export default function EntranceLayer() {
   const [entrances, setEntrances] = useState(null);
 
   useEffect(() => {
-    fetch("/data/entrances.geojson")
+    fetch("/data/campus/entrances.geojson")
       .then((res) => res.json())
       .then((data) => setEntrances(data));
   }, []);
