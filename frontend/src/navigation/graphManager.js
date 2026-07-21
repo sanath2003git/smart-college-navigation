@@ -1,7 +1,9 @@
 let graphs = {
   outdoor: null,
-  groundFloor: null,
-  firstFloor: null,
+
+  groundFloor: {},
+
+  firstFloor: {},
 };
 
 export function setGraphs(newGraphs) {
@@ -16,10 +18,10 @@ export function getOutdoorGraph() {
   return graphs.outdoor;
 }
 
-export function getGroundFloorGraph() {
-  return graphs.groundFloor;
+export function getGroundFloorGraph(building) {
+  return graphs.groundFloor[building] ?? null;
 }
 
-export function getFirstFloorGraph() {
-  return graphs.firstFloor;
+export function getFirstFloorGraph(building) {
+  return graphs.firstFloor[building] ?? null;
 }

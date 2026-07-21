@@ -7,40 +7,90 @@ export async function loadGraphs() {
 
   const [
     walkwaysRes,
-    indoorGFRes,
-    indoorFFRes,
+
+    chemicalGFRes,
+    chemicalFFRes,
+
+    mechanicalGFRes,
+    mechanicalFFRes,
   ] = await Promise.all([
     fetch("/data/campus/walkways.geojson"),
+
     fetch("/data/chemical/ground_floor/paths.geojson"),
     fetch("/data/chemical/first_floor/paths.geojson"),
+
+    fetch("/data/mechanical/ground_floor/paths.geojson"),
+    fetch("/data/mechanical/first_floor/paths.geojson"),
   ]);
 
   if (!walkwaysRes.ok)
     throw new Error("Failed to load campus/walkways.geojson");
 
-  if (!indoorGFRes.ok)
+  if (!chemicalGFRes.ok)
     throw new Error(
-  "Failed to load chemical/ground_floor/paths.geojson");
+      "Failed to load chemical/ground_floor/paths.geojson"
+    );
 
-  if (!indoorFFRes.ok)
+  if (!chemicalFFRes.ok)
     throw new Error(
-  "Failed to load chemical/first_floor/paths.geojson");
+      "Failed to load chemical/first_floor/paths.geojson"
+    );
+
+  if (!mechanicalGFRes.ok)
+    throw new Error(
+      "Failed to load mechanical/ground_floor/paths.geojson"
+    );
+
+  if (!mechanicalFFRes.ok)
+    throw new Error(
+      "Failed to load mechanical/first_floor/paths.geojson"
+    );
 
   const walkways = await walkwaysRes.json();
-  const indoorGF = await indoorGFRes.json();
-  const indoorFF = await indoorFFRes.json();
+
+  const chemicalGF = await chemicalGFRes.json();
+  const chemicalFF = await chemicalFFRes.json();
+
+  const mechanicalGF = await mechanicalGFRes.json();
+  const mechanicalFF = await mechanicalFFRes.json();
 
   console.log("Outdoor Paths:", walkways.features.length);
-  console.log("Ground Floor Paths:", indoorGF.features.length);
-  console.log("First Floor Paths:", indoorFF.features.length);
+
+  console.log(
+    "Chemical Ground Floor Paths:",
+    chemicalGF.features.length
+  );
+
+  console.log(
+    "Chemical First Floor Paths:",
+    chemicalFF.features.length
+  );
+
+  console.log(
+    "Mechanical Ground Floor Paths:",
+    mechanicalGF.features.length
+  );
+
+  console.log(
+    "Mechanical First Floor Paths:",
+    mechanicalFF.features.length
+  );
 
   // ----------------------------
-  // Build three independent graphs
+  // Build graphs
   // ----------------------------
 
   const outdoorGraph = buildGraph(walkways);
-  const groundFloorGraph = buildGraph(indoorGF);
-  const firstFloorGraph = buildGraph(indoorFF);
+
+  const groundFloorGraphs = {
+    "Chemical Block": buildGraph(chemicalGF),
+    "Mechanical Block": buildGraph(mechanicalGF),
+  };
+
+  const firstFloorGraphs = {
+    "Chemical Block": buildGraph(chemicalFF),
+    "Mechanical Block": buildGraph(mechanicalFF),
+  };
 
   console.log(
     "Outdoor Graph Nodes:",
@@ -48,13 +98,31 @@ export async function loadGraphs() {
   );
 
   console.log(
-    "Ground Floor Graph Nodes:",
-    Object.keys(groundFloorGraph).length
+    "Chemical GF Graph Nodes:",
+    Object.keys(
+      groundFloorGraphs["Chemical Block"]
+    ).length
   );
 
   console.log(
-    "First Floor Graph Nodes:",
-    Object.keys(firstFloorGraph).length
+    "Mechanical GF Graph Nodes:",
+    Object.keys(
+      groundFloorGraphs["Mechanical Block"]
+    ).length
+  );
+
+  console.log(
+    "Chemical FF Graph Nodes:",
+    Object.keys(
+      firstFloorGraphs["Chemical Block"]
+    ).length
+  );
+
+  console.log(
+    "Mechanical FF Graph Nodes:",
+    Object.keys(
+      firstFloorGraphs["Mechanical Block"]
+    ).length
   );
 
   // ----------------------------
@@ -62,21 +130,23 @@ export async function loadGraphs() {
   // ----------------------------
 
   setGraphs({
-  outdoor: outdoorGraph,
-  groundFloor: groundFloorGraph,
-  firstFloor: firstFloorGraph,
-});
+    outdoor: outdoorGraph,
+    groundFloor: groundFloorGraphs,
+    firstFloor: firstFloorGraphs,
+  });
 
-// Build stair lookup table
-await connectFloorTransitions(firstFloorGraph);
+  // Leave this as-is for now.
+  // We'll refactor graphConnector.js next.
+  await connectFloorTransitions(
+    firstFloorGraphs["Chemical Block"]
+  );
 
-console.log("Navigation Engine V2 Ready");
-
+  console.log("Navigation Engine V2 Ready");
   console.log("==============================================");
 
   return {
     outdoor: outdoorGraph,
-    groundFloor: groundFloorGraph,
-    firstFloor: firstFloorGraph,
+    groundFloor: groundFloorGraphs,
+    firstFloor: firstFloorGraphs,
   };
 }

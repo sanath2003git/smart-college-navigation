@@ -43,10 +43,14 @@ export function useNavigationStage() {
         destination.properties.level ??
         currentFloor;
 
+      // Destination building
+      const building = destination.properties.building;
+
       // Debug Logs
       console.log("========== NAVIGATION STAGE ==========");
       console.log("Stage:", navigationStage);
       console.log("Destination Floor:", destinationFloor);
+      console.log("Building:", building);
 
       console.log("Destination:");
       console.log(
@@ -86,6 +90,7 @@ export function useNavigationStage() {
           stage: NAVIGATION_STAGE.GROUND_FLOOR,
           start: currentLocation,
           destination,
+          building,
         });
       }
 
@@ -102,6 +107,7 @@ export function useNavigationStage() {
           stage: NAVIGATION_STAGE.GROUND_FLOOR,
           start: currentLocation,
           stairId: targetStair.properties.id,
+          building,
         });
       }
 

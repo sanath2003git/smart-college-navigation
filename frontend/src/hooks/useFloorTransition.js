@@ -93,6 +93,7 @@ console.log("name:", destination.properties.name);
 console.log("id:", destination.properties.id);
 // Generate the new First Floor route
 const result = await navigateOnFloor(
+  destination.properties.building,
   targetStair.properties.id,
   destination.properties.room_no
 );
