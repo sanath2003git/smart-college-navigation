@@ -5,6 +5,7 @@ import { useNavigation } from "./useNavigation";
 import { shouldEnterBuilding } from "../navigation/navigationStageManager";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
 import { navigate } from "../navigation/navigationRouter";
+import { speak } from "../services/voiceService";
 
 export function useNavigationStage() {
   const {
@@ -75,6 +76,8 @@ export function useNavigationStage() {
       console.log("Reached Entrance:", reachedEntrance);
 
       if (!reachedEntrance) return;
+      // Voice instruction
+      speak(`You have reached the entrance. Enter ${building}.`);
 
       console.log(
         "✅ Building entrance reached. Calculating Ground Floor route..."
@@ -117,6 +120,16 @@ export function useNavigationStage() {
       }
 
       setRoute(result.route);
+
+      speak(`You have reached the entrance. Enter ${building}.`);
+
+      if (destinationFloor === 1) {
+        const stairName = targetStair.properties.name || "Stair 2";
+
+        setTimeout(() => {
+          speak(`Proceed to ${stairName}.`);
+        }, 4000);
+      }
 
       setNavigationStage(
         NAVIGATION_STAGE.GROUND_FLOOR

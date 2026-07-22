@@ -6,6 +6,7 @@ import { NAVIGATION_STAGE } from "../constants/navigationStages";
 import { shouldEnterBuilding } from "../navigation/navigationStageManager";
 
 import { navigateOnFloor } from "../navigation/floorNavigationService";
+import { speak } from "../services/voiceService";
 
 export function useFloorTransition() {
   const {
@@ -71,6 +72,9 @@ if (!targetStair) return;
       console.log("Reached Stair:", reachedStair);
 
       if (!reachedStair) return;
+
+      // Voice instruction
+      speak("Go to First Floor.");
 
      console.log(
   "✅ Stair reached. Switching to First Floor..."

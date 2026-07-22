@@ -11,6 +11,7 @@ import {
   getTargetStair,
   findStairById,
 } from "../../services/stairService";
+import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
@@ -63,6 +64,9 @@ export default function SearchBar() {
 
       // Route
       setRoute(result.route);
+
+      // Voice
+      speak("Navigation started.");
 
       // Destination
       setDestination(result.destination);

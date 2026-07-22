@@ -13,6 +13,7 @@ import { loadGraphs } from "../../navigation/loadGraphs";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useNavigationStage } from "../../hooks/useNavigationStage";
 import { useFloorTransition } from "../../hooks/useFloorTransition";
+import { useDestinationArrival } from "../../hooks/useDestinationArrival";
 
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 import useCurrentBuilding from "../../hooks/useCurrentBuilding";
@@ -41,6 +42,9 @@ useIndoorEntry();
 
   // Automatic Ground Floor → First Floor
   useFloorTransition();
+
+  // Automatic Destination Arrival
+  useDestinationArrival();
 
   const handleBuildingClick = (feature, layer) => {
     layer.on({
