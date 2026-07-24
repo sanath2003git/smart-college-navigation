@@ -30,9 +30,9 @@ export default function PermanentLayers({
   interactive={true}
   onEachFeature={handleBuildingClick}
   style={{
-    color: "#d32f2f",
+    color: "#388095",
     weight: 2,
-    fillColor: "#ef9a9a",
+    fillColor: "#62b2cb",
     fillOpacity: 0.5,
   }}
 />

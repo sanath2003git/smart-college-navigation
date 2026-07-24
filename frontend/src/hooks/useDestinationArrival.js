@@ -40,7 +40,7 @@ export function useDestinationArrival() {
   destination.properties.room ??
   destination.properties.id;
 
-speak(`You have reached ${room}.`);
+speak(`You have reached destination ${room}.`);
   }, [
     currentLocation,
     destination,

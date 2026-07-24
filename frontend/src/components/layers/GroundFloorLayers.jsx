@@ -26,9 +26,9 @@ export default function GroundFloorLayers({
             url="/data/chemical/ground_floor/rooms.geojson"
             interactive={false}
             style={{
-              color: "#00acc1",
+              color: "#388095",
               weight: 1,
-              fillColor: "#80deea",
+              fillColor: "#bfe7f3",
               fillOpacity: 0.35,
             }}
           />
@@ -54,9 +54,9 @@ export default function GroundFloorLayers({
             url="/data/mechanical/ground_floor/rooms.geojson"
             interactive={false}
             style={{
-              color: "#8e24aa",
+              color: "#388095",
               weight: 1,
-              fillColor: "#ce93d8",
+              fillColor: "#bfe7f3",
               fillOpacity: 0.35,
             }}
           />
