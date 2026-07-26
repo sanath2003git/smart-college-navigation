@@ -137,9 +137,17 @@ export async function loadGraphs() {
 
   // Leave this as-is for now.
   // We'll refactor graphConnector.js next.
-  await connectFloorTransitions(
+  await Promise.all([
+  connectFloorTransitions(
+    "Chemical Block",
     firstFloorGraphs["Chemical Block"]
-  );
+  ),
+
+  connectFloorTransitions(
+    "Mechanical Block",
+    firstFloorGraphs["Mechanical Block"]
+  ),
+]);
 
   console.log("Navigation Engine V2 Ready");
   console.log("==============================================");

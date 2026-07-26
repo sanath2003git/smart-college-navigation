@@ -1,50 +1,97 @@
 import { findNearestNode } from "./findNearestNode";
 
-const stairGraphNodes = {};
+// Transition nodes stored separately for each building.
+const transitionGraphNodes = {};
 
-export async function connectFloorTransitions(graph) {
-  const [gfResponse, ffResponse] = await Promise.all([
-    fetch("/data/chemical/ground_floor/stairs.geojson"),
-    fetch("/data/chemical/first_floor/stairs.geojson"),
-  ]);
+export async function connectFloorTransitions(
+  building,
+  firstFloorGraph
+) {
+  if (!building || !firstFloorGraph) {
+    console.error(
+      "connectFloorTransitions: building or graph missing."
+    );
+    return;
+  }
+
+  const folder =
+    building === "Chemical Block"
+      ? "chemical"
+      : building === "Mechanical Block"
+        ? "mechanical"
+        : null;
+
+  if (!folder) {
+    console.error(
+      "Unsupported building:",
+      building
+    );
+    return;
+  }
+
+  const [gfResponse, ffResponse] =
+    await Promise.all([
+      fetch(`/data/${folder}/ground_floor/stairs.geojson`),
+      fetch(`/data/${folder}/first_floor/stairs.geojson`),
+    ]);
+
+  if (!gfResponse.ok || !ffResponse.ok) {
+    console.error(
+      `Failed to load transition data for ${building}`
+    );
+    return;
+  }
 
   const gf = await gfResponse.json();
   const ff = await ffResponse.json();
 
-  const stairs = [
-    ...gf.features,
-    ...ff.features,
-  ];
+  transitionGraphNodes[building] = {};
 
-  console.log("========== STAIR GRAPH NODES ==========");
+  console.log(
+    `========== ${building} TRANSITION NODES ==========`
+  );
 
-  stairs.forEach((stair) => {
-    const [lng, lat] = stair.geometry.coordinates;
+  // We mainly need the FF node because routing resumes
+  // on the first-floor graph after the transition.
+  ff.features.forEach((transition) => {
+    const [lng, lat] =
+      transition.geometry.coordinates;
 
     const nearestNode = findNearestNode(
-      graph,
+      firstFloorGraph,
       lat,
       lng
     );
 
-    stairGraphNodes[stair.properties.id] = nearestNode;
+    const id = transition.properties.id;
 
-    console.log(
-      stair.properties.id,
-      "→",
-      nearestNode
-    );
+    transitionGraphNodes[building][id] =
+      nearestNode;
+
+    console.log(id, "→", nearestNode);
   });
 
-  console.log("=======================================");
+  console.log(
+    "=========================================="
+  );
 
-  return graph;
+  return {
+    groundFloorTransitions: gf.features,
+    firstFloorTransitions: ff.features,
+  };
 }
 
-export function findConnectedStairNode(stairId) {
-  console.log("========== STAIR LOOKUP ==========");
-  console.log("Requested Stair:", stairId);
-  console.log("Available Stair Nodes:", stairGraphNodes);
+export function findConnectedStairNode(
+  building,
+  transitionId
+) {
+  console.log("========== TRANSITION LOOKUP ==========");
+  console.log("Building:", building);
+  console.log("Transition:", transitionId);
 
-  return stairGraphNodes[stairId] ?? null;
+  return (
+    transitionGraphNodes[building]?.[
+      transitionId
+    ] ?? null
+  );
 }

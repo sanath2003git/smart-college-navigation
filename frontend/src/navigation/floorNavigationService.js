@@ -44,9 +44,13 @@ export async function navigateOnFloor(
   console.log("Destination:", destination);
 
   // Convert GF stair id → F1 stair id
-  const startNode = findConnectedStairNode(
-    stairId.replace("_GF", "_F1")
-  );
+  const firstFloorTransitionId =
+  stairId.replace("_GF", "_F1");
+
+const startNode = findConnectedStairNode(
+  building,
+  firstFloorTransitionId
+);
 
   if (!startNode) {
     console.error("First-floor stair node not found.");
