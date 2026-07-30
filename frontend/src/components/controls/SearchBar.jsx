@@ -6,115 +6,225 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { navigate } from "../../navigation/navigationRouter";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
-import { findNearestEntrance } from "../../services/entranceService";
 import {
   getTargetStair,
   findStairById,
 } from "../../services/stairService";
+
 import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-  setRoute,
-  currentLocation,
-  setDestination,
-  setSelectedBuilding,
-  setCurrentFloor,
-  setTargetEntrance,
-  setTargetStair,
-  setNavigationStage,
-} = useNavigation();
+    setRoute,
+    currentLocation,
+    setDestination,
+    setSelectedBuilding,
+    setCurrentFloor,
+    setTargetEntrance,
+    setTargetStair,
+    setNavigationStage,
+  } = useNavigation();
 
   const handleSearch = async () => {
-    const room = query.trim().toUpperCase();
+    const room =
+      query.trim().toUpperCase();
 
     if (!room) return;
 
     try {
       if (!currentLocation) {
-        alert("Waiting for your current location...");
+        alert(
+          "Waiting for your current location..."
+        );
+
         return;
       }
 
-      const currentLat = currentLocation.lat;
-      const currentLng = currentLocation.lng;
+      const currentLat =
+        currentLocation.lat;
 
+      const currentLng =
+        currentLocation.lng;
+
+      // -----------------------------------
       // Reset previous navigation
-      setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
+      // -----------------------------------
+
+      setNavigationStage(
+        NAVIGATION_STAGE.OUTDOOR
+      );
+
       setRoute([]);
+
+      setTargetEntrance(null);
+
       setTargetStair(null);
 
-
+      // -----------------------------------
       // Navigation Engine V2
+      // -----------------------------------
+
       const result = await navigate({
-        stage: NAVIGATION_STAGE.OUTDOOR,
+        stage:
+          NAVIGATION_STAGE.OUTDOOR,
+
         start: {
           lat: currentLat,
           lng: currentLng,
         },
+
         destination: room,
       });
 
       if (!result) {
-        alert("Destination not found.");
+        alert(
+          "Destination not found."
+        );
+
         return;
       }
 
+      // -----------------------------------
       // Route
+      // -----------------------------------
+
       setRoute(result.route);
 
-      // Voice
-      speak("Navigation started.");
-
+      // -----------------------------------
       // Destination
-      setDestination(result.destination);
+      // -----------------------------------
 
+      setDestination(
+        result.destination
+      );
+
+      const building =
+        result.destination.properties
+          .building;
+
+      const floor =
+        result.destination.properties
+          .floor;
+
+      // -----------------------------------
       // Building
+      // -----------------------------------
+
       setSelectedBuilding(
-        result.destination.properties.building
+        building
       );
 
-      // Floor
-      const floor = result.destination.properties.floor;
-      setCurrentFloor(floor);
+      // -----------------------------------
+      // Destination Floor
+      // -----------------------------------
 
+      setCurrentFloor(
+        floor
+      );
+
+      // -----------------------------------
       // Target Entrance
-      const entrance = await findNearestEntrance(
-        result.destination.properties.building,
-        currentLat,
-        currentLng
+      //
+      // IMPORTANT:
+      // This is the same entrance that
+      // navigationRouter used to create
+      // the outdoor route.
+      // -----------------------------------
+
+      setTargetEntrance(
+        result.entrance
       );
 
-      setTargetEntrance(entrance);
+      console.log(
+        "Target Entrance:",
+        result.entrance
+      );
 
-      console.log("Target Entrance:", entrance);
+      // -----------------------------------
+      // Target Stair
+      // First Floor destinations only
+      // -----------------------------------
 
-      // Target Stair (only for first floor)
       if (floor === 1) {
-        const stairId = getTargetStair(
-          result.destination.properties.building,
-          floor
+        const stairId =
+          getTargetStair(
+            building,
+            floor
+          );
+
+        console.log(
+          "Target Stair ID:",
+          stairId
         );
 
         if (stairId) {
-          const stair = await findStairById(stairId);
+          const stair =
+            await findStairById(
+              stairId
+            );
 
-          setTargetStair(stair);
+          setTargetStair(
+            stair
+          );
 
-          console.log("Target Stair:", stair);
+          console.log(
+            "Target Stair:",
+            stair
+          );
+        } else {
+          setTargetStair(null);
         }
       } else {
         setTargetStair(null);
       }
 
-      console.log("Search:", room);
-      console.log("Route:", result.route);
-      console.log("Destination:", result.destination);
+      // -----------------------------------
+      // Voice
+      // -----------------------------------
+
+      speak(
+        "Navigation started."
+      );
+
+      // -----------------------------------
+      // Debug
+      // -----------------------------------
+
+      console.log(
+        "Search:",
+        room
+      );
+
+      console.log(
+        "Building:",
+        building
+      );
+
+      console.log(
+        "Floor:",
+        floor
+      );
+
+      console.log(
+        "Route:",
+        result.route
+      );
+
+      console.log(
+        "Destination:",
+        result.destination
+      );
     } catch (err) {
-      console.error(err);
-      alert("Room not found.");
+      console.error(
+        "Search navigation error:",
+        err
+      );
+
+      alert(
+        "Room not found."
+      );
     }
   };
 
@@ -137,7 +247,9 @@ export default function SearchBar() {
             type="text"
             placeholder="Search buildings, rooms, labs..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) =>
+              setQuery(e.target.value)
+            }
             onKeyDown={handleKeyDown}
             className="flex-1 outline-none bg-transparent text-gray-700"
           />

@@ -1,15 +1,10 @@
 import GeoJsonLayer from "../map/GeoJsonLayer";
-import RouteLayer from "../map/RouteLayer";
 import CurrentLocation from "../map/CurrentLocation";
 import LocateButton from "../controls/LocateButton";
-
-import { useNavigation } from "../../hooks/useNavigation";
 
 export default function PermanentLayers({
   handleBuildingClick,
 }) {
-  const { route } = useNavigation();
-
   return (
     <>
       {/* Campus Boundary */}
@@ -25,20 +20,17 @@ export default function PermanentLayers({
       />
 
       {/* Buildings */}
-<GeoJsonLayer
-  url="/data/campus/buildings.geojson"
-  interactive={true}
-  onEachFeature={handleBuildingClick}
-  style={{
-    color: "#388095",
-    weight: 2,
-    fillColor: "#62b2cb",
-    fillOpacity: 0.5,
-  }}
-/>
-
-      {/* Navigation Route */}
-      <RouteLayer path={route} />
+      <GeoJsonLayer
+        url="/data/campus/buildings.geojson"
+        interactive={true}
+        onEachFeature={handleBuildingClick}
+        style={{
+          color: "#388095",
+          weight: 2,
+          fillColor: "#62b2cb",
+          fillOpacity: 0.5,
+        }}
+      />
 
       {/* Current Location */}
       <CurrentLocation />

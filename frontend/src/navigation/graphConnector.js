@@ -29,11 +29,10 @@ export async function connectFloorTransitions(
     return;
   }
 
-  const [gfResponse, ffResponse] =
-    await Promise.all([
-      fetch(`/data/${folder}/ground_floor/stairs.geojson`),
-      fetch(`/data/${folder}/first_floor/stairs.geojson`),
-    ]);
+  const [gfResponse, ffResponse] = await Promise.all([
+    fetch(`/data/${folder}/ground_floor/stairs.geojson`),
+    fetch(`/data/${folder}/first_floor/stairs.geojson`),
+  ]);
 
   if (!gfResponse.ok || !ffResponse.ok) {
     console.error(
@@ -51,8 +50,8 @@ export async function connectFloorTransitions(
     `========== ${building} TRANSITION NODES ==========`
   );
 
-  // We mainly need the FF node because routing resumes
-  // on the first-floor graph after the transition.
+  // Register every First Floor transition against
+  // its nearest node in the building's FF graph.
   ff.features.forEach((transition) => {
     const [lng, lat] =
       transition.geometry.coordinates;
@@ -81,11 +80,17 @@ export async function connectFloorTransitions(
   };
 }
 
+// ------------------------------------------------------
+// Get registered FF graph node
+// ------------------------------------------------------
+
 export function findConnectedStairNode(
   building,
   transitionId
 ) {
-  console.log("========== TRANSITION LOOKUP ==========");
+  console.log(
+    "========== TRANSITION LOOKUP =========="
+  );
   console.log("Building:", building);
   console.log("Transition:", transitionId);
 
@@ -94,4 +99,53 @@ export function findConnectedStairNode(
       transitionId
     ] ?? null
   );
+}
+
+// ------------------------------------------------------
+// Get registered FF transition as { lat, lng }
+// ------------------------------------------------------
+
+export function getTransitionLocation(
+  building,
+  transitionId
+) {
+  const nodeId = findConnectedStairNode(
+    building,
+    transitionId
+  );
+
+  if (!nodeId) {
+    console.error(
+      "Transition graph node not found:",
+      building,
+      transitionId
+    );
+
+    return null;
+  }
+
+  // Graph node IDs use:
+  // "latitude,longitude"
+  const [latString, lngString] =
+    nodeId.split(",");
+
+  const lat = Number(latString);
+  const lng = Number(lngString);
+
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng)
+  ) {
+    console.error(
+      "Invalid transition graph node:",
+      nodeId
+    );
+
+    return null;
+  }
+
+  return {
+    lat,
+    lng,
+  };
 }
