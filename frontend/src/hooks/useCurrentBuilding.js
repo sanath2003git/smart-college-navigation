@@ -16,6 +16,13 @@ export default function useCurrentBuilding() {
     // Building detection logic will be added here.
     async function detectBuilding() {
   const buildings = await loadBuildings();
+  console.log(
+  "Loaded buildings:",
+  buildings.features.map((b) => ({
+    id: b.properties.id,
+    name: b.properties.name,
+  }))
+);
 
   console.log(
     "Building Features:",
