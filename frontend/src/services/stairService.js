@@ -1,58 +1,188 @@
 let stairs = [];
 
+// ======================================================
+// LOAD STAIRS
+// ======================================================
+
 async function loadStairs() {
   if (stairs.length === 0) {
-    const [gfResponse, ffResponse] = await Promise.all([
-      fetch("/data/stairs.geojson"),
-      fetch("/data/stairs_ff.geojson"),
+    const [
+      chemicalGfResponse,
+      chemicalFfResponse,
+      mechanicalGfResponse,
+      mechanicalFfResponse,
+    ] = await Promise.all([
+      fetch(
+        "/data/chemical/ground_floor/stairs.geojson"
+      ),
+
+      fetch(
+        "/data/chemical/first_floor/stairs.geojson"
+      ),
+
+      fetch(
+        "/data/mechanical/ground_floor/stairs.geojson"
+      ),
+
+      fetch(
+        "/data/mechanical/first_floor/stairs.geojson"
+      ),
     ]);
 
-    const gfData = await gfResponse.json();
-    const ffData = await ffResponse.json();
+    if (
+      !chemicalGfResponse.ok ||
+      !chemicalFfResponse.ok ||
+      !mechanicalGfResponse.ok ||
+      !mechanicalFfResponse.ok
+    ) {
+      throw new Error(
+        "Failed to load stair GeoJSON data."
+      );
+    }
+
+    const [
+      chemicalGfData,
+      chemicalFfData,
+      mechanicalGfData,
+      mechanicalFfData,
+    ] = await Promise.all([
+      chemicalGfResponse.json(),
+      chemicalFfResponse.json(),
+      mechanicalGfResponse.json(),
+      mechanicalFfResponse.json(),
+    ]);
 
     stairs = [
-      ...gfData.features,
-      ...ffData.features,
+      ...chemicalGfData.features,
+      ...chemicalFfData.features,
+      ...mechanicalGfData.features,
+      ...mechanicalFfData.features,
     ];
+
+    console.log(
+      "========== STAIRS LOADED =========="
+    );
+
+    console.log(
+      "Total Stair/Lift Features:",
+      stairs.length
+    );
+
+    console.log(
+      "==================================="
+    );
   }
 
   return stairs;
 }
 
-// Existing function used by navigationService.js
-export async function findStairs(search) {
-  const allStairs = await loadStairs();
+// ======================================================
+// SEARCH STAIRS
+// ======================================================
 
-  const query = search.trim().toUpperCase();
+export async function findStairs(search) {
+  const allStairs =
+    await loadStairs();
+
+  const query =
+    search.trim().toUpperCase();
 
   return allStairs.filter((stair) => {
     const p = stair.properties;
 
+    const id =
+      p.id?.toUpperCase() ?? "";
+
+    const name =
+      p.name?.toUpperCase() ?? "";
+
     return (
-      p.id.toUpperCase() === query ||
-      p.name.toUpperCase().includes(query)
+      id === query ||
+      name.includes(query)
     );
   });
 }
 
-// New function for floor-transition logic
+// ======================================================
+// DEFAULT FLOOR TRANSITION
+// ======================================================
+
 const STAIR_MAPPING = {
   "Chemical Block": {
     1: "CHEM_STAIR_02_GF",
   },
+
+  "Mechanical Block": {
+    1: "MECH_STAIR_01_GF",
+  },
 };
 
-export function getTargetStair(building, floor) {
-  return STAIR_MAPPING[building]?.[floor] ?? null;
+// ======================================================
+// GET TARGET STAIR
+// ======================================================
+
+export function getTargetStair(
+  building,
+  floor
+) {
+  const stairId =
+    STAIR_MAPPING[building]?.[floor] ??
+    null;
+
+  console.log(
+    "========== TARGET STAIR LOOKUP =========="
+  );
+
+  console.log(
+    "Building:",
+    building
+  );
+
+  console.log(
+    "Destination Floor:",
+    floor
+  );
+
+  console.log(
+    "Target Stair ID:",
+    stairId
+  );
+
+  console.log(
+    "========================================="
+  );
+
+  return stairId;
 }
 
-// Helper to retrieve a stair feature by ID
-export async function findStairById(id) {
-  const allStairs = await loadStairs();
+// ======================================================
+// FIND STAIR BY ID
+// ======================================================
 
-  return (
+export async function findStairById(id) {
+  if (!id) {
+    console.error(
+      "findStairById: stair ID missing."
+    );
+
+    return null;
+  }
+
+  const allStairs =
+    await loadStairs();
+
+  const stair =
     allStairs.find(
-      (stair) => stair.properties.id === id
-    ) || null
-  );
+      (feature) =>
+        feature.properties.id === id
+    ) ?? null;
+
+  if (!stair) {
+    console.error(
+      "Stair not found:",
+      id
+    );
+  }
+
+  return stair;
 }

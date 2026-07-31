@@ -27,23 +27,48 @@ export default function useIndoorEntry() {
     console.log("===============================");
 
     const enteredBuilding =
-      previousBuilding.current === null &&
-      currentBuilding !== null;
+  previousBuilding.current === null &&
+  currentBuilding !== null;
 
+const exitedBuilding =
+  previousBuilding.current !== null &&
+  currentBuilding === null;
+
+console.log(
+  "Previous Building:",
+  previousBuilding.current
+);
+
+console.log(
+  "Entered Building:",
+  enteredBuilding
+);
+
+console.log(
+  "Exited Building:",
+  exitedBuilding
+);
+
+   if (!currentBuilding) {
+
+  if (
+    exitedBuilding &&
+    navigationStage === "GROUND_FLOOR"
+  ) {
     console.log(
-      "Previous Building:",
-      previousBuilding.current
+      "Exiting Building..."
     );
 
-    console.log(
-      "Entered Building:",
-      enteredBuilding
-    );
+    // Clear the selected building
+    setSelectedBuilding(null);
 
-    if (!currentBuilding) {
-      previousBuilding.current = currentBuilding;
-      return;
-    }
+    // Return to outdoor mode
+    setNavigationStage("OUTDOOR");
+  }
+
+  previousBuilding.current = currentBuilding;
+  return;
+}
 
     if (destination) {
       console.log(

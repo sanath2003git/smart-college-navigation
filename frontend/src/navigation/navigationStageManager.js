@@ -30,6 +30,22 @@ export function shouldEnterBuilding(
   return distance <= threshold;
 }
 
+// NEW
+export function hasReachedLocation(
+  currentLocation,
+  targetLocation,
+  threshold = 3
+) {
+  const distance = distanceInMeters(
+    currentLocation.lat,
+    currentLocation.lng,
+    targetLocation.lat,
+    targetLocation.lng
+  );
+
+  return distance <= threshold;
+}
+
 export function getNextStage(currentFloor) {
   if (currentFloor === 0) {
     return NAVIGATION_STAGE.GROUND_FLOOR;

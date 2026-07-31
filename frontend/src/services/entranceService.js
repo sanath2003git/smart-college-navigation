@@ -3,7 +3,7 @@ let entrances = null;
 async function loadEntrances() {
   if (entrances) return entrances;
 
-  const response = await fetch("/data/entrances.geojson");
+  const response = await fetch("/data/campus/entrances.geojson");
   const data = await response.json();
 
   entrances = data.features;

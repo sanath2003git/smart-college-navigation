@@ -1,16 +1,18 @@
-let rooms = [];
+import { getRoomsPath } from "../utils/dataPaths";
 
-export async function findRooms(roomNo) {
-  if (rooms.length === 0) {
+const roomCache = {};
+
+export async function findRooms(building, roomNo) {
+  if (!roomCache[building]) {
     const [gfResponse, ffResponse] = await Promise.all([
-      fetch("/data/doors.geojson"),
-      fetch("/data/doors_ff.geojson"),
+      fetch(getRoomsPath(building, 0)),
+      fetch(getRoomsPath(building, 1)),
     ]);
 
     const gfData = await gfResponse.json();
     const ffData = await ffResponse.json();
 
-    rooms = [
+    roomCache[building] = [
       ...gfData.features,
       ...ffData.features,
     ];
@@ -18,7 +20,7 @@ export async function findRooms(roomNo) {
 
   const query = roomNo.trim().toUpperCase();
 
-  return rooms.filter(
+  return roomCache[building].filter(
     (feature) =>
       feature.properties.room_no.toUpperCase() === query
   );

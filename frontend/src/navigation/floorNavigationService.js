@@ -6,23 +6,32 @@ import { findConnectedStairNode } from "./graphConnector";
 import { getFirstFloorGraph } from "./graphManager";
 
 export async function navigateOnFloor(
+  building,
   stairId,
   destinationRoom
 ) {
   console.log("========== FLOOR NAVIGATION ==========");
+  console.log("Building:", building);
+  console.log("Stair:", stairId);
+  console.log("Destination Room:", destinationRoom);
 
   // Get the dedicated First Floor graph
-  const graph = getFirstFloorGraph();
+  const graph = getFirstFloorGraph(building);
 
   if (!graph) {
-    console.error("First Floor graph not loaded.");
+    console.error(
+      "First Floor graph not loaded for:",
+      building
+    );
     return null;
   }
 
   // Search destination room
-  const rooms = await findRooms(destinationRoom);
+  const rooms = await findRooms(
+    building,
+    destinationRoom
+  );
 
-  console.log("Searching Room:", destinationRoom);
   console.log("Rooms Found:", rooms);
 
   if (!rooms || rooms.length === 0) {
@@ -35,9 +44,13 @@ export async function navigateOnFloor(
   console.log("Destination:", destination);
 
   // Convert GF stair id → F1 stair id
-  const startNode = findConnectedStairNode(
-    stairId.replace("_GF", "_F1")
-  );
+  const firstFloorTransitionId =
+  stairId.replace("_GF", "_F1");
+
+const startNode = findConnectedStairNode(
+  building,
+  firstFloorTransitionId
+);
 
   if (!startNode) {
     console.error("First-floor stair node not found.");
@@ -52,8 +65,7 @@ export async function navigateOnFloor(
   const goalNode = findNearestNode(
     graph,
     lat,
-    lng,
-    null
+    lng
   );
 
   if (!goalNode) {

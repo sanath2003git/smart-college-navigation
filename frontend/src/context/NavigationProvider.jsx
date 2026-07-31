@@ -32,6 +32,9 @@ export function NavigationProvider({ children }) {
   // Current Destination Floor
   const [currentFloor, setCurrentFloor] = useState(0);
 
+  // User's actual physical floor
+  const [userFloor, setUserFloor] = useState(null);
+
   return (
     <NavigationContext.Provider
       value={{
@@ -70,6 +73,9 @@ export function NavigationProvider({ children }) {
         // Floor
         currentFloor,
         setCurrentFloor,
+
+        userFloor,
+        setUserFloor,
       }}
     >
       {children}

@@ -1,5 +1,8 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+} from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 
@@ -7,14 +10,17 @@ import PermanentLayers from "../../components/layers/PermanentLayers";
 import OutdoorLayers from "../../components/layers/OutdoorLayers";
 import GroundFloorLayers from "../../components/layers/GroundFloorLayers";
 import FirstFloorLayers from "../../components/layers/FirstFloorLayers";
+import RouteLayer from "../../components/map/RouteLayer";
 
 import { loadGraphs } from "../../navigation/loadGraphs";
 
 import { useNavigation } from "../../hooks/useNavigation";
 import { useNavigationStage } from "../../hooks/useNavigationStage";
 import { useFloorTransition } from "../../hooks/useFloorTransition";
+import { useDestinationArrival } from "../../hooks/useDestinationArrival";
 
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
+
 import useCurrentBuilding from "../../hooks/useCurrentBuilding";
 import useIndoorEntry from "../../hooks/useIndoorEntry";
 
@@ -27,20 +33,27 @@ export default function CampusPage() {
   const navigate = useNavigate();
 
   const {
-  navigationStage,
-  selectedBuilding,
-} = useNavigation();
+    navigationStage,
+    selectedBuilding,
+    route,
+  } = useNavigation();
 
   const center = [8.9138, 76.6323];
+
   // Automatic Building Detection
   useCurrentBuilding();
+
   // Automatic Indoor Entry
-useIndoorEntry();
+  useIndoorEntry();
+
   // Automatic Outdoor → Ground Floor
   useNavigationStage();
 
   // Automatic Ground Floor → First Floor
   useFloorTransition();
+
+  // Automatic Destination Arrival
+  useDestinationArrival();
 
   const handleBuildingClick = (feature, layer) => {
     layer.on({
@@ -61,7 +74,9 @@ useIndoorEntry();
 
         const graphs = await loadGraphs();
 
-        console.log("========== NAVIGATION ENGINE V2 ==========");
+        console.log(
+          "========== NAVIGATION ENGINE V2 =========="
+        );
 
         console.log(
           "Outdoor Graph Nodes:",
@@ -78,10 +93,18 @@ useIndoorEntry();
           Object.keys(graphs.firstFloor).length
         );
 
-        console.log("Navigation Engine V2 Ready");
-        console.log("==========================================");
+        console.log(
+          "Navigation Engine V2 Ready"
+        );
+
+        console.log(
+          "=========================================="
+        );
       } catch (err) {
-        console.error("Navigation Error:", err);
+        console.error(
+          "Navigation Error:",
+          err
+        );
       }
     }
 
@@ -89,7 +112,12 @@ useIndoorEntry();
   }, []);
 
   return (
-    <div style={{ height: "100%", width: "100%" }}>
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+      }}
+    >
       <MapContainer
         center={center}
         zoom={18}
@@ -108,23 +136,34 @@ useIndoorEntry();
         />
 
         {/* Always Visible */}
-        <PermanentLayers handleBuildingClick={handleBuildingClick} />
+        <PermanentLayers
+          handleBuildingClick={handleBuildingClick}
+        />
 
-        {navigationStage === NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers/>
+        {/* Outdoor Layers */}
+        {navigationStage ===
+          NAVIGATION_STAGE.OUTDOOR && (
+          <OutdoorLayers />
         )}
 
-        {navigationStage === NAVIGATION_STAGE.GROUND_FLOOR && (
-  <GroundFloorLayers
-    building={selectedBuilding}
-  />
-)}
+        {/* Ground Floor Layers */}
+        {navigationStage ===
+          NAVIGATION_STAGE.GROUND_FLOOR && (
+          <GroundFloorLayers
+            building={selectedBuilding}
+          />
+        )}
 
-{navigationStage === NAVIGATION_STAGE.FIRST_FLOOR && (
-  <FirstFloorLayers
-    building={selectedBuilding}
-  />
-)}
+        {/* First Floor Layers */}
+        {navigationStage ===
+          NAVIGATION_STAGE.FIRST_FLOOR && (
+          <FirstFloorLayers
+            building={selectedBuilding}
+          />
+        )}
+
+        {/* Keep navigation route above map geometry */}
+        <RouteLayer path={route} />
       </MapContainer>
     </div>
   );

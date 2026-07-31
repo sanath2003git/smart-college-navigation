@@ -3,114 +3,260 @@ import { useEffect } from "react";
 import { useNavigation } from "./useNavigation";
 
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
+
 import { shouldEnterBuilding } from "../navigation/navigationStageManager";
 
-import { navigateOnFloor } from "../navigation/floorNavigationService";
+import { navigate } from "../navigation/navigationRouter";
+
+import { getTransitionLocation } from "../navigation/graphConnector";
+
+import { speak } from "../services/voiceService";
 
 export function useFloorTransition() {
   const {
-  currentLocation,
+    currentLocation,
 
-  destination,
+    destination,
 
-  currentFloor,
+    currentFloor,
 
-  navigationStage,
-  setNavigationStage,
+    navigationStage,
+    setNavigationStage,
 
-  targetStair,
+    targetStair,
 
-  setRoute,
-} = useNavigation();
+    setRoute,
+  } = useNavigation();
+
   useEffect(() => {
     async function transitionToFirstFloor() {
-  console.log("========== useFloorTransition ==========");
-console.log("currentLocation:", currentLocation);
-console.log("destination:", destination);
-console.log("targetStair:", targetStair);
-console.log("currentFloor:", currentFloor);
-console.log("navigationStage:", navigationStage);
+      console.log(
+        "========== useFloorTransition =========="
+      );
 
-if (!currentLocation) return;
-if (!destination) return;
-if (!targetStair) return;
+      console.log(
+        "currentLocation:",
+        currentLocation
+      );
 
-      // Only for First Floor destinations
+      console.log(
+        "destination:",
+        destination
+      );
+
+      console.log(
+        "targetStair:",
+        targetStair
+      );
+
+      console.log(
+        "currentFloor:",
+        currentFloor
+      );
+
+      console.log(
+        "navigationStage:",
+        navigationStage
+      );
+
+      // -----------------------------------
+      // Required navigation state
+      // -----------------------------------
+
+      if (!currentLocation) return;
+      if (!destination) return;
+      if (!targetStair) return;
+
+      // Destination must be First Floor.
       if (currentFloor !== 1) return;
 
-      // Must already be on Ground Floor
+      // User must currently be navigating
+      // through the Ground Floor.
       if (
-        navigationStage !== NAVIGATION_STAGE.GROUND_FLOOR
+        navigationStage !==
+        NAVIGATION_STAGE.GROUND_FLOOR
       ) {
         return;
       }
 
-      const [lng, lat] = targetStair.geometry.coordinates;
+      // -----------------------------------
+      // Check arrival at GF transition
+      // -----------------------------------
 
-      console.log("========== FLOOR TRANSITION ==========");
-      console.log("Current Floor:", currentFloor);
-      console.log("Target Stair:", targetStair.properties.id);
+      const [lng, lat] =
+        targetStair.geometry.coordinates;
 
-      console.log("Target Stair Coordinates");
+      console.log(
+        "========== FLOOR TRANSITION =========="
+      );
+
+      console.log(
+        "Destination Floor:",
+        currentFloor
+      );
+
+      console.log(
+        "Target Transition:",
+        targetStair.properties.id
+      );
+
+      console.log(
+        "Target Transition Coordinates:"
+      );
+
       console.log("Latitude :", lat);
       console.log("Longitude:", lng);
 
-      console.log("Current Location");
-      console.log("Latitude :", currentLocation.lat);
-      console.log("Longitude:", currentLocation.lng);
-
-      const reachedStair = shouldEnterBuilding(
-        currentLocation,
-        {
-          lat,
-          lng,
-        },
-        3
+      console.log(
+        "Current Location:"
       );
 
-      console.log("Reached Stair:", reachedStair);
+      console.log(
+        "Latitude :",
+        currentLocation.lat
+      );
 
-      if (!reachedStair) return;
+      console.log(
+        "Longitude:",
+        currentLocation.lng
+      );
 
-     console.log(
-  "✅ Stair reached. Switching to First Floor..."
-);
+      const reachedTransition =
+        shouldEnterBuilding(
+          currentLocation,
+          {
+            lat,
+            lng,
+          },
+          3
+        );
 
-console.log("Changing stage...");
+      console.log(
+        "Reached Transition:",
+        reachedTransition
+      );
 
-setNavigationStage(
-  NAVIGATION_STAGE.FIRST_FLOOR
-);
+      if (!reachedTransition) return;
 
-console.log("Stage changed.");
-console.log("Destination properties:");
-console.log(destination.properties);
+      // -----------------------------------
+      // Determine building
+      // -----------------------------------
 
-console.log("room_no:", destination.properties.room_no);
-console.log("roomNumber:", destination.properties.roomNumber);
-console.log("room:", destination.properties.room);
-console.log("name:", destination.properties.name);
-console.log("id:", destination.properties.id);
-// Generate the new First Floor route
-const result = await navigateOnFloor(
-  targetStair.properties.id,
-  destination.properties.room_no
-);
+      const building =
+        destination.properties.building;
 
-console.log("navigateOnFloor Result:");
-console.log(result);
+      if (!building) {
+        console.error(
+          "Destination building missing."
+        );
 
-if (!result) {
-  console.error("First Floor route generation failed.");
-  return;
-}
+        return;
+      }
 
-console.log(
-  "========== FIRST FLOOR ROUTE =========="
-);
-console.log(result.route);
+      // -----------------------------------
+      // GF transition ID → FF transition ID
+      // -----------------------------------
 
-setRoute(result.route);
+      const groundFloorTransitionId =
+        targetStair.properties.id;
+
+      const firstFloorTransitionId =
+        groundFloorTransitionId.replace(
+          "_GF",
+          "_F1"
+        );
+
+      console.log(
+        "GF Transition:",
+        groundFloorTransitionId
+      );
+
+      console.log(
+        "FF Transition:",
+        firstFloorTransitionId
+      );
+
+      // -----------------------------------
+      // Get FF graph start location
+      // -----------------------------------
+
+      const firstFloorStart =
+        getTransitionLocation(
+          building,
+          firstFloorTransitionId
+        );
+
+      console.log(
+        "First Floor Start:",
+        firstFloorStart
+      );
+
+      if (!firstFloorStart) {
+        console.error(
+          "Unable to locate corresponding First Floor transition."
+        );
+
+        return;
+      }
+
+      // -----------------------------------
+      // Generate First Floor route
+      // -----------------------------------
+
+      const result = await navigate({
+        stage:
+          NAVIGATION_STAGE.FIRST_FLOOR,
+
+        building,
+
+        start: firstFloorStart,
+
+        destination,
+      });
+
+      console.log(
+        "First Floor Navigation Result:"
+      );
+
+      console.log(result);
+
+      if (
+        !result ||
+        !result.route ||
+        result.route.length === 0
+      ) {
+        console.error(
+          "First Floor route generation failed."
+        );
+
+        return;
+      }
+
+      // -----------------------------------
+      // Switch navigation to FF
+      // -----------------------------------
+
+      speak("Go to First Floor.");
+
+      console.log(
+        "✅ Transition reached."
+      );
+
+      console.log(
+        "Switching to First Floor..."
+      );
+
+      setNavigationStage(
+        NAVIGATION_STAGE.FIRST_FLOOR
+      );
+
+      setRoute(result.route);
+
+      console.log(
+        "========== FIRST FLOOR ROUTE =========="
+      );
+
+      console.log(result.route);
     }
 
     transitionToFirstFloor();

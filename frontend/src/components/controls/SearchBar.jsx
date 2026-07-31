@@ -6,25 +6,33 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { navigate } from "../../navigation/navigationRouter";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
-import { findNearestEntrance } from "../../services/entranceService";
 import {
   getTargetStair,
   findStairById,
 } from "../../services/stairService";
 
+import { findRooms } from "../../services/roomService";
+import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
+
+import { speak } from "../../services/voiceService";
+
 export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   const {
-  setRoute,
-  currentLocation,
-  setDestination,
-  setSelectedBuilding,
-  setCurrentFloor,
-  setTargetEntrance,
-  setTargetStair,
-  setNavigationStage,
-} = useNavigation();
+    setRoute,
+    currentLocation,
+
+    currentBuilding,
+    navigationStage,
+
+    setDestination,
+    setSelectedBuilding,
+    setCurrentFloor,
+    setTargetEntrance,
+    setTargetStair,
+    setNavigationStage,
+  } = useNavigation();
 
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
@@ -40,76 +48,451 @@ export default function SearchBar() {
       const currentLat = currentLocation.lat;
       const currentLng = currentLocation.lng;
 
-      // Reset previous navigation
-      setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
+      // -----------------------------------
+      // Clear previous navigation data
+      // -----------------------------------
+
       setRoute([]);
+      setTargetEntrance(null);
       setTargetStair(null);
 
+      // -----------------------------------
+      // Determine destination building
+      // -----------------------------------
 
-      // Navigation Engine V2
-      const result = await navigate({
-        stage: NAVIGATION_STAGE.OUTDOOR,
-        start: {
-          lat: currentLat,
-          lng: currentLng,
-        },
-        destination: room,
-      });
+      const destinationBuilding =
+        getBuildingFromRoom(room);
 
-      if (!result) {
+      if (!destinationBuilding) {
         alert("Destination not found.");
         return;
       }
 
-      // Route
-      setRoute(result.route);
+      // -----------------------------------
+      // Find destination room
+      // -----------------------------------
 
-      // Destination
-      setDestination(result.destination);
-
-      // Building
-      setSelectedBuilding(
-        result.destination.properties.building
+      const rooms = await findRooms(
+        destinationBuilding,
+        room
       );
 
-      // Floor
-      const floor = result.destination.properties.floor;
-      setCurrentFloor(floor);
+      if (rooms.length === 0) {
+        alert("Destination not found.");
+        return;
+      }
 
-      // Target Entrance
-      const entrance = await findNearestEntrance(
-        result.destination.properties.building,
-        currentLat,
-        currentLng
+      const destinationFeature = rooms[0];
+
+      const destinationFloor =
+        destinationFeature.properties.floor;
+
+      console.log(
+        "========== SEARCH ROUTING DECISION =========="
       );
 
-      setTargetEntrance(entrance);
+      console.log(
+        "Current Building:",
+        currentBuilding
+      );
 
-      console.log("Target Entrance:", entrance);
+      console.log(
+        "Current Stage:",
+        navigationStage
+      );
 
-      // Target Stair (only for first floor)
-      if (floor === 1) {
-        const stairId = getTargetStair(
-          result.destination.properties.building,
-          floor
+      console.log(
+        "Destination Building:",
+        destinationBuilding
+      );
+
+      console.log(
+        "Destination Floor:",
+        destinationFloor
+      );
+
+      // -----------------------------------
+      // Determine current navigation state
+      // -----------------------------------
+
+      const sameBuilding =
+        currentBuilding === destinationBuilding;
+
+      const alreadyOnGroundFloor =
+        navigationStage ===
+        NAVIGATION_STAGE.GROUND_FLOOR;
+
+      let result;
+      let preparedTargetStair = null;
+
+      // ===================================
+      // CASE 1
+      // Same building: GF → GF
+      // ===================================
+
+      if (
+        sameBuilding &&
+        alreadyOnGroundFloor &&
+        destinationFloor === 0
+      ) {
+        console.log(
+          "Routing mode: SAME BUILDING GF → GF"
         );
 
-        if (stairId) {
-          const stair = await findStairById(stairId);
+        result = await navigate({
+          stage: NAVIGATION_STAGE.GROUND_FLOOR,
 
-          setTargetStair(stair);
+          start: {
+            lat: currentLat,
+            lng: currentLng,
+          },
 
-          console.log("Target Stair:", stair);
+          destination: destinationFeature,
+
+          building: destinationBuilding,
+        });
+
+        if (!result) {
+          alert("Unable to calculate indoor route.");
+          return;
         }
-      } else {
+
+        setNavigationStage(
+          NAVIGATION_STAGE.GROUND_FLOOR
+        );
+
+        setTargetEntrance(null);
         setTargetStair(null);
       }
 
-      console.log("Search:", room);
-      console.log("Route:", result.route);
-      console.log("Destination:", result.destination);
+      // ===================================
+      // CASE 2
+      // Same building: GF → FF
+      // ===================================
+
+      else if (
+        sameBuilding &&
+        alreadyOnGroundFloor &&
+        destinationFloor === 1
+      ) {
+        console.log(
+          "Routing mode: SAME BUILDING GF → FF"
+        );
+
+        // ---------------------------------
+        // Determine GF transition
+        // ---------------------------------
+
+        const stairId =
+          getTargetStair(
+            destinationBuilding,
+            destinationFloor
+          );
+
+        console.log(
+          "Target Stair ID:",
+          stairId
+        );
+
+        if (!stairId) {
+          alert(
+            "No floor transition is available for this destination."
+          );
+          return;
+        }
+
+        // ---------------------------------
+        // Load actual GF stair/lift
+        // ---------------------------------
+
+        preparedTargetStair =
+          await findStairById(stairId);
+
+        if (!preparedTargetStair) {
+          console.error(
+            "Target stair not found:",
+            stairId
+          );
+
+          alert(
+            "Unable to find the floor transition."
+          );
+          return;
+        }
+
+        console.log(
+          "Target Stair:",
+          preparedTargetStair
+        );
+
+        // ---------------------------------
+        // Store FINAL destination
+        //
+        // M203 remains the final destination.
+        // The GF router will separately route
+        // to stairId.
+        // ---------------------------------
+
+        setDestination(
+          destinationFeature
+        );
+
+        setSelectedBuilding(
+          destinationBuilding
+        );
+
+        setCurrentFloor(
+          destinationFloor
+        );
+
+        setTargetEntrance(null);
+
+        setTargetStair(
+          preparedTargetStair
+        );
+
+        // ---------------------------------
+        // Route current GF position → stair
+        //
+        // IMPORTANT:
+        // Do NOT pass destinationFeature here.
+        //
+        // navigateGroundFloor() already uses
+        // stairId to load the correct stair
+        // and choose its nearest graph node.
+        // ---------------------------------
+
+        result = await navigate({
+          stage: NAVIGATION_STAGE.GROUND_FLOOR,
+
+          start: {
+            lat: currentLat,
+            lng: currentLng,
+          },
+
+          stairId,
+
+          building: destinationBuilding,
+        });
+
+        if (!result) {
+          alert(
+            "Unable to calculate route to the floor transition."
+          );
+          return;
+        }
+
+        // User is physically still on GF.
+        setNavigationStage(
+          NAVIGATION_STAGE.GROUND_FLOOR
+        );
+      }
+
+      // ===================================
+      // CASE 3
+      // Existing outdoor flow
+      //
+      // Preserve:
+      // OUTDOOR → entrance → GF
+      // OUTDOOR → entrance → GF → FF
+      // ===================================
+
+      else {
+        console.log(
+          "Routing mode: EXISTING OUTDOOR FLOW"
+        );
+
+        setNavigationStage(
+          NAVIGATION_STAGE.OUTDOOR
+        );
+
+        result = await navigate({
+          stage: NAVIGATION_STAGE.OUTDOOR,
+
+          start: {
+            lat: currentLat,
+            lng: currentLng,
+          },
+
+          destination: room,
+        });
+
+        if (!result) {
+          alert("Destination not found.");
+          return;
+        }
+
+        // Use exactly the entrance selected
+        // by navigationRouter.
+        setTargetEntrance(
+          result.entrance
+        );
+
+        console.log(
+          "Target Entrance:",
+          result.entrance
+        );
+      }
+
+      // -----------------------------------
+      // Store route
+      // -----------------------------------
+
+      setRoute(
+        result.route
+      );
+
+      // -----------------------------------
+      // Store FINAL destination
+      //
+      // For GF → FF, navigateGroundFloor()
+      // returns the original destination that
+      // was already stored above by SearchBar.
+      // -----------------------------------
+
+      if (
+        sameBuilding &&
+        alreadyOnGroundFloor &&
+        destinationFloor === 1
+      ) {
+        setDestination(
+          destinationFeature
+        );
+      } else {
+        setDestination(
+          result.destination
+        );
+      }
+
+      // -----------------------------------
+      // Final destination building/floor
+      // -----------------------------------
+
+      const finalDestination =
+        sameBuilding &&
+        alreadyOnGroundFloor &&
+        destinationFloor === 1
+          ? destinationFeature
+          : result.destination;
+
+      const building =
+        finalDestination.properties.building;
+
+      const floor =
+        finalDestination.properties.floor;
+
+      // -----------------------------------
+      // Destination building
+      // -----------------------------------
+
+      setSelectedBuilding(
+        building
+      );
+
+      // -----------------------------------
+      // Destination floor
+      // -----------------------------------
+
+      setCurrentFloor(
+        floor
+      );
+
+      // -----------------------------------
+      // Configure floor transition
+      //
+      // GF → FF already loaded the stair
+      // above, so don't load it twice.
+      // -----------------------------------
+
+      if (
+        floor === 1 &&
+        !preparedTargetStair
+      ) {
+        const stairId =
+          getTargetStair(
+            building,
+            floor
+          );
+
+        console.log(
+          "Target Stair ID:",
+          stairId
+        );
+
+        if (stairId) {
+          const stair =
+            await findStairById(
+              stairId
+            );
+
+          if (stair) {
+            setTargetStair(
+              stair
+            );
+
+            console.log(
+              "Target Stair:",
+              stair
+            );
+          } else {
+            console.error(
+              "Target stair not found:",
+              stairId
+            );
+
+            setTargetStair(null);
+          }
+        } else {
+          setTargetStair(null);
+        }
+      } else if (floor !== 1) {
+        setTargetStair(null);
+      }
+
+      // -----------------------------------
+      // Voice
+      // -----------------------------------
+
+      speak("Navigation started.");
+
+      // -----------------------------------
+      // Debug
+      // -----------------------------------
+
+      console.log(
+        "Search:",
+        room
+      );
+
+      console.log(
+        "Building:",
+        building
+      );
+
+      console.log(
+        "Floor:",
+        floor
+      );
+
+      console.log(
+        "Route:",
+        result.route
+      );
+
+      console.log(
+        "Destination:",
+        finalDestination
+      );
+
+      console.log(
+        "============================================"
+      );
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Search navigation error:",
+        err
+      );
+
       alert("Room not found.");
     }
   };
@@ -133,7 +516,9 @@ export default function SearchBar() {
             type="text"
             placeholder="Search buildings, rooms, labs..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) =>
+              setQuery(e.target.value)
+            }
             onKeyDown={handleKeyDown}
             className="flex-1 outline-none bg-transparent text-gray-700"
           />

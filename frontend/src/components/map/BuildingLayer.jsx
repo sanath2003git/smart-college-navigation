@@ -7,7 +7,7 @@ export default function BuildingLayer() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/data/buildings.geojson")
+    fetch("/data/campus/buildings.geojson")
       .then((response) => response.json())
       .then((data) => setBuildings(data))
       .catch((error) =>

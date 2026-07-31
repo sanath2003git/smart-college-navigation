@@ -5,7 +5,7 @@ export default function WalkwayLayer() {
   const [walkways, setWalkways] = useState(null);
 
   useEffect(() => {
-    fetch("/data/walkways.geojson")
+    fetch("/data/campus/walkways.geojson")
       .then((res) => res.json())
       .then((data) => setWalkways(data));
   }, []);

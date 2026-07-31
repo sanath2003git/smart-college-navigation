@@ -10,7 +10,7 @@ export default function LocateButton() {
 
     map.flyTo(
       [location.lat, location.lng],
-      20,
+      21.5,
       {
         animate: true,
         duration: 1.5,

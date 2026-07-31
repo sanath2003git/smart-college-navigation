@@ -5,30 +5,67 @@ export default function FirstFloorLayers({
 }) {
   return (
     <>
-      {/* Indoor Navigation Paths */}
-      <GeoJsonLayer
-        url="/data/chemical_ff_paths.geojson"
-        interactive={false}
-        style={{
-          color: "#ff9800",
-          weight: 3,
-          dashArray: "6,4",
-        }}
-      />
+      {/* ===================================
+          Chemical Block - First Floor
+          =================================== */}
 
-      {/* Chemical First Floor */}
       {building === "Chemical Block" && (
-  <GeoJsonLayer
-    url="/data/chemical_ff.geojson"
-    interactive={false}
-    style={{
-      color: "#00acc1",
-      weight: 1,
-      fillColor: "#80deea",
-      fillOpacity: 0.35,
-    }}
-  />
-)}
+        <>
+          {/* Indoor Navigation Paths */}
+          <GeoJsonLayer
+            url="/data/chemical/first_floor/paths.geojson"
+            interactive={false}
+            style={{
+              color: "#ff9800",
+              weight: 3,
+              dashArray: "6,4",
+            }}
+          />
+
+          {/* Rooms */}
+          <GeoJsonLayer
+            url="/data/chemical/first_floor/rooms.geojson"
+            interactive={false}
+            style={{
+              color: "#00acc1",
+              weight: 1,
+              fillColor: "#80deea",
+              fillOpacity: 0.35,
+            }}
+          />
+        </>
+      )}
+
+      {/* ===================================
+          Mechanical Block - First Floor
+          =================================== */}
+
+      {building === "Mechanical Block" && (
+        <>
+          {/* Indoor Navigation Paths */}
+          <GeoJsonLayer
+            url="/data/mechanical/first_floor/paths.geojson"
+            interactive={false}
+            style={{
+              color: "#ff9800",
+              weight: 3,
+              dashArray: "6,4",
+            }}
+          />
+
+          {/* Rooms */}
+          <GeoJsonLayer
+            url="/data/mechanical/first_floor/rooms.geojson"
+            interactive={false}
+            style={{
+              color: "#388095",
+              weight: 1,
+              fillColor: "#bfe7f3",
+              fillOpacity: 0.35,
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
