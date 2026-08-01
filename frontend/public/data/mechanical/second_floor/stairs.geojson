@@ -1,0 +1,138 @@
+{
+  "type": "FeatureCollection",
+  "name": "stairs",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 2,
+        "id": "MECH_STAIR_02_F2_START",
+        "name": "MECH_STAIR_02_F2_START",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Stair",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.63194582804904,
+          8.913000454192257
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 3,
+        "id": "MECH_STAIR_03_F2_START",
+        "name": "MECH_STAIR_03_F2_START",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Stair",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.6318493908225,
+          8.912714784199261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 4,
+        "id": "MECH_LIFT_01_F2",
+        "name": "MECH_LIFT_01_F2",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Lift",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.6318903095528,
+          8.91285898246286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 5,
+        "id": "MECH_STAIR_01_F2_END",
+        "name": "MECH_STAIR_01_F2_END",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Stair",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.63170448399016,
+          8.912985214282125
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 6,
+        "id": "MECH_STAIR_02_F2_END",
+        "name": "MECH_STAIR_02_F2_END",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Stair",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.63193539242371,
+          8.912968376264239
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": 7,
+        "id": "MECH_STAIR_03_F2_END",
+        "name": "MECH_STAIR_03_F2_END",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Stair",
+        "accessible": true,
+        "connects_down": null,
+        "connects_up": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.63185950158379,
+          8.912746296134461
+        ]
+      }
+    }
+  ]
+}

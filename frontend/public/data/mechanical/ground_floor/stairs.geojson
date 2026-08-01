@@ -3,9 +3,9 @@
 "name": "stairs",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "fid": 4, "name": "Staircase 1", "id": "MECH_STAIR_01_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_01_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631662320886932, 8.912961607544828 ] } },
-{ "type": "Feature", "properties": { "fid": 5, "name": "Staircase 2", "id": "MECH_STAIR_02_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_02_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631945828049041, 8.913000454192257 ] } },
-{ "type": "Feature", "properties": { "fid": 6, "name": "Staircase 3", "id": "MECH_STAIR_03_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_03_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631849390822495, 8.912714784199261 ] } },
-{ "type": "Feature", "properties": { "fid": 7, "name": "Lift", "id": "MECH_LIFT_01_GF", "building": "Mechanical Block", "floor": 0, "type": "Lift", "accessible": true, "connects_to": "MECH_LIFT_01_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631890309552801, 8.912858982462859 ] } }
+{ "type": "Feature", "properties": { "fid": 4, "name": "MECH_STAIR_01_GF_START", "id": "MECH_STAIR_01_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_01_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631662320886932, 8.912961607544828 ] } },
+{ "type": "Feature", "properties": { "fid": 5, "name": "MECH_STAIR_02_GF_START", "id": "MECH_STAIR_02_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_02_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631945828049041, 8.913000454192257 ] } },
+{ "type": "Feature", "properties": { "fid": 6, "name": "MECH_STAIR_03_GF_START", "id": "MECH_STAIR_03_GF", "building": "Mechanical Block", "floor": 0, "type": "Stair", "accessible": true, "connects_to": "MECH_STAIR_03_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631849390822495, 8.912714784199261 ] } },
+{ "type": "Feature", "properties": { "fid": 7, "name": "MECH_LIFT_01_GF", "id": "MECH_LIFT_01_GF", "building": "Mechanical Block", "floor": 0, "type": "Lift", "accessible": true, "connects_to": "MECH_LIFT_01_F1" }, "geometry": { "type": "Point", "coordinates": [ 76.631890309552801, 8.912858982462859 ] } }
 ]
 }
