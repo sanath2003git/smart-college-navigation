@@ -1,7 +1,7 @@
 import { buildGraph } from "./graph";
 import { setGraphs } from "./graphManager";
 import { connectFloorTransitions } from "./graphConnector";
-
+import { getNextTransition } from "./transitionService";
 export async function loadGraphs() {
   console.log("========== LOADING NAVIGATION ENGINE V2 ==========");
 
@@ -199,6 +199,7 @@ export async function loadGraphs() {
 
   console.log("Navigation Engine V2 Ready");
   console.log("==============================================");
+  
 
   return {
     outdoor: outdoorGraph,
