@@ -161,10 +161,10 @@ export function useFloorTransition() {
         targetStair.properties.id;
 
       const firstFloorTransitionId =
-        groundFloorTransitionId.replace(
-          "_GF",
-          "_F1"
-        );
+  groundFloorTransitionId.replace(
+    "_GF",
+    "_F1_START"
+  );
 
       console.log(
         "GF Transition:",
