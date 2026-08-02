@@ -11,6 +11,7 @@ import { navigate } from "../navigation/navigationRouter";
 import { getTransitionLocation } from "../navigation/graphConnector";
 
 import { speak } from "../services/voiceService";
+import { getNextTransition } from "../navigation/transitionService";
 
 export function useFloorTransition() {
   const {
@@ -158,24 +159,38 @@ export function useFloorTransition() {
       // -----------------------------------
 
       const groundFloorTransitionId =
-        targetStair.properties.id;
+  targetStair.properties.id;
 
-      const firstFloorTransitionId =
-  groundFloorTransitionId.replace(
-    "_GF",
-    "_F1_START"
+const transition =
+  getNextTransition(
+    building,
+    groundFloorTransitionId
   );
 
-      console.log(
-        "GF Transition:",
-        groundFloorTransitionId
-      );
+if (!transition) {
+  console.error(
+    `No transition mapping found for ${groundFloorTransitionId}`
+  );
+  return;
+}
 
-      console.log(
-        "FF Transition:",
-        firstFloorTransitionId
-      );
+const firstFloorTransitionId =
+  transition.next;
 
+console.log(
+  "Current Transition:",
+  groundFloorTransitionId
+);
+
+console.log(
+  "Next Transition:",
+  firstFloorTransitionId
+);
+
+console.log(
+  "Transition Info:",
+  transition
+);
       // -----------------------------------
       // Get FF graph start location
       // -----------------------------------

@@ -6,10 +6,8 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { navigate } from "../../navigation/navigationRouter";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
-import {
-  getTargetStair,
-  findStairById,
-} from "../../services/stairService";
+import { findStairById } from "../../services/stairService";
+import { selectBestTransition } from "../../navigation/transitionSelector";
 
 import { findRooms } from "../../services/roomService";
 import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
@@ -183,11 +181,24 @@ export default function SearchBar() {
         // Determine GF transition
         // ---------------------------------
 
-        const stairId =
-          getTargetStair(
-            destinationBuilding,
-            destinationFloor
-          );
+        const transition =
+  await selectBestTransition({
+    building: destinationBuilding,
+    destinationFloor,
+    start: {
+      lat: currentLat,
+      lng: currentLng,
+    },
+  });
+
+if (!transition) {
+  alert(
+    "No floor transition is available for this destination."
+  );
+  return;
+}
+
+const stairId = transition.id;
 
         console.log(
           "Target Stair ID:",
@@ -408,11 +419,17 @@ export default function SearchBar() {
         floor === 1 &&
         !preparedTargetStair
       ) {
-        const stairId =
-          getTargetStair(
-            building,
-            floor
-          );
+       const transition =
+  await selectBestTransition({
+    building,
+    destinationFloor: floor,
+    start: {
+      lat: currentLat,
+      lng: currentLng,
+    },
+  });
+
+const stairId = transition?.id;
 
         console.log(
           "Target Stair ID:",

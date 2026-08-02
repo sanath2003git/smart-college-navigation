@@ -10,7 +10,11 @@ export function getNextTransition(building, currentTransitionId) {
     return null;
   }
 
-  return buildingMap[currentTransitionId] ?? null;
+  return (
+    buildingMap.transitions?.[
+      currentTransitionId
+    ] ?? null
+);
 }
 
 export function hasTransition(building, currentTransitionId) {
