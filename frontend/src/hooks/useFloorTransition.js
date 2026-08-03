@@ -129,7 +129,7 @@ export function useFloorTransition() {
             lat,
             lng,
           },
-          3
+          1,5
         );
 
       console.log(

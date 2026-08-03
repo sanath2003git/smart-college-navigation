@@ -258,10 +258,6 @@ const stairId = transition.id;
 
         setTargetEntrance(null);
 
-        setTargetStair(
-          preparedTargetStair
-        );
-
         // ---------------------------------
         // Route current GF position → stair
         //
@@ -282,6 +278,8 @@ const stairId = transition.id;
           },
 
           stairId,
+          transitionCandidates: transition.candidates,
+          transitionStrategy: transition.strategy,
 
           building: destinationBuilding,
         });
@@ -292,6 +290,17 @@ const stairId = transition.id;
           );
           return;
         }
+
+        if (result.selectedTransition) {
+  console.log(
+    "Router Selected Transition:",
+    result.selectedTransition.properties.id
+  );
+
+  setTargetStair(
+    result.selectedTransition
+  );
+}
 
         // User is physically still on GF.
         setNavigationStage(

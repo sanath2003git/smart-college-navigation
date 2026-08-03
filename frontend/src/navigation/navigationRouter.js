@@ -259,14 +259,66 @@ async function navigateOutdoor(options) {
 // ======================================================
 // GROUND FLOOR NAVIGATION
 // ======================================================
+async function findBestTransitionRoute({
+  graph,
+  startNode,
+  candidateIds,
+}) {
+  let best = null;
+
+  for (const candidateId of candidateIds) {
+    const feature = await findStairById(candidateId);
+
+    if (!feature) continue;
+
+    const [lng, lat] = feature.geometry.coordinates;
+
+    const goalNode = findNearestNode(
+      graph,
+      lat,
+      lng
+    );
+
+    if (!goalNode) continue;
+
+    const route = aStar(
+      graph,
+      startNode,
+      goalNode
+    );
+
+    if (!route || route.length === 0) {
+      continue;
+    }
+
+    console.log(
+      `${candidateId} → ${route.length} nodes`
+    );
+
+    if (
+      !best ||
+      route.length < best.route.length
+    ) {
+      best = {
+        id: candidateId,
+        feature,
+        route,
+      };
+    }
+  }
+
+  return best;
+}
 
 async function navigateGroundFloor(options) {
   const {
-    start,
-    stairId,
-    destination,
-    building,
-  } = options;
+  start,
+  stairId,
+  transitionCandidates,
+  transitionStrategy,
+  destination,
+  building,
+} = options;
 
   console.log(
     "========== GROUND FLOOR ROUTING =========="
@@ -323,26 +375,76 @@ async function navigateGroundFloor(options) {
   }
 
   // -----------------------------------
-  // Stair Navigation
-  // -----------------------------------
+// Stair / Lift Navigation
+// -----------------------------------
 
-  else {
-    console.log(
-      "Routing to Stair:",
-      stairId
+else {
+  console.log(
+    "Routing to Transition:",
+    stairId
+  );
+
+  // If transitionSelector returned
+  // multiple candidates, evaluate them.
+  if (
+  transitionCandidates &&
+  transitionCandidates.length > 0
+) {
+  console.log(
+    "========== SMART TRANSITION =========="
+  );
+
+  console.log(
+    "Strategy:",
+    transitionStrategy
+  );
+
+  console.log(
+    "Candidates:",
+    transitionCandidates
+  );
+
+  const best =
+    await findBestTransitionRoute({
+      graph,
+      startNode,
+      candidateIds: transitionCandidates,
+    });
+
+  if (!best) {
+    console.error(
+      "No valid transition route found."
     );
 
+    return null;
+  }
+
+  console.log(
+    "Best Transition:",
+    best.id
+  );
+
+  console.log(
+    "======================================"
+  );
+
+  targetFeature = best.feature;
+}
+
+  // Backward compatibility
+  else {
     targetFeature =
       await findStairById(stairId);
 
     if (!targetFeature) {
       console.error(
-        "Target stair not found."
+        "Target transition not found."
       );
 
       return null;
     }
   }
+}
 
   console.log(
     "Target:",
@@ -397,9 +499,15 @@ async function navigateGroundFloor(options) {
   );
 
   return {
-    route,
-    destination: targetFeature,
-  };
+  route,
+  destination: targetFeature,
+
+  selectedTransitionId:
+    targetFeature.properties.id,
+
+  selectedTransition:
+    targetFeature,
+};
 }
 
 // ======================================================
