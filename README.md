@@ -1,18 +1,18 @@
-# 🧭 CampusNav - Smart College Navigation System
+# 🧭 SmartNav – Smart College Navigation System
 
-A web-based Smart College Navigation System that helps students, staff, and visitors navigate both outdoor and indoor areas of a college campus using GIS, interactive maps, and shortest-path navigation.
+SmartNav is a web-based indoor and outdoor navigation system designed for college campuses. It enables students, faculty, staff, and visitors to navigate seamlessly across the campus using GIS-based maps, interactive floor plans, and shortest-path routing.
 
-> **MCA Semester 3 Mini Project (Prototype)**
+> 🎓 MCA Semester 3 Mini Project – TKM College of Engineering
 
 ---
 
 # 📖 Overview
 
-Large educational institutions often consist of multiple buildings and multiple floors, making it difficult for students, visitors, and staff to locate classrooms, laboratories, offices, and other facilities.
+Finding classrooms, laboratories, offices, and other facilities inside large educational campuses can be challenging, especially for newcomers.
 
-CampusNav provides an interactive campus map with intelligent navigation that guides users from their current location to the selected destination using the shortest available route.
+SmartNav combines outdoor campus navigation with indoor building navigation to provide a seamless navigation experience. Using interactive maps and graph-based pathfinding, users can search for a destination and receive the shortest route from their current location.
 
-The system combines outdoor campus navigation with indoor building navigation to provide a seamless navigation experience.
+The project currently focuses on the Mechanical Block and Chemical Block of TKM College of Engineering and is designed to be easily extended to additional campus buildings.
 
 ---
 
@@ -21,42 +21,65 @@ The system combines outdoor campus navigation with indoor building navigation to
 ## 🌍 Outdoor Navigation
 
 - Interactive campus map
-- Campus boundary
-- Building locations
-- Outdoor walkways
+- Campus boundary visualization
+- Building polygons
+- Outdoor walkway network
 - Building entrances
 - Current user location
+- Automatic building detection
 - Building selection
 
 ---
 
 ## 🏢 Indoor Navigation
 
-- Chemical Block Ground Floor navigation
-- Indoor corridor network
-- Door-based room navigation
-- Multi-door room support
-- Stair mapping
+- Mechanical Block navigation
+  - Ground Floor
+  - First Floor
+  - Second Floor
+  - Third Floor
+
+- Chemical Block navigation
+  - Ground Floor
+  - First Floor
+
+- Interactive floor plans
+- Indoor corridor routing
+- Door-based navigation
+- Multiple entrance support
 - Stair connectors
-- Indoor shortest-path routing
-- Interactive floor layout
+- Floor transition support
 
 ---
 
-## 🔍 Search
+## 🔍 Smart Search
 
-- Search rooms by room number
-- Automatic route generation
-- Nearest door selection for rooms with multiple entrances
+- Search by room number
+- Search across supported buildings
+- Automatic building identification
+- Automatic floor selection
+- Nearest room entrance detection
 
 ---
 
-## 🧠 Navigation
+## 🧠 Navigation Engine
 
-- Graph-based navigation
+- Graph-based routing
 - A* (A-Star) Pathfinding Algorithm
-- Indoor navigation graph generated from GeoJSON
-- Real-time route visualization
+- GeoJSON-based navigation graph
+- Outdoor-to-indoor navigation
+- Indoor shortest-path routing
+- Dynamic route visualization
+
+---
+
+# 🗺 GIS & Mapping
+
+- OpenStreetMap
+- QGIS
+- GeoJSON
+- Leaflet
+- React Leaflet
 
 ---
 
@@ -75,26 +98,82 @@ The system combines outdoor campus navigation with indoor building navigation to
 
 ---
 
-## Backend *(Planned)*
+## Backend *(Upcoming)*
 
 - Django
 - Django REST Framework
 
 ---
 
-## GIS & Mapping
+## Navigation & GIS
 
-- QGIS
 - GeoJSON
-- OpenStreetMap
+- Graph Data Structure
+- A* Pathfinding Algorithm
+- Turf.js
+- QGIS
 
 ---
 
-## Navigation
+# 📂 Current Project Structure
 
-- Graph-based Navigation
-- A* Pathfinding Algorithm
+```
+src/
+│
+├── components/
+├── pages/
+├── navigation/
+├── hooks/
+├── services/
+├── context/
+├── config/
+├── data/
+├── assets/
+└── utils/
+```
 
+---
+
+# 🚀 Current Progress
+
+✅ Interactive Campus Map
+
+✅ Outdoor Navigation
+
+✅ Building Detection
+
+✅ Multi-Building Support
+
+✅ Mechanical Block Indoor Navigation
+
+✅ Chemical Block Indoor Navigation
+
+✅ Stair Connections
+
+✅ Floor Transition Logic
+
+✅ Room Search
+
+🚧 Indoor-to-Indoor Navigation
+
+🚧 Voice Navigation
+
+🚧 Backend API Integration
+
+🚧 Real-time GPS Improvements
+
+---
+
+# 🎯 Future Enhancements
+
+- Voice-guided navigation
+- Live indoor positioning
+- Accessibility-aware routing
+- QR code based navigation
+- Admin dashboard
+- Room information management
+- Event navigation
+- Multi-campus support
 
 ---
 
