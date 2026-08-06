@@ -115,6 +115,177 @@ The project currently focuses on the Mechanical Block and Chemical Block of TKM 
 
 ---
 
+# 👥 Project Team & Module Responsibilities
+
+SmartNav is being developed as a collaborative MCA Mini Project. The system is divided into two major modules to enable parallel development and easier integration.
+
+---
+
+## 👨 Brian — Campus Information & Exploration
+
+**Goal:** Enable users to discover, explore, and understand the campus and its facilities.
+
+### Responsibilities
+
+#### Frontend
+
+- Home page
+- Campus map
+- Building explorer
+- Floor viewer
+- Room details
+- Department information
+- Building information pages
+- Search UI
+- Interactive map markers
+
+#### Backend
+
+- Building APIs
+- Floor APIs
+- Room APIs
+- Department APIs
+- Search APIs
+- Campus information services
+
+#### Database
+
+- Buildings
+- Floors
+- Rooms
+- Departments
+- Points of Interest (POIs)
+- Building metadata
+- Search indexing
+
+#### GIS
+
+- Campus base map
+- Building polygons
+- Floor plans
+- Room polygons
+- Department locations
+- Landmarks and POIs
+
+#### Module Responsibilities
+
+- Manage campus information
+- Maintain building and room data
+- Create and update GIS datasets
+- Develop search functionality
+- Maintain searchable campus information
+- Display campus information on the map
+
+---
+
+## 👨 Sanath Sreekumar — Navigation & Routing
+
+**Goal:** Enable users to navigate efficiently from their current location to any destination.
+
+### Responsibilities
+
+#### Frontend
+
+- Navigation screen
+- Route visualization
+- Navigation controls
+- Navigation status panel
+- Floor transition UI
+- Route instructions
+- Search integration with navigation
+
+#### Backend
+
+- Navigation APIs
+- A* Pathfinding Engine
+- Building detection
+- GPS and location services
+- Route generation
+- Route recalculation
+- Destination selection
+- Navigation initialization
+
+#### Database
+
+- Navigation graph
+- Nodes
+- Edges
+- Route metadata
+- Navigation configuration
+
+#### GIS
+
+- Outdoor walkways
+- Indoor pathways
+- Entrances
+- Staircases
+- Lifts
+- Floor transition points
+- Routing network
+
+#### Module Responsibilities
+
+- Develop the routing engine
+- Handle indoor and outdoor navigation
+- Integrate GPS and live location tracking
+- Generate shortest paths
+- Optimize navigation routes
+- Integrate search results with navigation
+- Handle destination selection
+- Start navigation
+- Highlight calculated routes on the map
+
+---
+
+## 🤝 Shared Responsibilities
+
+Both team members collaborate on:
+
+- Module integration
+- API integration
+- End-to-end testing
+- Bug fixing
+- Deployment
+- Documentation
+- Git branch management
+- Scrum reviews
+- Final project presentation
+
+---
+
+# 📌 Ownership Summary
+
+| Module | Brian | Sanath |
+|---------|:------:|:------:|
+| Campus Information | ✅ | |
+| Building & Room Data | ✅ | |
+| Search System | ✅ | |
+| Search API | ✅ | |
+| Search UI | ✅ | |
+| Search Integration | | ✅ |
+| Destination Selection | | ✅ |
+| Route Generation | | ✅ |
+| Route Highlighting | | ✅ |
+| Navigation Engine | | ✅ |
+| GPS Integration | | ✅ |
+| A* Pathfinding | | ✅ |
+| Indoor Routing | | ✅ |
+| Outdoor Routing | | ✅ |
+| Floor Transition | | ✅ |
+| Module Integration | ✅ | ✅ |
+| Testing | ✅ | ✅ |
+| Documentation | ✅ | ✅ |
+
+---
+
+> **Integration Workflow**
+>
+> 1. Campus information is provided through the Campus Information module.
+> 2. Users search for a destination using the Search module.
+> 3. The selected destination is passed to the Navigation module.
+> 4. The Navigation Engine computes the optimal route using the A* Pathfinding algorithm.
+> 5. The calculated route is visualized on the interactive campus map.
+
 # 📂 Current Project Structure
 
 ```
