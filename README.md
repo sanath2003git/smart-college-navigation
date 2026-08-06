@@ -253,39 +253,6 @@ Both team members collaborate on:
 
 ---
 
-# 📌 Ownership Summary
-
-| Module | Brian | Sanath |
-|---------|:------:|:------:|
-| Campus Information | ✅ | |
-| Building & Room Data | ✅ | |
-| Search System | ✅ | |
-| Search API | ✅ | |
-| Search UI | ✅ | |
-| Search Integration | | ✅ |
-| Destination Selection | | ✅ |
-| Route Generation | | ✅ |
-| Route Highlighting | | ✅ |
-| Navigation Engine | | ✅ |
-| GPS Integration | | ✅ |
-| A* Pathfinding | | ✅ |
-| Indoor Routing | | ✅ |
-| Outdoor Routing | | ✅ |
-| Floor Transition | | ✅ |
-| Module Integration | ✅ | ✅ |
-| Testing | ✅ | ✅ |
-| Documentation | ✅ | ✅ |
-
----
-
-> **Integration Workflow**
->
-> 1. Campus information is provided through the Campus Information module.
-> 2. Users search for a destination using the Search module.
-> 3. The selected destination is passed to the Navigation module.
-> 4. The Navigation Engine computes the optimal route using the A* Pathfinding algorithm.
-> 5. The calculated route is visualized on the interactive campus map.
-
 # 📂 Current Project Structure
 
 ```
