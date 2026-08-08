@@ -1,89 +1,310 @@
 import { findNearestNode } from "./findNearestNode";
 
 // Transition nodes stored separately for each building.
+//
+// Structure:
+//
+// transitionGraphNodes[building][transitionId] = graphNodeId
+//
+// Example:
+//
+// transitionGraphNodes["Mechanical Block"][
+//   "MECH_STAIR_01_F2_END"
+// ]
+//
+// → "8.9129852,76.6317045"
 const transitionGraphNodes = {};
 
-export async function connectFloorTransitions(
-  building,
-  firstFloorGraph
-) {
-  if (!building || !firstFloorGraph) {
-    console.error(
-      "connectFloorTransitions: building or graph missing."
-    );
-    return;
+/**
+ * Get the public-data folder for a building.
+ */
+function getBuildingFolder(building) {
+  if (building === "Chemical Block") {
+    return "chemical";
   }
 
+  if (building === "Mechanical Block") {
+    return "mechanical";
+  }
+
+  return null;
+}
+
+/**
+ * Return the floor configuration for a building.
+ *
+ * Chemical currently has:
+ *   GF + FF
+ *
+ * Mechanical currently has:
+ *   GF + FF + SF + TF
+ */
+function getFloorConfiguration(building) {
+  if (building === "Chemical Block") {
+    return [
+      {
+        floor: 0,
+        key: "groundFloor",
+        folder: "ground_floor",
+      },
+      {
+        floor: 1,
+        key: "firstFloor",
+        folder: "first_floor",
+      },
+    ];
+  }
+
+  if (building === "Mechanical Block") {
+    return [
+      {
+        floor: 0,
+        key: "groundFloor",
+        folder: "ground_floor",
+      },
+      {
+        floor: 1,
+        key: "firstFloor",
+        folder: "first_floor",
+      },
+      {
+        floor: 2,
+        key: "secondFloor",
+        folder: "second_floor",
+      },
+      {
+        floor: 3,
+        key: "thirdFloor",
+        folder: "top_floor",
+      },
+    ];
+  }
+
+  return [];
+}
+
+/**
+ * Load stairs.geojson for every floor of a building.
+ */
+async function loadTransitionFeatures(
+  building
+) {
   const folder =
-    building === "Chemical Block"
-      ? "chemical"
-      : building === "Mechanical Block"
-        ? "mechanical"
-        : null;
+    getBuildingFolder(building);
 
   if (!folder) {
     console.error(
       "Unsupported building:",
       building
     );
-    return;
+
+    return null;
   }
 
-  const [gfResponse, ffResponse] = await Promise.all([
-    fetch(`/data/${folder}/ground_floor/stairs.geojson`),
-    fetch(`/data/${folder}/first_floor/stairs.geojson`),
-  ]);
+  const floorConfig =
+    getFloorConfiguration(building);
 
-  if (!gfResponse.ok || !ffResponse.ok) {
-    console.error(
-      `Failed to load transition data for ${building}`
+  const responses =
+    await Promise.all(
+      floorConfig.map(
+        async ({
+          floor,
+          key,
+          folder: floorFolder,
+        }) => {
+          const response =
+            await fetch(
+              `/data/${folder}/${floorFolder}/stairs.geojson`
+            );
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to load ${building} floor ${floor} stairs.geojson`
+            );
+          }
+
+          const data =
+            await response.json();
+
+          return {
+            floor,
+            key,
+            folder: floorFolder,
+            data,
+          };
+        }
+      )
     );
+
+  return responses;
+}
+
+/**
+ * Connect every stair/lift transition feature
+ * to the nearest node in its own floor graph.
+ *
+ * IMPORTANT:
+ *
+ * We do NOT connect an F2 transition to the F1 graph.
+ *
+ * Each transition is connected to the graph
+ * belonging to the same floor.
+ *
+ * Example:
+ *
+ * MECH_STAIR_01_F2_END
+ *       ↓
+ * Second Floor Graph
+ *
+ * MECH_STAIR_02_F2_START
+ *       ↓
+ * Second Floor Graph
+ *
+ * MECH_STAIR_02_F3_END
+ *       ↓
+ * Top Floor Graph
+ */
+export async function connectFloorTransitions(
+  building,
+  floorGraphs
+) {
+  if (!building || !floorGraphs) {
+    console.error(
+      "connectFloorTransitions: building or floor graphs missing."
+    );
+
     return;
   }
 
-  const gf = await gfResponse.json();
-  const ff = await ffResponse.json();
+  const floorConfig =
+    getFloorConfiguration(building);
 
+  if (floorConfig.length === 0) {
+    console.error(
+      "No floor configuration found for:",
+      building
+    );
+
+    return;
+  }
+
+  let transitionData;
+
+  try {
+    transitionData =
+      await loadTransitionFeatures(
+        building
+      );
+  } catch (error) {
+    console.error(
+      "Failed to load transition data:",
+      error
+    );
+
+    return;
+  }
+
+  // Reset existing nodes for this building.
   transitionGraphNodes[building] = {};
 
   console.log(
     `========== ${building} TRANSITION NODES ==========`
   );
 
-  // Register every First Floor transition against
-  // its nearest node in the building's FF graph.
-  ff.features.forEach((transition) => {
-    const [lng, lat] =
-      transition.geometry.coordinates;
+  for (const floorInfo of transitionData) {
+    const {
+      floor,
+      key,
+      folder,
+      data,
+    } = floorInfo;
 
-    const nearestNode = findNearestNode(
-      firstFloorGraph,
-      lat,
-      lng
+    const graph =
+      floorGraphs[key];
+
+    console.log(
+      `--- Floor ${floor} (${folder}) ---`
     );
 
-    const id = transition.properties.id;
+    if (!graph) {
+      console.warn(
+        `No graph supplied for ${building} floor ${floor}.`
+      );
 
-    transitionGraphNodes[building][id] =
-      nearestNode;
+      continue;
+    }
 
-    console.log(id, "→", nearestNode);
-  });
+    if (
+      !data ||
+      !Array.isArray(data.features)
+    ) {
+      console.warn(
+        `No transition features found for ${building} floor ${floor}.`
+      );
+
+      continue;
+    }
+
+    for (const transition of data.features) {
+      const coordinates =
+        transition.geometry?.coordinates;
+
+      const id =
+        transition.properties?.id;
+
+      if (
+        !id ||
+        !Array.isArray(coordinates) ||
+        coordinates.length < 2
+      ) {
+        console.warn(
+          "Skipping invalid transition feature:",
+          transition
+        );
+
+        continue;
+      }
+
+      const [lng, lat] =
+        coordinates;
+
+      const nearestNode =
+        findNearestNode(
+          graph,
+          lat,
+          lng
+        );
+
+      if (!nearestNode) {
+        console.warn(
+          `Unable to connect transition ${id} to floor ${floor} graph.`
+        );
+
+        continue;
+      }
+
+      transitionGraphNodes[
+        building
+      ][id] = nearestNode;
+
+      console.log(
+        `${id} → ${nearestNode}`
+      );
+    }
+  }
 
   console.log(
     "=========================================="
   );
 
-  return {
-    groundFloorTransitions: gf.features,
-    firstFloorTransitions: ff.features,
-  };
+  return transitionGraphNodes[
+    building
+  ];
 }
 
-// ------------------------------------------------------
-// Get registered FF graph node
-// ------------------------------------------------------
-
+/**
+ * Get the graph node connected to a transition.
+ */
 export function findConnectedStairNode(
   building,
   transitionId
@@ -91,28 +312,50 @@ export function findConnectedStairNode(
   console.log(
     "========== TRANSITION LOOKUP =========="
   );
-  console.log("Building:", building);
-  console.log("Transition:", transitionId);
 
-  return (
-    transitionGraphNodes[building]?.[
-      transitionId
-    ] ?? null
+  console.log(
+    "Building:",
+    building
   );
+
+  console.log(
+    "Transition:",
+    transitionId
+  );
+
+  const node =
+    transitionGraphNodes[
+      building
+    ]?.[transitionId] ?? null;
+
+  console.log(
+    "Connected Graph Node:",
+    node
+  );
+
+  return node;
 }
 
-// ------------------------------------------------------
-// Get registered FF transition as { lat, lng }
-// ------------------------------------------------------
-
+/**
+ * Get the graph-connected location of a
+ * transition.
+ *
+ * Returns:
+ *
+ * {
+ *   lat,
+ *   lng
+ * }
+ */
 export function getTransitionLocation(
   building,
   transitionId
 ) {
-  const nodeId = findConnectedStairNode(
-    building,
-    transitionId
-  );
+  const nodeId =
+    findConnectedStairNode(
+      building,
+      transitionId
+    );
 
   if (!nodeId) {
     console.error(
@@ -125,12 +368,19 @@ export function getTransitionLocation(
   }
 
   // Graph node IDs use:
+  //
   // "latitude,longitude"
-  const [latString, lngString] =
-    nodeId.split(",");
+  //
+  const [
+    latString,
+    lngString,
+  ] = nodeId.split(",");
 
-  const lat = Number(latString);
-  const lng = Number(lngString);
+  const lat =
+    Number(latString);
+
+  const lng =
+    Number(lngString);
 
   if (
     !Number.isFinite(lat) ||

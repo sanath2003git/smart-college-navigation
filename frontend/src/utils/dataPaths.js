@@ -5,9 +5,11 @@ export function getFloorFolder(building, floor) {
   };
 
   const floorMap = {
-    0: "ground_floor",
-    1: "first_floor",
-  };
+  0: "ground_floor",
+  1: "first_floor",
+  2: "second_floor",
+  3: "top_floor",
+};
 
   return `/data/${buildingMap[building]}/${floorMap[floor]}`;
 }

@@ -1,39 +1,66 @@
 // src/navigation/transitionSelector.js
 
-import { getCandidateTransitions } from "./candidateTransitionService";
+import {
+  getCandidateTransitions,
+} from "./candidateTransitionService";
 
 /**
- * Selects the best transition (stair/lift)
- * for reaching a destination floor.
+ * Selects the transition that should be used
+ * for the NEXT floor.
  *
- * Currently:
- * - Returns the first candidate.
+ * The selector does NOT jump directly to the
+ * final destination-floor transition.
  *
- * Future:
- * - Evaluate all candidates using A*
- * - Compare route cost
- * - Return the shortest path
+ * Example:
+ *
+ * currentFloor = 0
+ * destinationFloor = 3
+ *
+ * The required sequence is:
+ *
+ * GF → F1
+ * F1 → F2
+ * F2 → F3
+ *
+ * Therefore, on Ground Floor we select
+ * only the GF → F1 candidates.
  */
 export async function selectBestTransition({
   building,
+  currentFloor,
   destinationFloor,
   start,
 }) {
-  const candidates = getCandidateTransitions(
-    building,
-    destinationFloor
-  );
+  const candidates =
+    getCandidateTransitions(
+      building,
+      currentFloor,
+      destinationFloor
+    );
 
   console.log(
     "========== TRANSITION SELECTOR =========="
   );
 
-  console.log("Building:", building);
+  console.log(
+    "Building:",
+    building
+  );
+
+  console.log(
+    "Current Floor:",
+    currentFloor
+  );
+
   console.log(
     "Destination Floor:",
     destinationFloor
   );
-  console.log("Current Location:", start);
+
+  console.log(
+    "Current Location:",
+    start
+  );
 
   console.log(
     "Candidate Count:",
@@ -46,6 +73,24 @@ export async function selectBestTransition({
     }))
   );
 
+  // -----------------------------------
+  // Already on destination floor
+  // -----------------------------------
+
+  if (
+    currentFloor === destinationFloor
+  ) {
+    console.log(
+      "Already on destination floor."
+    );
+
+    return null;
+  }
+
+  // -----------------------------------
+  // No candidates
+  // -----------------------------------
+
   if (candidates.length === 0) {
     console.error(
       "No candidate transitions found."
@@ -54,17 +99,24 @@ export async function selectBestTransition({
     return null;
   }
 
-  // ----------------------------------------------------------------
-  // TEMPORARY IMPLEMENTATION
+  // -----------------------------------
+  // Temporary selection
+  // -----------------------------------
   //
-  // The router still expects a single transition ID.
-  // For now we return the first candidate so behaviour
-  // stays identical while we refactor incrementally.
-  // ----------------------------------------------------------------
+  // The graph-based evaluator in
+  // navigationRouter.js will evaluate
+  // all candidates and select the
+  // shortest route.
+  //
+  // This selector only determines the
+  // correct FLOOR LEVEL of candidates.
+  // -----------------------------------
 
   const selectedTransition = {
     id: candidates[0],
+
     candidates,
+
     strategy: "FIRST_CANDIDATE",
   };
 

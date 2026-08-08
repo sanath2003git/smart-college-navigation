@@ -186,16 +186,34 @@ export async function loadGraphs() {
   });
 
   await Promise.all([
-    connectFloorTransitions(
-      "Chemical Block",
-      firstFloorGraphs["Chemical Block"]
-    ),
+  connectFloorTransitions(
+    "Chemical Block",
+    {
+      groundFloor:
+        groundFloorGraphs["Chemical Block"],
 
-    connectFloorTransitions(
-      "Mechanical Block",
-      firstFloorGraphs["Mechanical Block"]
-    ),
-  ]);
+      firstFloor:
+        firstFloorGraphs["Chemical Block"],
+    }
+  ),
+
+  connectFloorTransitions(
+    "Mechanical Block",
+    {
+      groundFloor:
+        groundFloorGraphs["Mechanical Block"],
+
+      firstFloor:
+        firstFloorGraphs["Mechanical Block"],
+
+      secondFloor:
+        secondFloorGraphs["Mechanical Block"],
+
+      thirdFloor:
+        thirdFloorGraphs["Mechanical Block"],
+    }
+  ),
+]);
 
   console.log("Navigation Engine V2 Ready");
   console.log("==============================================");
