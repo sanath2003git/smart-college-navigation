@@ -1,21 +1,32 @@
+import { BUILDING_CONFIG } from "../config/buildingConfig";
 import { getRoomsPath } from "../utils/dataPaths";
 
 const roomCache = {};
 
 export async function findRooms(building, roomNo) {
+  // Defensive check
+  if (!BUILDING_CONFIG[building]) {
+    console.warn(`Unknown building: ${building}`);
+    return [];
+  }
+
   if (!roomCache[building]) {
-    const [gfResponse, ffResponse] = await Promise.all([
-      fetch(getRoomsPath(building, 0)),
-      fetch(getRoomsPath(building, 1)),
-    ]);
+    const floors = Object.keys(BUILDING_CONFIG[building].floors)
+      .map(Number);
 
-    const gfData = await gfResponse.json();
-    const ffData = await ffResponse.json();
+    const responses = await Promise.all(
+      floors.map((floor) =>
+        fetch(getRoomsPath(building, floor))
+      )
+    );
 
-    roomCache[building] = [
-      ...gfData.features,
-      ...ffData.features,
-    ];
+    const datasets = await Promise.all(
+      responses.map((response) => response.json())
+    );
+
+    roomCache[building] = datasets.flatMap(
+      (data) => data.features
+    );
   }
 
   const query = roomNo.trim().toUpperCase();

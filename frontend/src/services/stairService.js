@@ -11,6 +11,8 @@ async function loadStairs() {
       chemicalFfResponse,
       mechanicalGfResponse,
       mechanicalFfResponse,
+      mechanicalSfResponse,
+      mechanicalTfResponse,
     ] = await Promise.all([
       fetch(
         "/data/chemical/ground_floor/stairs.geojson"
@@ -27,36 +29,65 @@ async function loadStairs() {
       fetch(
         "/data/mechanical/first_floor/stairs.geojson"
       ),
+
+      fetch(
+        "/data/mechanical/second_floor/stairs.geojson"
+      ),
+
+      fetch(
+        "/data/mechanical/top_floor/stairs.geojson"
+      ),
     ]);
+
+    // -----------------------------------
+    // Validate responses
+    // -----------------------------------
 
     if (
       !chemicalGfResponse.ok ||
       !chemicalFfResponse.ok ||
       !mechanicalGfResponse.ok ||
-      !mechanicalFfResponse.ok
+      !mechanicalFfResponse.ok ||
+      !mechanicalSfResponse.ok ||
+      !mechanicalTfResponse.ok
     ) {
       throw new Error(
         "Failed to load stair GeoJSON data."
       );
     }
 
+    // -----------------------------------
+    // Convert to JSON
+    // -----------------------------------
+
     const [
       chemicalGfData,
       chemicalFfData,
       mechanicalGfData,
       mechanicalFfData,
+      mechanicalSfData,
+      mechanicalTfData,
     ] = await Promise.all([
       chemicalGfResponse.json(),
       chemicalFfResponse.json(),
       mechanicalGfResponse.json(),
       mechanicalFfResponse.json(),
+      mechanicalSfResponse.json(),
+      mechanicalTfResponse.json(),
     ]);
+
+    // -----------------------------------
+    // Merge all stair/lift features
+    // -----------------------------------
 
     stairs = [
       ...chemicalGfData.features,
       ...chemicalFfData.features,
+
       ...mechanicalGfData.features,
       ...mechanicalFfData.features,
+      ...mechanicalSfData.features,
+      ...mechanicalTfData.features,
     ];
 
     console.log(
@@ -66,6 +97,36 @@ async function loadStairs() {
     console.log(
       "Total Stair/Lift Features:",
       stairs.length
+    );
+
+    console.log(
+      "Chemical GF:",
+      chemicalGfData.features.length
+    );
+
+    console.log(
+      "Chemical FF:",
+      chemicalFfData.features.length
+    );
+
+    console.log(
+      "Mechanical GF:",
+      mechanicalGfData.features.length
+    );
+
+    console.log(
+      "Mechanical FF:",
+      mechanicalFfData.features.length
+    );
+
+    console.log(
+      "Mechanical SF:",
+      mechanicalSfData.features.length
+    );
+
+    console.log(
+      "Mechanical TF:",
+      mechanicalTfData.features.length
     );
 
     console.log(

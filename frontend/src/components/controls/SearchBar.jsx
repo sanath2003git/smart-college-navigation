@@ -6,10 +6,8 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { navigate } from "../../navigation/navigationRouter";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
-import {
-  getTargetStair,
-  findStairById,
-} from "../../services/stairService";
+import { findStairById } from "../../services/stairService";
+import { selectBestTransition } from "../../navigation/transitionSelector";
 
 import { findRooms } from "../../services/roomService";
 import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
@@ -24,6 +22,7 @@ export default function SearchBar() {
     currentLocation,
 
     currentBuilding,
+    currentFloor,
     navigationStage,
 
     setDestination,
@@ -99,6 +98,11 @@ export default function SearchBar() {
       console.log(
         "Current Stage:",
         navigationStage
+      );
+
+      console.log(
+        "Current Floor:",
+        currentFloor
       );
 
       console.log(
@@ -183,11 +187,31 @@ export default function SearchBar() {
         // Determine GF transition
         // ---------------------------------
 
-        const stairId =
-          getTargetStair(
-            destinationBuilding,
-            destinationFloor
+        const transition =
+          await selectBestTransition({
+            building: destinationBuilding,
+
+            // IMPORTANT:
+            // This is the user's actual floor,
+            // NOT the destination floor.
+            currentFloor,
+
+            destinationFloor,
+
+            start: {
+              lat: currentLat,
+              lng: currentLng,
+            },
+          });
+
+        if (!transition) {
+          alert(
+            "No floor transition is available for this destination."
           );
+          return;
+        }
+
+        const stairId = transition.id;
 
         console.log(
           "Target Stair ID:",
@@ -227,10 +251,6 @@ export default function SearchBar() {
 
         // ---------------------------------
         // Store FINAL destination
-        //
-        // M203 remains the final destination.
-        // The GF router will separately route
-        // to stairId.
         // ---------------------------------
 
         setDestination(
@@ -241,25 +261,23 @@ export default function SearchBar() {
           destinationBuilding
         );
 
-        setCurrentFloor(
-          destinationFloor
-        );
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT do:
+         *
+         * setCurrentFloor(destinationFloor)
+         *
+         * The user is still physically on GF.
+         *
+         * currentFloor must remain 0 until the
+         * actual floor transition happens.
+         */
 
         setTargetEntrance(null);
 
-        setTargetStair(
-          preparedTargetStair
-        );
-
         // ---------------------------------
         // Route current GF position → stair
-        //
-        // IMPORTANT:
-        // Do NOT pass destinationFeature here.
-        //
-        // navigateGroundFloor() already uses
-        // stairId to load the correct stair
-        // and choose its nearest graph node.
         // ---------------------------------
 
         result = await navigate({
@@ -272,6 +290,12 @@ export default function SearchBar() {
 
           stairId,
 
+          transitionCandidates:
+            transition.candidates,
+
+          transitionStrategy:
+            transition.strategy,
+
           building: destinationBuilding,
         });
 
@@ -280,6 +304,17 @@ export default function SearchBar() {
             "Unable to calculate route to the floor transition."
           );
           return;
+        }
+
+        if (result.selectedTransition) {
+          console.log(
+            "Router Selected Transition:",
+            result.selectedTransition.properties.id
+          );
+
+          setTargetStair(
+            result.selectedTransition
+          );
         }
 
         // User is physically still on GF.
@@ -292,15 +327,42 @@ export default function SearchBar() {
       // CASE 3
       // Existing outdoor flow
       //
-      // Preserve:
       // OUTDOOR → entrance → GF
-      // OUTDOOR → entrance → GF → FF
       // ===================================
 
       else {
         console.log(
           "Routing mode: EXISTING OUTDOOR FLOW"
         );
+
+        /*
+         * IMPORTANT:
+         *
+         * When navigation starts outside,
+         * the first indoor floor is Ground Floor.
+         *
+         * Therefore:
+         *
+         * currentFloor = 0
+         *
+         * destinationFloor may be 1, 2 or 3.
+         *
+         * Example:
+         *
+         * M402:
+         * currentFloor = 0
+         * destinationFloor = 3
+         */
+        if (
+          navigationStage ===
+          NAVIGATION_STAGE.OUTDOOR
+        ) {
+          setCurrentFloor(0);
+
+          console.log(
+            "Outdoor navigation: currentFloor set to 0"
+          );
+        }
 
         setNavigationStage(
           NAVIGATION_STAGE.OUTDOOR
@@ -344,10 +406,6 @@ export default function SearchBar() {
 
       // -----------------------------------
       // Store FINAL destination
-      //
-      // For GF → FF, navigateGroundFloor()
-      // returns the original destination that
-      // was already stored above by SearchBar.
       // -----------------------------------
 
       if (
@@ -365,7 +423,7 @@ export default function SearchBar() {
       }
 
       // -----------------------------------
-      // Final destination building/floor
+      // Final destination
       // -----------------------------------
 
       const finalDestination =
@@ -389,30 +447,51 @@ export default function SearchBar() {
         building
       );
 
-      // -----------------------------------
-      // Destination floor
-      // -----------------------------------
-
-      setCurrentFloor(
-        floor
-      );
+      /*
+       * IMPORTANT:
+       *
+       * Do NOT set currentFloor here.
+       *
+       * floor = destination floor.
+       *
+       * currentFloor = user's physical floor.
+       *
+       * They are different concepts.
+       */
 
       // -----------------------------------
       // Configure floor transition
       //
-      // GF → FF already loaded the stair
-      // above, so don't load it twice.
+      // Only prepare the GF → FF transition
+      // for the existing same-building flow.
+      //
+      // Outdoor navigation will select the
+      // appropriate transition when the user
+      // actually reaches the building entrance.
       // -----------------------------------
 
       if (
+        sameBuilding &&
+        alreadyOnGroundFloor &&
         floor === 1 &&
         !preparedTargetStair
       ) {
-        const stairId =
-          getTargetStair(
+        const transition =
+          await selectBestTransition({
             building,
-            floor
-          );
+
+            currentFloor,
+
+            destinationFloor: floor,
+
+            start: {
+              lat: currentLat,
+              lng: currentLng,
+            },
+          });
+
+        const stairId =
+          transition?.id;
 
         console.log(
           "Target Stair ID:",
@@ -445,15 +524,15 @@ export default function SearchBar() {
         } else {
           setTargetStair(null);
         }
-      } else if (floor !== 1) {
-        setTargetStair(null);
       }
 
       // -----------------------------------
       // Voice
       // -----------------------------------
 
-      speak("Navigation started.");
+      speak(
+        "Navigation started."
+      );
 
       // -----------------------------------
       // Debug
@@ -470,8 +549,13 @@ export default function SearchBar() {
       );
 
       console.log(
-        "Floor:",
+        "Destination Floor:",
         floor
+      );
+
+      console.log(
+        "Current Floor:",
+        currentFloor
       );
 
       console.log(

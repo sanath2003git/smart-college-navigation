@@ -12,11 +12,11 @@
       "type": "Feature",
       "properties": {
         "fid": 1,
-        "id": "DOOR_M215",
-        "room_no": "M215",
-        "room_name": "HOD Room",
+        "id": null,
+        "room_no": "M316",
+        "room_name": "Faculty Room",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -32,11 +32,11 @@
       "type": "Feature",
       "properties": {
         "fid": 2,
-        "id": "DOOR_M215_2",
-        "room_no": "M215",
-        "room_name": "HOD Room",
+        "id": null,
+        "room_no": "M315",
+        "room_name": "Lecture Hall",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -51,32 +51,12 @@
     {
       "type": "Feature",
       "properties": {
-        "fid": 3,
-        "id": "DOOR_M215A",
-        "room_no": "M215A",
-        "room_name": "Toilet",
-        "building": "Mechanical Block",
-        "floor": 1,
-        "type": "Door",
-        "accessible": true
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          76.63169013728951,
-          8.913084672622793
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "fid": 4,
-        "id": "DOOR_M214",
-        "room_no": "M214",
-        "room_name": "Faculty Room",
+        "id": null,
+        "room_no": "M314",
+        "room_name": "Class Room",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -92,11 +72,11 @@
       "type": "Feature",
       "properties": {
         "fid": 5,
-        "id": "DOOR_M213",
-        "room_no": "M213",
-        "room_name": "M.Tech Lecture Room",
+        "id": null,
+        "room_no": "M313",
+        "room_name": "Bio Medical Engineering Lab",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -112,11 +92,11 @@
       "type": "Feature",
       "properties": {
         "fid": 6,
-        "id": "DOOR_M212",
-        "room_no": "M212",
+        "id": null,
+        "room_no": "M312",
         "room_name": "Class Room 1",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -132,11 +112,11 @@
       "type": "Feature",
       "properties": {
         "fid": 7,
-        "id": "DOOR_M211",
-        "room_no": "M211",
+        "id": null,
+        "room_no": "M311",
         "room_name": "Class Room 2",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -152,11 +132,11 @@
       "type": "Feature",
       "properties": {
         "fid": 8,
-        "id": "DOOR_M210",
-        "room_no": "M210",
-        "room_name": "Class Room 3",
+        "id": null,
+        "room_no": "M310",
+        "room_name": "PG PLG",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -172,11 +152,11 @@
       "type": "Feature",
       "properties": {
         "fid": 9,
-        "id": "DOOR_M209",
-        "room_no": "M209",
-        "room_name": "Library",
+        "id": null,
+        "room_no": "M309",
+        "room_name": "Class Room 4",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -192,11 +172,11 @@
       "type": "Feature",
       "properties": {
         "fid": 10,
-        "id": "DOOR_M208",
-        "room_no": "M208",
+        "id": null,
+        "room_no": "M308",
         "room_name": "Faculty",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -212,11 +192,11 @@
       "type": "Feature",
       "properties": {
         "fid": 11,
-        "id": "DOOR_M207",
-        "room_no": "M207",
+        "id": null,
+        "room_no": "M307",
         "room_name": "Class Room 5",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -232,11 +212,11 @@
       "type": "Feature",
       "properties": {
         "fid": 12,
-        "id": "DOOR_M206",
-        "room_no": "M206",
+        "id": null,
+        "room_no": "M306",
         "room_name": "Class Room 6",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -252,11 +232,11 @@
       "type": "Feature",
       "properties": {
         "fid": 13,
-        "id": "DOOR_M205",
-        "room_no": "M205",
-        "room_name": "Class Room 7",
+        "id": null,
+        "room_no": "M305",
+        "room_name": "Research Lab of MCA and ASAP Class Room",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -272,11 +252,11 @@
       "type": "Feature",
       "properties": {
         "fid": 14,
-        "id": "DOOR_M205_2",
-        "room_no": "M205",
-        "room_name": "Class Room 7",
+        "id": null,
+        "room_no": "M305",
+        "room_name": "Research Lab of MCA and ASAP Class Room",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -292,11 +272,11 @@
       "type": "Feature",
       "properties": {
         "fid": 15,
-        "id": "DOOR_M204",
-        "room_no": "M204",
+        "id": null,
+        "room_no": "M304",
         "room_name": "Class Room 8",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -312,11 +292,11 @@
       "type": "Feature",
       "properties": {
         "fid": 16,
-        "id": "DOOR_M203",
-        "room_no": "M203",
-        "room_name": "Class Room 9",
+        "id": null,
+        "room_no": "M303",
+        "room_name": "Class Room",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -332,11 +312,11 @@
       "type": "Feature",
       "properties": {
         "fid": 17,
-        "id": "DOOR_M202",
-        "room_no": "M202",
-        "room_name": "Faculty Room",
+        "id": null,
+        "room_no": "M302",
+        "room_name": "PG Lecture Hall",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
@@ -351,63 +331,62 @@
     {
       "type": "Feature",
       "properties": {
-        "fid": 18,
-        "id": "DOOR_M202_2",
-        "room_no": "M202",
-        "room_name": "Faculty Room",
+        "fid": 21,
+        "id": null,
+        "room_no": "M301",
+        "room_name": "Drawing Hall",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          76.63163212276785,
-          8.912762464560064
+          76.63169108231385,
+          8.91293747456647
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "fid": 19,
-        "id": "DOOR_M201B",
-        "room_no": "M201B",
-        "room_name": "Faculty",
+        "fid": 22,
+        "id": null,
+        "room_no": "M301",
+        "room_name": "Drawing Hall",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          76.63167513551512,
-          8.912889855285304
+          76.6316402743804,
+          8.912786507620147
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "fid": 20,
-        "id": "DOOR_M201A",
-        "room_no": "M201A",
-        "room_name": "Faculty",
+        "fid": 23,
+        "id": null,
+        "room_no": "M310",
+        "room_name": "PG PLG",
         "building": "Mechanical Block",
-        "floor": 1,
+        "floor": 2,
         "type": "Door",
         "accessible": true
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          76.6316544204387,
-          8.912925192369782
+          76.63197285390336,
+          8.913006745160871
         ]
       }
-    },
-    { "type": "Feature", "properties": { "fid": 23, "id": "DOOR_M210A", "room_no": "M210", "room_name": "M210", "building": "Mechanical Block", "floor": 1, "type": "Door", "accessible": true }, "geometry": { "type": "Point", "coordinates": [ 76.631972853903363, 8.913006745160871 ] } }
+    }
   ]
 }

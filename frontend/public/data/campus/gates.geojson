@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "gatess",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": "GATE_SMALL", "name": "Small Gate", "type": "Gate", "status": "Open", "description": "Secondary pedestrian entrance" }, "geometry": { "type": "Point", "coordinates": [ 76.631285992304683, 8.912677296399897 ] } },
+{ "type": "Feature", "properties": { "id": "GATE_SERVICE", "name": "Service Gate", "type": "Gate", "status": "Open", "description": "Service and maintenance entrance" }, "geometry": { "type": "Point", "coordinates": [ 76.632631843787365, 8.914111303448255 ] } },
+{ "type": "Feature", "properties": { "id": "GATE_FRONT", "name": "Front Gate", "type": "Gate", "status": "Open", "description": "Main entrance to the campus" }, "geometry": { "type": "Point", "coordinates": [ 76.632012473052768, 8.915053814357668 ] } },
+{ "type": "Feature", "properties": { "id": "GATE_HOSTEL", "name": "Hostel Gate", "type": "Gate", "status": "Open", "description": "Entrance to the hostel area" }, "geometry": { "type": "Point", "coordinates": [ 76.631353988371544, 8.912329694129054 ] } }
+]
+}

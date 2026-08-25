@@ -1,0 +1,770 @@
+{
+  "type": "FeatureCollection",
+  "name": "paths",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_001",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "StairConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63171466710418,
+            8.912982301731931
+          ],
+          [
+            76.63170448399016,
+            8.912985214282125
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_002",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63169662787708,
+            8.912929575631345
+          ],
+          [
+            76.63164973086728,
+            8.912783699390621
+          ],
+          [
+            76.6316402743804,
+            8.912786507620147
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_003",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Corridor",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63164973086728,
+            8.912783699390621
+          ],
+          [
+            76.63163991446184,
+            8.912759520043481
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_004",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63169108231385,
+            8.91293747456647
+          ],
+          [
+            76.63169846190833,
+            8.91293493624474
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_005",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "StairConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63185950158379,
+            8.912746296134461
+          ],
+          [
+            76.63187663299367,
+            8.912740532751519
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": null,
+        "path_id": "MECH_SF_PATH_006",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "StairConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63193539242371,
+            8.912968376264239
+          ],
+          [
+            76.6319496397643,
+            8.912963844634895
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 6,
+        "path_id": "MECH_SF_PATH_007",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63169662787708,
+            8.912929575631345
+          ],
+          [
+            76.63169846190833,
+            8.91293493624474
+          ],
+          [
+            76.63171466710418,
+            8.912982301731931
+          ],
+          [
+            76.6317222148537,
+            8.913004362730298
+          ],
+          [
+            76.63171468991057,
+            8.913006551304292
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 7,
+        "path_id": "MECH_SF_PATH_008",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.6317222148537,
+            8.913004362730296
+          ],
+          [
+            76.6317437392525,
+            8.913069712984143
+          ],
+          [
+            76.63173646486571,
+            8.913071684409925
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 9,
+        "path_id": "MECH_SF_PATH_009",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.6317437392525,
+            8.913069712984143
+          ],
+          [
+            76.63175147971477,
+            8.913092351935017
+          ],
+          [
+            76.63174426151481,
+            8.913095007330398
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 10,
+        "path_id": "MECH_SF_PATH_010",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63175147971477,
+            8.913092351935017
+          ],
+          [
+            76.63177442208149,
+            8.913157807242731
+          ],
+          [
+            76.63181632767332,
+            8.913144384274013
+          ],
+          [
+            76.63181403379575,
+            8.91313685031029
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 11,
+        "path_id": "MECH_SF_PATH_011",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63181632767332,
+            8.913144384274013
+          ],
+          [
+            76.63189565558199,
+            8.913118105762033
+          ],
+          [
+            76.63189282459692,
+            8.91311127487538
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 12,
+        "path_id": "MECH_SF_PATH_012",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63189565558199,
+            8.913118105762033
+          ],
+          [
+            76.63197473762682,
+            8.913091997325015
+          ],
+          [
+            76.63197233871996,
+            8.913085464648914
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 13,
+        "path_id": "MECH_SF_PATH_013",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63197473762682,
+            8.913091997325015
+          ],
+          [
+            76.6319896540482,
+            8.91308650531182
+          ],
+          [
+            76.63200004551695,
+            8.913087454025382
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 14,
+        "path_id": "MECH_SF_PATH_014",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "StairConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.6319896540482,
+            8.91308650531182
+          ],
+          [
+            76.63196540712318,
+            8.91301145488342
+          ],
+          [
+            76.63196006102851,
+            8.912996329882718
+          ],
+          [
+            76.63194582804904,
+            8.913000454192257
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 15,
+        "path_id": "MECH_SF_PATH_015",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63196006102851,
+            8.912996329882716
+          ],
+          [
+            76.6319496397643,
+            8.912963844634895
+          ],
+          [
+            76.63193642901825,
+            8.912922663987949
+          ],
+          [
+            76.63194367533971,
+            8.912920138704921
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 16,
+        "path_id": "MECH_SF_PATH_016",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63193642901825,
+            8.912922663987949
+          ],
+          [
+            76.63192741732392,
+            8.912894268027149
+          ],
+          [
+            76.63193415564375,
+            8.912891882781532
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 17,
+        "path_id": "MECH_SF_PATH_017",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63192741732392,
+            8.912894268027149
+          ],
+          [
+            76.63191758995153,
+            8.912864807382435
+          ],
+          [
+            76.63192438180575,
+            8.912862872523146
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 18,
+        "path_id": "MECH_SF_PATH_018",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "VerticalConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63191758995153,
+            8.912864807382435
+          ],
+          [
+            76.63191292440332,
+            8.912851504172865
+          ],
+          [
+            76.6318903095528,
+            8.91285898246286
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 19,
+        "path_id": "MECH_SF_PATH_019",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63191292440332,
+            8.912851504172865
+          ],
+          [
+            76.63188957141304,
+            8.912780299787945
+          ],
+          [
+            76.63189595307556,
+            8.912778491655105
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 20,
+        "path_id": "MECH_SF_PATH_020",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "StairConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63188957141304,
+            8.912780299787942
+          ],
+          [
+            76.63187663299367,
+            8.912740532751519
+          ],
+          [
+            76.63186656273412,
+            8.91270958117952
+          ],
+          [
+            76.6318493908225,
+            8.912714784199261
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 21,
+        "path_id": "MECH_SF_PATH_021",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63186656273412,
+            8.91270958117952
+          ],
+          [
+            76.63186172486016,
+            8.91269482857201
+          ],
+          [
+            76.63186713632008,
+            8.912692946129766
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 22,
+        "path_id": "MECH_SF_PATH_022",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63186172486016,
+            8.912694828572008
+          ],
+          [
+            76.63183545244839,
+            8.912612612233264
+          ],
+          [
+            76.63183986242444,
+            8.912611486966059
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 23,
+        "path_id": "MECH_SF_PATH_023",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63183545244839,
+            8.912612612233264
+          ],
+          [
+            76.63181617576906,
+            8.91261918989142
+          ],
+          [
+            76.63181938483375,
+            8.912629708540969
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 24,
+        "path_id": "MECH_SF_PATH_024",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63181617576906,
+            8.91261918989142
+          ],
+          [
+            76.6317355858953,
+            8.912647306699382
+          ],
+          [
+            76.63173909128615,
+            8.912655929287586
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 25,
+        "path_id": "MECH_SF_PATH_025",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "DoorConnector",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.6317355858953,
+            8.912647306699382
+          ],
+          [
+            76.63165755293767,
+            8.91267317210492
+          ],
+          [
+            76.63166010873043,
+            8.912681721913458
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fid": null,
+        "id": 26,
+        "path_id": "MECH_SF_PATH_026",
+        "building": "Mechanical Block",
+        "floor": 2,
+        "type": "Corridor",
+        "accessible": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63165755293767,
+            8.91267317210492
+          ],
+          [
+            76.63161413951688,
+            8.912688603427881
+          ],
+          [
+            76.63163991446184,
+            8.912759520043481
+          ]
+        ]
+      }
+    }
+  ]
+}

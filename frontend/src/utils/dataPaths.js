@@ -1,15 +1,21 @@
+import { BUILDING_CONFIG } from "../config/buildingConfig";
+
 export function getFloorFolder(building, floor) {
-  const buildingMap = {
-    "Chemical Block": "chemical",
-    "Mechanical Block": "mechanical",
-  };
+  const buildingConfig = BUILDING_CONFIG[building];
 
-  const floorMap = {
-    0: "ground_floor",
-    1: "first_floor",
-  };
+  if (!buildingConfig) {
+    throw new Error(`Unknown building: ${building}`);
+  }
 
-  return `/data/${buildingMap[building]}/${floorMap[floor]}`;
+  const floorConfig = buildingConfig.floors[floor];
+
+  if (!floorConfig) {
+    throw new Error(
+      `Unknown floor ${floor} for building: ${building}`
+    );
+  }
+
+  return `/data/${buildingConfig.dataFolder}/${floorConfig.folder}`;
 }
 
 export function getRoomsPath(building, floor) {

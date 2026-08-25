@@ -1,7 +1,7 @@
 import { buildGraph } from "./graph";
 import { setGraphs } from "./graphManager";
 import { connectFloorTransitions } from "./graphConnector";
-
+import { getNextTransition } from "./transitionService";
 export async function loadGraphs() {
   console.log("========== LOADING NAVIGATION ENGINE V2 ==========");
 
@@ -13,6 +13,8 @@ export async function loadGraphs() {
 
     mechanicalGFRes,
     mechanicalFFRes,
+    mechanicalSFRes,
+    mechanicalTFRes,
   ] = await Promise.all([
     fetch("/data/campus/walkways.geojson"),
 
@@ -21,6 +23,8 @@ export async function loadGraphs() {
 
     fetch("/data/mechanical/ground_floor/paths.geojson"),
     fetch("/data/mechanical/first_floor/paths.geojson"),
+    fetch("/data/mechanical/second_floor/paths.geojson"),
+    fetch("/data/mechanical/top_floor/paths.geojson"),
   ]);
 
   if (!walkwaysRes.ok)
@@ -46,6 +50,16 @@ export async function loadGraphs() {
       "Failed to load mechanical/first_floor/paths.geojson"
     );
 
+  if (!mechanicalSFRes.ok)
+    throw new Error(
+      "Failed to load mechanical/second_floor/paths.geojson"
+    );
+
+  if (!mechanicalTFRes.ok)
+    throw new Error(
+      "Failed to load mechanical/top_floor/paths.geojson"
+    );
+
   const walkways = await walkwaysRes.json();
 
   const chemicalGF = await chemicalGFRes.json();
@@ -53,6 +67,8 @@ export async function loadGraphs() {
 
   const mechanicalGF = await mechanicalGFRes.json();
   const mechanicalFF = await mechanicalFFRes.json();
+  const mechanicalSF = await mechanicalSFRes.json();
+  const mechanicalTF = await mechanicalTFRes.json();
 
   console.log("Outdoor Paths:", walkways.features.length);
 
@@ -76,9 +92,19 @@ export async function loadGraphs() {
     mechanicalFF.features.length
   );
 
-  // ----------------------------
-  // Build graphs
-  // ----------------------------
+  console.log(
+    "Mechanical Second Floor Paths:",
+    mechanicalSF.features.length
+  );
+
+  console.log(
+    "Mechanical Top Floor Paths:",
+    mechanicalTF.features.length
+  );
+
+  // --------------------------------------------------
+  // Build Graphs
+  // --------------------------------------------------
 
   const outdoorGraph = buildGraph(walkways);
 
@@ -90,6 +116,14 @@ export async function loadGraphs() {
   const firstFloorGraphs = {
     "Chemical Block": buildGraph(chemicalFF),
     "Mechanical Block": buildGraph(mechanicalFF),
+  };
+
+  const secondFloorGraphs = {
+    "Mechanical Block": buildGraph(mechanicalSF),
+  };
+
+  const thirdFloorGraphs = {
+    "Mechanical Block": buildGraph(mechanicalTF),
   };
 
   console.log(
@@ -125,36 +159,71 @@ export async function loadGraphs() {
     ).length
   );
 
-  // ----------------------------
-  // Register graphs
-  // ----------------------------
+  console.log(
+    "Mechanical SF Graph Nodes:",
+    Object.keys(
+      secondFloorGraphs["Mechanical Block"]
+    ).length
+  );
+
+  console.log(
+    "Mechanical Top Floor Graph Nodes:",
+    Object.keys(
+      thirdFloorGraphs["Mechanical Block"]
+    ).length
+  );
+
+  // --------------------------------------------------
+  // Register Graphs
+  // --------------------------------------------------
 
   setGraphs({
     outdoor: outdoorGraph,
     groundFloor: groundFloorGraphs,
     firstFloor: firstFloorGraphs,
+    secondFloor: secondFloorGraphs,
+    thirdFloor: thirdFloorGraphs,
   });
 
-  // Leave this as-is for now.
-  // We'll refactor graphConnector.js next.
   await Promise.all([
   connectFloorTransitions(
     "Chemical Block",
-    firstFloorGraphs["Chemical Block"]
+    {
+      groundFloor:
+        groundFloorGraphs["Chemical Block"],
+
+      firstFloor:
+        firstFloorGraphs["Chemical Block"],
+    }
   ),
 
   connectFloorTransitions(
     "Mechanical Block",
-    firstFloorGraphs["Mechanical Block"]
+    {
+      groundFloor:
+        groundFloorGraphs["Mechanical Block"],
+
+      firstFloor:
+        firstFloorGraphs["Mechanical Block"],
+
+      secondFloor:
+        secondFloorGraphs["Mechanical Block"],
+
+      thirdFloor:
+        thirdFloorGraphs["Mechanical Block"],
+    }
   ),
 ]);
 
   console.log("Navigation Engine V2 Ready");
   console.log("==============================================");
+  
 
   return {
     outdoor: outdoorGraph,
     groundFloor: groundFloorGraphs,
     firstFloor: firstFloorGraphs,
+    secondFloor: secondFloorGraphs,
+    thirdFloor: thirdFloorGraphs,
   };
 }

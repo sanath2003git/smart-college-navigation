@@ -1,9 +1,244 @@
 {
-"type": "FeatureCollection",
-"name": "walkways",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-"features": [
-{ "type": "Feature", "properties": { "id": 1, "name": "Mechanical-Chemical Walkway", "type": "Walkway", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.631631641809747, 8.912952142010484 ], [ 76.631631623231087, 8.912952148763097 ], [ 76.63155368067973, 8.912977943834608 ], [ 76.631412896949342, 8.912553012902466 ], [ 76.631489511535989, 8.912525104666102 ] ] } },
-{ "type": "Feature", "properties": { "id": 2, "name": "Main Gate to Main Block", "type": "pedestrian", "accessible": 1 }, "geometry": { "type": "LineString", "coordinates": [ [ 76.632003602236921, 8.915049535715331 ], [ 76.632038439099048, 8.915000518977937 ], [ 76.632083502691572, 8.914945244776815 ] ] } }
-]
+  "type": "FeatureCollection",
+  "name": "walkwayss",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_HOSTEL_MAIN_01",
+        "name": "Hostel Gate to Main Walkway",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63135398837154,
+            8.912329694129054
+          ],
+          [
+            76.63141289694934,
+            8.912553012902466
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_MECH_CHEM_01",
+        "name": "Mechanical-Chemical Walkway",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63163164180975,
+            8.912952142010484
+          ],
+          [
+            76.63163162323109,
+            8.912952148763097
+          ],
+          [
+            76.63158352132966,
+            8.912968068077804
+          ],
+          [
+            76.63155368067973,
+            8.912977943834608
+          ],
+          [
+            76.63143884222323,
+            8.91263132418612
+          ],
+          [
+            76.63141289694934,
+            8.912553012902466
+          ],
+          [
+            76.63148951153599,
+            8.912525104666102
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_SMALL_MAIN_01",
+        "name": "Small Gate to Main Walkway",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63128599230468,
+            8.912677296399897
+          ],
+          [
+            76.63143884222323,
+            8.91263132418612
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_SERVICE_MAIN_01",
+        "name": "Service Gate to Main Walkway",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63263184378737,
+            8.914111303448255
+          ],
+          [
+            76.63260517388393,
+            8.91403526771275
+          ],
+          [
+            76.63242188639566,
+            8.914082051655285
+          ],
+          [
+            76.63236612725493,
+            8.913870424805642
+          ],
+          [
+            76.6323278889382,
+            8.913880875131516
+          ],
+          [
+            76.63212568211647,
+            8.913247609361482
+          ],
+          [
+            76.63204851366967,
+            8.913267533967867
+          ],
+          [
+            76.63201757679872,
+            8.91320311061034
+          ],
+          [
+            76.63196372707353,
+            8.913218541601031
+          ],
+          [
+            76.63193886432283,
+            8.913134642683618
+          ],
+          [
+            76.63166823412057,
+            8.913224390505748
+          ],
+          [
+            76.63158352132966,
+            8.912968068077804
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_FRONT_MAIN_01",
+        "name": "Front Gate to Main Walkway",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63201247305277,
+            8.915053814357668
+          ],
+          [
+            76.63205925658758,
+            8.91500021617477
+          ],
+          [
+            76.63199411057299,
+            8.91496491214139
+          ],
+          [
+            76.63159707318567,
+            8.913453264688847
+          ],
+          [
+            76.63159083251162,
+            8.913342664859055
+          ],
+          [
+            76.63157260886102,
+            8.913216716276908
+          ],
+          [
+            76.63155368067973,
+            8.912977943834608
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "WALK_MAIN_CHEM_BACK_01",
+        "name": "Main Walkway to Chemical Back Entrance",
+        "type": "Walkway",
+        "accessible": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.63193886432283,
+            8.91313464268362
+          ],
+          [
+            76.63238649330128,
+            8.912984823425058
+          ],
+          [
+            76.63227973060029,
+            8.91265137602171
+          ],
+          [
+            76.63221866859315,
+            8.912673250799447
+          ],
+          [
+            76.632023378384,
+            8.912389405150028
+          ],
+          [
+            76.63188396108544,
+            8.912423297715875
+          ],
+          [
+            76.6318370112777,
+            8.912412762684593
+          ]
+        ]
+      }
+    }
+  ]
 }
