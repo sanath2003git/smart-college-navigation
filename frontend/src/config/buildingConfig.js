@@ -1,9 +1,37 @@
 export const BUILDING_CONFIG = {
   "Mechanical Block": {
-    floors: [0, 1, 2, 3],
+    dataFolder: "mechanical",
+
+    floors: {
+      0: {
+        folder: "ground_floor",
+      },
+
+      1: {
+        folder: "first_floor",
+      },
+
+      2: {
+        folder: "second_floor",
+      },
+
+      3: {
+        folder: "top_floor",
+      },
+    },
   },
 
   "Chemical Block": {
-    floors: [0, 1],
+    dataFolder: "chemical",
+
+    floors: {
+      0: {
+        folder: "ground_floor",
+      },
+
+      1: {
+        folder: "first_floor",
+      },
+    },
   },
 };

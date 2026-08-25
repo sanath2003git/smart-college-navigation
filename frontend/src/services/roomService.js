@@ -11,7 +11,8 @@ export async function findRooms(building, roomNo) {
   }
 
   if (!roomCache[building]) {
-    const floors = BUILDING_CONFIG[building].floors;
+    const floors = Object.keys(BUILDING_CONFIG[building].floors)
+      .map(Number);
 
     const responses = await Promise.all(
       floors.map((floor) =>
