@@ -9,7 +9,7 @@ export default function OutdoorLayers() {
         url="/data/campus/walkways.geojson"
         interactive={false}
         style={{
-          color: "#bad9ce",
+          color: "#eaebeb",
           weight: 5.5,
         }}
       />
