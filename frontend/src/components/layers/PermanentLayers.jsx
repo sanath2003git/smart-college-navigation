@@ -19,6 +19,18 @@ export default function PermanentLayers({
         }}
       />
 
+      {/* Campus Areas */}
+      <GeoJsonLayer
+        url="/data/campus/areas.geojson"
+        interactive={false}
+        style={{
+          color: "#2e7d32",
+          weight: 0.3,
+          fillColor: "#81c784",
+          fillOpacity: 0.35,
+        }}
+      />
+
       {/* Buildings */}
       <GeoJsonLayer
         url="/data/campus/buildings.geojson"
