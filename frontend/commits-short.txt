@@ -1,0 +1,65 @@
+b5a1bca | 2026-07-05 | C S Sanath Sreekumar | Initial project setup
+a1b5667 | 2026-07-05 | C S Sanath Sreekumar | Clean repository and update gitignore
+2738b09 | 2026-07-05 | C S Sanath Sreekumar | Clean repository and update gitignore
+2748bc9 | 2026-07-05 | C S Sanath Sreekumar |  add application layout and navigation
+3ca9aae | 2026-07-05 | C S Sanath Sreekumar | add search bar component
+5e4ab8e | 2026-07-05 | C S Sanath Sreekumar | improve campus UI with search bar and collapsible sidebar
+b4d5a59 | 2026-07-05 | sanath2003git | Merge pull request #1 from sanath2003git/feature/ui
+ca8fc32 | 2026-07-05 | C S Sanath Sreekumar | Complete Chemical Block ground floor digitization
+8ba5251 | 2026-07-08 | C S Sanath Sreekumar |  implement indoor navigation and room routing prototype
+f2133ca | 2026-07-08 | C S Sanath Sreekumar | update campus GIS data and navigation layers
+4b6ad95 | 2026-07-08 | Brian Peter Bernard | Add hello message to README
+2b1204f | 2026-07-11 | C S Sanath Sreekumar | implement room search and dynamic indoor navigation
+de3b890 | 2026-07-11 | C S Sanath Sreekumar | implement live current location using browser geolocation
+0239cb3 | 2026-07-12 | C S Sanath Sreekumar | Complete Chemical Block ground floor indoor navigation
+241eabe | 2026-07-12 | sanath2003git | Merge pull request #2 from sanath2003git/feature/gis
+d70c7e1 | 2026-07-12 | sanath2003git | Update README with project details and features
+32ac9ca | 2026-07-12 | C S Sanath Sreekumar | Add multi-floor navigation support and Chemical Block first floor prototype
+5e2a4b4 | 2026-07-12 | sanath2003git | Merge pull request #3 from sanath2003git/feature/gis
+d0b4243 | 2026-07-15 | C S Sanath Sreekumar | Implement automatic multi-floor navigation transitions
+dca61f1 | 2026-07-15 | sanath2003git | Merge pull request #4 from sanath2003git/feature/gis
+e1c2786 | 2026-07-16 | C S Sanath Sreekumar | Complete Navigation Engine V1 with automatic multi-floor navigation
+0f19c16 | 2026-07-16 | C S Sanath Sreekumar | migrate navigation engine to V2 graph architecture
+5c8a389 | 2026-07-16 | C S Sanath Sreekumar | add unified navigation router foundation
+c6d3a86 | 2026-07-16 | C S Sanath Sreekumar | migrate outdoor routing to navigation router
+c4c49ca | 2026-07-17 | C S Sanath Sreekumar | standardize navigation router API
+140e8a6 | 2026-07-17 | C S Sanath Sreekumar | add route planner foundation
+6f1d253 | 2026-07-17 | C S Sanath Sreekumar | Complete Ground Floor navigation and outdoor-to-indoor stage transition
+242b2e9 | 2026-07-18 | C S Sanath Sreekumar | Add Chemical Block multi-floor indoor navigation
+23165d9 | 2026-07-18 | C S Sanath Sreekumar | Add currentBuilding state to navigation context
+b2ff640 | 2026-07-18 | C S Sanath Sreekumar | Refactor map layers by moving building polygons to permanent rendering
+0bac1b4 | 2026-07-18 | C S Sanath Sreekumar | Refactor map layers and prepare building-aware indoor rendering
+28e41d0 | 2026-07-18 | C S Sanath Sreekumar | Refactor Ground Floor rendering for building-aware navigation
+19c9421 | 2026-07-18 | C S Sanath Sreekumar | Refactor indoor navigation state for building-aware floor loading
+897c06c | 2026-07-19 | C S Sanath Sreekumar | Implement building loader and initialize automatic building detection hook
+17fa6dd | 2026-07-19 | C S Sanath Sreekumar | Add Turf.js foundation for automatic building detection
+451071e | 2026-07-19 | C S Sanath Sreekumar | Implement automatic building detection using Turf.js
+e795f57 | 2026-07-19 | sanath2003git | Merge pull request #5 from sanath2003git/feature/gis
+acb3215 | 2026-07-19 | C S Sanath Sreekumar | Implement indoor entry detection for exploration mode
+39b8738 | 2026-07-20 | C S Sanath Sreekumar | Implement automatic indoor entry for exploration mode
+f68d2ba | 2026-07-20 | sanath2003git | Merge pull request #6 from sanath2003git/feature/indoor-entry
+65f8c55 | 2026-07-20 | C S Sanath Sreekumar | Prototype v2.3.1: Implement automatic indoor exit
+0efdffb | 2026-07-21 | C S Sanath Sreekumar | Prototype v2.3.1: Complete automatic indoor entry and exit for Mechanical Block
+c7b262d | 2026-07-21 | C S Sanath Sreekumar | Refactor GeoJSON data structure and update asset paths
+0fd40de | 2026-07-21 | C S Sanath Sreekumar | Refactor GeoJSON data structure and update navigation asset paths
+3659ebd | 2026-07-21 | C S Sanath Sreekumar | Refactor navigation engine for multi-building indoor routing
+b14fb1f | 2026-07-22 | C S Sanath Sreekumar | B Merge branch 'main' into feature/indoor-entry
+32d8919 | 2026-07-22 | C S Sanath Sreekumar | Add event-based voice navigation guidanc
+10d8aea | 2026-07-24 | C S Sanath Sreekumar | updated mechanical ground floor rooms
+d48f176 | 2026-07-25 | C S Sanath Sreekumar | Complete Mechanical Block ground floor mapping
+91f9a45 | 2026-07-27 | C S Sanath Sreekumar | Add Mechanical Block floor transition support
+342fadb | 2026-07-30 | C S Sanath Sreekumar | Implement Mechanical Block first floor navigation
+e4c7d54 | 2026-07-31 | C S Sanath Sreekumar | Fix same-building multi-floor navigation
+0d8912f | 2026-07-31 | sanath2003git | Merge pull request #7 from sanath2003git/feature/indoor-entry
+206ce7f | 2026-08-01 | C S Sanath Sreekumar | Rebuild Mechanical Block GIS using START/END stair transition model
+7a03d2e | 2026-08-01 | C S Sanath Sreekumar | Complete Mechanical GF to FF floor transition using START/END stair topology
+1b7151a | 2026-08-01 | C S Sanath Sreekumar | Extend navigation engine to load all Mechanical floor graphs
+516f7eb | 2026-08-01 | C S Sanath Sreekumar | Add reusable transition architecture for multi-floor navigation
+3ce79d2 | 2026-08-02 | C S Sanath Sreekumar | Integrate transition selector into floor navigation
+6595360 | 2026-08-03 | C S Sanath Sreekumar | Select optimal stair/lift using graph-based route evaluation
+3e5071e | 2026-08-04 | C S Sanath Sreekumar | Refine multi-floor transition topology and floor handoff
+f3dfb71 | 2026-08-05 | C S Sanath Sreekumar | Update README.md
+6b33bd1 | 2026-08-06 | C S Sanath Sreekumar | Update README.md
+79e3002 | 2026-08-06 | C S Sanath Sreekumar | Update README.md
+faedfa2 | 2026-08-06 | Brian Peter Bernard | backend
+d554a25 | 2026-08-09 | C S Sanath Sreekumar | Implement user-confirmed floor transitions
