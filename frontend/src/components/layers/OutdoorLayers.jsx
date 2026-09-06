@@ -10,7 +10,7 @@ export default function OutdoorLayers() {
         interactive={false}
         style={{
           color: "#eaebeb",
-          weight: 5.5,
+          weight: 2.5,
         }}
       />
 
