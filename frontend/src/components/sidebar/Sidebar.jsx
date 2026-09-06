@@ -16,102 +16,187 @@ export default function Sidebar() {
 
   const menu = [
     {
-      icon: <MapPinned size={20} />,
+      icon: MapPinned,
       label: "My Location",
-      color: "text-blue-600",
+      iconClass: "text-blue-600",
+      iconBg: "bg-blue-50",
     },
     {
-      icon: <Navigation size={20} />,
+      icon: Navigation,
       label: "Navigate",
-      color: "text-green-600",
+      iconClass: "text-emerald-600",
+      iconBg: "bg-emerald-50",
+      active: true,
     },
     {
-      icon: <Building2 size={20} />,
+      icon: Building2,
       label: "Buildings",
-      color: "text-orange-600",
+      iconClass: "text-orange-500",
+      iconBg: "bg-orange-50",
     },
     {
-      icon: <Layers3 size={20} />,
+      icon: Layers3,
       label: "Layers",
-      color: "text-purple-600",
+      iconClass: "text-violet-600",
+      iconBg: "bg-violet-50",
     },
     {
-      icon: <Star size={20} />,
+      icon: Star,
       label: "Favorites",
-      color: "text-yellow-500",
+      iconClass: "text-amber-500",
+      iconBg: "bg-amber-50",
     },
     {
-      icon: <Settings size={20} />,
+      icon: Settings,
       label: "Settings",
-      color: "text-gray-600",
+      iconClass: "text-slate-500",
+      iconBg: "bg-slate-100",
     },
   ];
 
   return (
-    <div
-      className={`bg-white shadow-lg border-r transition-all duration-300 ${
-        collapsed ? "w-16" : "w-56"
-      }`}
+    <aside
+      className={`
+        flex h-full flex-col overflow-hidden
+        rounded-[20px]
+        border border-slate-200/90
+        bg-white/95
+        shadow-[0_12px_32px_rgba(15,23,42,0.10)]
+        backdrop-blur-xl
+        transition-all duration-300 ease-in-out
+        ${collapsed ? "w-[76px]" : "w-[250px]"}
+      `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div
+        className={`
+          flex items-center
+          border-b border-slate-100
+          ${collapsed
+            ? "justify-center px-2 py-4"
+            : "justify-between px-4 py-4"
+          }
+        `}
+      >
         {!collapsed && (
-          <h2 className="font-bold text-blue-700">
-            Menu
-          </h2>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+              SmartNav
+            </p>
+
+            <h2 className="mt-1 text-[15px] font-bold text-slate-900">
+              Explore Campus
+            </h2>
+          </div>
         )}
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-500 hover:text-blue-600"
+          className="
+            flex h-9 w-9 items-center justify-center
+            rounded-xl
+            text-slate-400
+            transition-all duration-200
+            hover:bg-slate-100
+            hover:text-slate-800
+            active:scale-95
+          "
+          aria-label={
+            collapsed
+              ? "Expand sidebar"
+              : "Collapse sidebar"
+          }
         >
-          {collapsed ? <ChevronRight /> : <ChevronLeft />}
+          {collapsed ? (
+            <ChevronRight size={19} />
+          ) : (
+            <ChevronLeft size={19} />
+          )}
         </button>
       </div>
 
-      {/* Menu */}
-      <div className="py-3">
-        {menu.map((item) => (
-          <button
-            key={item.label}
-            className="w-full flex items-center gap-3 px-5 py-3 hover:bg-blue-50 hover:text-blue-700 transition"
-          >
-            <div className={item.color}>
-              {item.icon}
-            </div>
+      {/* Navigation Menu */}
+      <nav className="flex-1 space-y-1.5 p-3">
+        {menu.map((item) => {
+          const Icon = item.icon;
 
-            {!collapsed && (
-              <span>{item.label}</span>
-            )}
-          </button>
-        ))}
-      </div>
+          return (
+            <button
+              key={item.label}
+              title={collapsed ? item.label : undefined}
+              className={`
+                group relative flex w-full items-center
+                rounded-xl
+                px-3 py-2.5
+                text-left
+                transition-all duration-200
 
-      {/* Prototype Status */}
-      <div className="border-t mt-4 p-4">
-        {!collapsed && (
-          <>
-            <h3 className="font-semibold text-gray-700 mb-2">
-              Prototype Status
-            </h3>
+                ${
+                  item.active
+                    ? "bg-slate-50"
+                    : "hover:bg-slate-50/80"
+                }
 
-            <p className="text-sm text-gray-500">
-              Outdoor Navigation
-            </p>
+                ${
+                  collapsed
+                    ? "justify-center"
+                    : "gap-3"
+                }
+              `}
+            >
+              {/* Active indicator */}
+              {item.active && !collapsed && (
+                <span
+                  className="
+                    absolute left-0
+                    h-7 w-[3px]
+                    rounded-r-full
+                    bg-emerald-500
+                  "
+                />
+              )}
 
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              {/* Icon */}
               <div
-                className="bg-green-500 h-2 rounded-full"
-                style={{ width: "35%" }}
-              />
-            </div>
+                className={`
+                  flex h-9 w-9 shrink-0
+                  items-center justify-center
+                  rounded-xl
+                  transition-all duration-200
 
-            <p className="text-xs text-gray-500 mt-2">
-              Phase 1 Development
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+                  ${item.iconBg}
+
+                  group-hover:scale-105
+                `}
+              >
+                <Icon
+                  size={18}
+                  className={item.iconClass}
+                />
+              </div>
+
+              {/* Label */}
+              {!collapsed && (
+                <span
+                  className={`
+                    text-sm font-medium
+
+                    ${
+                      item.active
+                        ? "text-slate-900"
+                        : "text-slate-600"
+                    }
+                  `}
+                >
+                  {item.label}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      
+    </aside>
   );
 }
