@@ -1,3 +1,6 @@
+import { BUILDING_CONFIG } from "../config/buildingConfig";
+import { getStairsPath } from "../utils/dataPaths";
+
 let stairs = [];
 
 // ======================================================
@@ -5,134 +8,85 @@ let stairs = [];
 // ======================================================
 
 async function loadStairs() {
-  if (stairs.length === 0) {
-    const [
-      chemicalGfResponse,
-      chemicalFfResponse,
-      mechanicalGfResponse,
-      mechanicalFfResponse,
-      mechanicalSfResponse,
-      mechanicalTfResponse,
-    ] = await Promise.all([
-      fetch(
-        "/data/chemical/ground_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/chemical/first_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/ground_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/first_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/second_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/top_floor/stairs.geojson"
-      ),
-    ]);
-
-    // -----------------------------------
-    // Validate responses
-    // -----------------------------------
-
-    if (
-      !chemicalGfResponse.ok ||
-      !chemicalFfResponse.ok ||
-      !mechanicalGfResponse.ok ||
-      !mechanicalFfResponse.ok ||
-      !mechanicalSfResponse.ok ||
-      !mechanicalTfResponse.ok
-    ) {
-      throw new Error(
-        "Failed to load stair GeoJSON data."
-      );
-    }
-
-    // -----------------------------------
-    // Convert to JSON
-    // -----------------------------------
-
-    const [
-      chemicalGfData,
-      chemicalFfData,
-      mechanicalGfData,
-      mechanicalFfData,
-      mechanicalSfData,
-      mechanicalTfData,
-    ] = await Promise.all([
-      chemicalGfResponse.json(),
-      chemicalFfResponse.json(),
-      mechanicalGfResponse.json(),
-      mechanicalFfResponse.json(),
-      mechanicalSfResponse.json(),
-      mechanicalTfResponse.json(),
-    ]);
-
-    // -----------------------------------
-    // Merge all stair/lift features
-    // -----------------------------------
-
-    stairs = [
-      ...chemicalGfData.features,
-      ...chemicalFfData.features,
-
-      ...mechanicalGfData.features,
-      ...mechanicalFfData.features,
-      ...mechanicalSfData.features,
-      ...mechanicalTfData.features,
-    ];
-
-    console.log(
-      "========== STAIRS LOADED =========="
-    );
-
-    console.log(
-      "Total Stair/Lift Features:",
-      stairs.length
-    );
-
-    console.log(
-      "Chemical GF:",
-      chemicalGfData.features.length
-    );
-
-    console.log(
-      "Chemical FF:",
-      chemicalFfData.features.length
-    );
-
-    console.log(
-      "Mechanical GF:",
-      mechanicalGfData.features.length
-    );
-
-    console.log(
-      "Mechanical FF:",
-      mechanicalFfData.features.length
-    );
-
-    console.log(
-      "Mechanical SF:",
-      mechanicalSfData.features.length
-    );
-
-    console.log(
-      "Mechanical TF:",
-      mechanicalTfData.features.length
-    );
-
-    console.log(
-      "==================================="
-    );
+  if (stairs.length > 0) {
+    return stairs;
   }
+
+  const stairSources = [];
+
+  // -----------------------------------
+  // Build stair data sources dynamically
+  // -----------------------------------
+
+  for (const [building, buildingConfig] of Object.entries(
+    BUILDING_CONFIG
+  )) {
+    const floors = Object.keys(buildingConfig.floors)
+      .map(Number);
+
+    for (const floor of floors) {
+      stairSources.push({
+        building,
+        floor,
+        path: getStairsPath(building, floor),
+      });
+    }
+  }
+
+  // -----------------------------------
+  // Load all configured stair files
+  // -----------------------------------
+
+  const responses = await Promise.all(
+    stairSources.map(async (source) => {
+      const response = await fetch(source.path);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load stair GeoJSON: ${source.path}`
+        );
+      }
+
+      const data = await response.json();
+
+      return {
+        ...source,
+        data,
+      };
+    })
+  );
+
+  // -----------------------------------
+  // Merge all stair/lift features
+  // -----------------------------------
+
+  stairs = responses.flatMap(
+    ({ data }) => data.features ?? []
+  );
+
+  // -----------------------------------
+  // Debug information
+  // -----------------------------------
+
+  console.log(
+    "========== STAIRS LOADED =========="
+  );
+
+  console.log(
+    "Total Stair/Lift Features:",
+    stairs.length
+  );
+
+  responses.forEach(({ building, floor, data }) => {
+    console.log(
+      `${building} - Floor ${floor}:`,
+      data.features?.length ?? 0
+    );
+  });
+
+  console.log(
+    "==================================="
+  );
 
   return stairs;
 }
@@ -162,58 +116,6 @@ export async function findStairs(search) {
       name.includes(query)
     );
   });
-}
-
-// ======================================================
-// DEFAULT FLOOR TRANSITION
-// ======================================================
-
-const STAIR_MAPPING = {
-  "Chemical Block": {
-    1: "CHEM_STAIR_02_GF",
-  },
-
-  "Mechanical Block": {
-    1: "MECH_STAIR_01_GF",
-  },
-};
-
-// ======================================================
-// GET TARGET STAIR
-// ======================================================
-
-export function getTargetStair(
-  building,
-  floor
-) {
-  const stairId =
-    STAIR_MAPPING[building]?.[floor] ??
-    null;
-
-  console.log(
-    "========== TARGET STAIR LOOKUP =========="
-  );
-
-  console.log(
-    "Building:",
-    building
-  );
-
-  console.log(
-    "Destination Floor:",
-    floor
-  );
-
-  console.log(
-    "Target Stair ID:",
-    stairId
-  );
-
-  console.log(
-    "========================================="
-  );
-
-  return stairId;
 }
 
 // ======================================================

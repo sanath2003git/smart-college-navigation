@@ -187,12 +187,7 @@ export default function CampusPage() {
   }, []);
 
   return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
+  <div className="flex h-full w-full flex-col overflow-hidden">
       {/* =====================================
           Floor Transition Confirmation
           ===================================== */}
@@ -214,18 +209,14 @@ export default function CampusPage() {
       )}
 
       <MapContainer
-        center={center}
-        zoom={18}
-        minZoom={17}
-        maxZoom={22}
-        maxBounds={CAMPUS_BOUNDS}
-        maxBoundsViscosity={1.0}
-        style={{
-          height:
-            "calc(100vh - 170px)",
-          width: "100%",
-        }}
-      >
+  center={center}
+  zoom={18}
+  minZoom={17}
+  maxZoom={22}
+  maxBounds={CAMPUS_BOUNDS}
+  maxBoundsViscosity={1.0}
+  className="min-h-0 flex-1 w-full"
+>
         <TileLayer
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
