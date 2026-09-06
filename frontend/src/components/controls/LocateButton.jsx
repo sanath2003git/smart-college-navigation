@@ -1,8 +1,11 @@
 import { useMap } from "react-leaflet";
+import { Crosshair } from "lucide-react";
+
 import { useLocation } from "../../hooks/useLocation";
 
 export default function LocateButton() {
   const map = useMap();
+
   const { location } = useLocation();
 
   const handleLocate = () => {
@@ -21,21 +24,30 @@ export default function LocateButton() {
   return (
     <button
       onClick={handleLocate}
-      style={{
-        position: "absolute",
-        right: "15px",
-        bottom: "20px",
-        zIndex: 1000,
-        padding: "10px 14px",
-        borderRadius: "10px",
-        border: "none",
-        background: "#2563eb",
-        color: "white",
-        cursor: "pointer",
-        boxShadow: "0 2px 8px rgba(0,0,0,.3)",
-      }}
+      title="Locate Me"
+      aria-label="Locate Me"
+      className="
+        absolute bottom-5 right-5 z-[1000]
+        flex items-center gap-2
+        rounded-2xl border border-slate-200
+        bg-white px-4 py-3
+        text-sm font-semibold text-slate-700
+        shadow-[0_8px_25px_rgba(15,23,42,0.18)]
+        transition-all duration-200
+        hover:-translate-y-0.5
+        hover:bg-slate-50
+        hover:shadow-[0_12px_30px_rgba(15,23,42,0.22)]
+        active:translate-y-0
+      "
     >
-      📍 Locate Me
+      <Crosshair
+        size={19}
+        className="text-blue-600"
+      />
+
+      <span className="hidden sm:inline">
+        Locate Me
+      </span>
     </button>
   );
 }

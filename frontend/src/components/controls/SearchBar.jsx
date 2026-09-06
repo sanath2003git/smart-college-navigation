@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
 
@@ -588,85 +588,47 @@ export default function SearchBar() {
   };
 
   return (
-  <div className="w-full bg-slate-100 px-3 py-3 border-b">
-    <div className="max-w-screen-2xl mx-auto">
-      <div
-        className="
-          flex
-          items-center
-          bg-white
-          rounded-xl
-          shadow-sm
-          border
-          border-slate-200
-          px-3
-          py-2
-          md:px-4
-          md:py-3
-        "
-      >
-        <Search
-          size={20}
-          className="
-            text-slate-400
-            mr-2
-            shrink-0
-          "
-        />
+  <div className="smartnav-search-shell">
+    <div className="smartnav-search-container">
 
-        <input
-          type="text"
-          placeholder="Search buildings, rooms, labs..."
-          value={query}
-          onChange={(e) =>
-            setQuery(e.target.value)
-          }
-          onKeyDown={handleKeyDown}
-          className="
-            flex-1
-            min-w-0
-            outline-none
-            bg-transparent
-            text-sm
-            text-slate-700
-            placeholder:text-slate-400
-            md:text-base
-          "
-        />
+      <div className="smartnav-search-bar">
+        {/* Search icon */}
+        <div className="smartnav-search-icon">
+          <Search size={20} strokeWidth={2.2} />
+        </div>
 
-        <button
-          onClick={handleSearch}
-          aria-label="Search"
-          className="
-            ml-2
-            flex
-            items-center
-            justify-center
-            shrink-0
-            w-9
-            h-9
-            rounded-lg
-            bg-blue-600
-            text-white
-            hover:bg-blue-700
-            active:scale-95
-            transition
-            md:w-auto
-            md:h-auto
-            md:px-4
-            md:py-2
-          "
-        >
-          <Search
-            size={18}
-            className="md:hidden"
+        {/* Input */}
+        <div className="smartnav-search-input-wrapper">
+          <input
+            type="text"
+            placeholder="Where do you want to go?"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="smartnav-search-input"
           />
 
-          <span className="hidden md:inline">
+          {!query && (
+            <span className="smartnav-search-hint hidden md:inline">
+              Search rooms, labs, classrooms...
+            </span>
+          )}
+        </div>
+
+        {/* Search button */}
+        <button
+          onClick={handleSearch}
+          aria-label="Start navigation"
+          className="smartnav-search-button"
+        >
+          <Search size={19} />
+
+          <span className="hidden sm:inline">
             Search
           </span>
         </button>
       </div>
+
     </div>
   </div>
 );
