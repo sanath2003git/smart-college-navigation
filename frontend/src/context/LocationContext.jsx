@@ -1,20 +1,27 @@
-import { createContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { snapToWalkway } from "../services/pathSnappingService";
+import { loadBuildings } from "../navigation/loadBuildings";
+import { detectCurrentBuilding } from "../navigation/buildingDetection";
 
-// Export the context so custom hooks can use it
-export const LocationContext = createContext();
-
+// Maximum GPS accuracy we accept for outdoor path snapping.
 const MAX_GPS_ACCURACY_FOR_SNAPPING = 25;
+
+// Maximum distance from a walkway at which snapping is allowed.
 const MAX_SNAP_DISTANCE = 6;
 
+export const LocationContext = createContext();
+
 export function LocationProvider({ children }) {
-  // Location displayed on the map
   const [location, setLocation] = useState(null);
-
-  // Original GPS location from the device
   const [rawLocation, setRawLocation] = useState(null);
-
   const [error, setError] = useState(null);
+  const locationRequestId = useRef(0);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -22,78 +29,114 @@ export function LocationProvider({ children }) {
       return;
     }
 
-    const watchId = navigator.geolocation.watchPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
+    let isMounted = true;
 
-        const raw = {
-          lat: latitude,
-          lng: longitude,
-          accuracy,
-        };
+    async function processLocation(position) {
+      const requestId = ++locationRequestId.current;
+      const {
+        latitude,
+        longitude,
+        accuracy,
+      } = position.coords;
 
-        // Always preserve the real GPS location.
-        setRawLocation(raw);
+      const raw = {
+        lat: latitude,
+        lng: longitude,
+        accuracy,
+      };
 
-        // By default, display the raw GPS position.
-        setLocation({
-          ...raw,
-          isSnapped: false,
-          snapDistance: null,
-        });
+      if (!isMounted) return;
+
+      // Always preserve the real GPS location.
+      setRawLocation(raw);
+
+      /*
+       * Start with the raw GPS position.
+       * This is also our fallback when snapping isn't appropriate.
+       */
+      const rawDisplayLocation = {
+        ...raw,
+        isSnapped: false,
+        snapDistance: null,
+      };
+
+      setLocation(rawDisplayLocation);
+
+      /*
+       * Don't attempt walkway snapping when GPS accuracy
+       * is too poor.
+       */
+      if (accuracy > MAX_GPS_ACCURACY_FOR_SNAPPING) {
+        return;
+      }
+
+      try {
+        /*
+         * Check whether the RAW GPS position is inside
+         * a mapped building.
+         */
+        const buildings = await loadBuildings();
+
+        const currentBuilding = detectCurrentBuilding(
+          raw,
+          buildings
+        );
 
         /*
-         * Only attempt path snapping when GPS accuracy
-         * is good enough.
+         * IMPORTANT:
+         * Never snap an indoor GPS position to an outdoor walkway.
          */
-        if (accuracy > MAX_GPS_ACCURACY_FOR_SNAPPING) {
+        if (currentBuilding) {
+          console.log(
+            "Inside building - walkway snapping disabled:",
+            currentBuilding.properties.name
+          );
+
           return;
         }
 
-        try {
-          const snapped = await snapToWalkway(
-            latitude,
-            longitude,
-            MAX_SNAP_DISTANCE
-          );
+        /*
+         * We are outside and GPS accuracy is acceptable,
+         * so attempt walkway snapping.
+         */
+        const snapped = await snapToWalkway(
+          latitude,
+          longitude,
+          MAX_SNAP_DISTANCE
+        );
 
-          /*
-           * No suitable walkway nearby.
-           * Keep the original GPS location.
-           */
-          if (!snapped) {
-            return;
-          }
+        if (
+          !snapped ||
+          !isMounted ||
+          requestId !== locationRequestId.current
+        ) {
+          return;
+        }
 
-          /*
-           * Use the snapped point for display,
-           * while preserving the original GPS accuracy.
-           */
-          setLocation({
-            lat: snapped.lat,
-            lng: snapped.lng,
-            accuracy,
-            isSnapped: true,
-            snapDistance: snapped.distance,
-            rawLat: latitude,
-            rawLng: longitude,
-          });
-        } catch (err) {
-          console.error("Path snapping failed:", err);
+        setLocation({
+          lat: snapped.lat,
+          lng: snapped.lng,
+          accuracy,
+          isSnapped: true,
+          snapDistance: snapped.distance,
+          rawLat: latitude,
+          rawLng: longitude,
+        });
+      } catch (err) {
+        console.error(
+          "Location processing failed:",
+          err
+        );
+      }
+    }
 
-          // If snapping fails, continue using raw GPS.
-          setLocation({
-            ...raw,
-            isSnapped: false,
-            snapDistance: null,
-          });
+    const watchId = navigator.geolocation.watchPosition(
+      processLocation,
+      (err) => {
+        if (isMounted) {
+          setError(err.message);
         }
       },
-
-      (err) => {
-        setError(err.message);
-      },
-
       {
         enableHighAccuracy: true,
         maximumAge: 1000,
@@ -101,7 +144,10 @@ export function LocationProvider({ children }) {
       }
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    return () => {
+      isMounted = false;
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   return (
