@@ -22,19 +22,27 @@ const userIcon = L.divIcon({
 });
 
 export default function CurrentLocation() {
-  const { location } = useLocation();
+  const {
+    location,
+    rawLocation,
+  } = useLocation();
+
   const { setCurrentLocation } = useNavigation();
 
+  /*
+   * IMPORTANT:
+   * Use RAW GPS for navigation/building detection.
+   * The displayed location may be snapped to a walkway.
+   */
   useEffect(() => {
-    if (location) {
-      setCurrentLocation(location);
+    if (rawLocation) {
+      setCurrentLocation(rawLocation);
     }
-  }, [location, setCurrentLocation]);
+  }, [rawLocation, setCurrentLocation]);
 
   if (!location) return null;
 
-  // Use a fixed display radius for the prototype
-  const displayAccuracyRadius = 5;
+  const displayAccuracyRadius = 4;
 
   return (
     <>
@@ -58,30 +66,44 @@ export default function CurrentLocation() {
           <br />
           <br />
 
-          Latitude:
+          Display Latitude:
           <br />
           {location.lat}
 
           <br />
           <br />
 
-          Longitude:
+          Display Longitude:
           <br />
           {location.lng}
 
           <br />
           <br />
 
-          Actual GPS Accuracy:
+          GPS Accuracy:
           <br />
           {Math.round(location.accuracy)} m
 
           <br />
           <br />
-
           Display Radius:
           <br />
-          {displayAccuracyRadius} m
+          4 m
+          <br />
+          <br />
+
+          {location.isSnapped ? (
+            <>
+              <b>Path Snapping: Active</b>
+
+              <br />
+              Snapped to walkway:
+              <br />
+              {location.snapDistance?.toFixed(2)} m away
+            </>
+          ) : (
+            <b>Path Snapping: Not Active</b>
+          )}
         </Popup>
       </Marker>
     </>
