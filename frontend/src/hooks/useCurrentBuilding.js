@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigation } from "./useNavigation";
 import { loadBuildings } from "../navigation/loadBuildings";
 import { detectCurrentBuilding } from "../navigation/buildingDetection";
+
+const REQUIRED_CONFIRMATIONS = 3;
 
 export default function useCurrentBuilding() {
   const {
@@ -10,47 +12,99 @@ export default function useCurrentBuilding() {
     setCurrentBuilding,
   } = useNavigation();
 
+  // Keeps track of consecutive detections.
+  const candidateBuildingRef = useRef(null);
+  const candidateCountRef = useRef(0);
+
   useEffect(() => {
     if (!currentLocation) return;
 
-    // Building detection logic will be added here.
     async function detectBuilding() {
-  const buildings = await loadBuildings();
-  console.log(
-  "Loaded buildings:",
-  buildings.features.map((b) => ({
-    id: b.properties.id,
-    name: b.properties.name,
-  }))
-);
+      try {
+        const buildings = await loadBuildings();
 
-  console.log(
-    "Building Features:",
-    buildings.features.length
-  );
+        const building = detectCurrentBuilding(
+          currentLocation,
+          buildings
+        );
 
-  const building = detectCurrentBuilding(
-  currentLocation,
-  buildings
-);
+        const detectedBuilding =
+          building?.properties.name ?? null;
 
-const detectedBuilding =
-  building?.properties.name ?? null;
+        /*
+         * No building detected.
+         *
+         * Do not immediately switch outside because
+         * a single bad GPS reading can occur indoors.
+         */
+        if (!detectedBuilding) {
+          candidateBuildingRef.current = null;
+          candidateCountRef.current = 0;
 
-if (detectedBuilding !== currentBuilding) {
-  if (detectedBuilding) {
-    console.log(
-      "Current Building:",
-      detectedBuilding
-    );
-  } else {
-    console.log("Outside all buildings");
-  }
+          console.log(
+            "Building detection: no building detected"
+          );
 
-  setCurrentBuilding(detectedBuilding);
-}
-}
+          return;
+        }
 
-  detectBuilding();
-}, [currentLocation, currentBuilding,setCurrentBuilding]);
+        /*
+         * Same building as the current confirmed building.
+         */
+        if (detectedBuilding === currentBuilding) {
+          candidateBuildingRef.current = detectedBuilding;
+          candidateCountRef.current = 0;
+
+          return;
+        }
+
+        /*
+         * New building candidate.
+         */
+        if (
+          candidateBuildingRef.current === detectedBuilding
+        ) {
+          candidateCountRef.current += 1;
+        } else {
+          candidateBuildingRef.current = detectedBuilding;
+          candidateCountRef.current = 1;
+        }
+
+        console.log(
+          `Building candidate: ${detectedBuilding} ` +
+            `(${candidateCountRef.current}/${REQUIRED_CONFIRMATIONS})`
+        );
+
+        /*
+         * Confirm the building only after several
+         * consecutive GPS readings agree.
+         */
+        if (
+          candidateCountRef.current >=
+          REQUIRED_CONFIRMATIONS
+        ) {
+          console.log(
+            "Confirmed Current Building:",
+            detectedBuilding
+          );
+
+          setCurrentBuilding(detectedBuilding);
+
+          candidateBuildingRef.current = null;
+          candidateCountRef.current = 0;
+        }
+      } catch (error) {
+        console.error(
+          "Building detection failed:",
+          error
+        );
+      }
+    }
+
+    detectBuilding();
+  }, [
+    currentLocation,
+    currentBuilding,
+    setCurrentBuilding,
+  ]);
 }
