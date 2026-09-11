@@ -27,28 +27,43 @@ export default function CurrentLocation() {
     rawLocation,
   } = useLocation();
 
-  const { setCurrentLocation } = useNavigation();
+  const {
+    setCurrentLocation,
+  } = useNavigation();
 
   /*
-   * IMPORTANT:
-   * Use RAW GPS for navigation/building detection.
-   * The displayed location may be snapped to a walkway.
+   * Use RAW GPS for navigation and
+   * building detection.
    */
   useEffect(() => {
     if (rawLocation) {
       setCurrentLocation(rawLocation);
     }
-  }, [rawLocation, setCurrentLocation]);
+  }, [
+    rawLocation,
+    setCurrentLocation,
+  ]);
 
   if (!location) return null;
 
+  /*
+   * This is only the visual size of the
+   * blue location indicator.
+   *
+   * It is NOT the actual GPS accuracy.
+   */
   const displayAccuracyRadius = 4;
 
   return (
     <>
       <Circle
-        center={[location.lat, location.lng]}
-        radius={displayAccuracyRadius}
+        center={[
+          location.lat,
+          location.lng,
+        ]}
+        radius={
+          displayAccuracyRadius
+        }
         pathOptions={{
           color: "#2563eb",
           fillColor: "#2563eb",
@@ -57,7 +72,10 @@ export default function CurrentLocation() {
       />
 
       <Marker
-        position={[location.lat, location.lng]}
+        position={[
+          location.lat,
+          location.lng,
+        ]}
         icon={userIcon}
       >
         <Popup>
@@ -66,14 +84,14 @@ export default function CurrentLocation() {
           <br />
           <br />
 
-          Display Latitude:
+          Latitude:
           <br />
           {location.lat}
 
           <br />
           <br />
 
-          Display Longitude:
+          Longitude:
           <br />
           {location.lng}
 
@@ -82,28 +100,17 @@ export default function CurrentLocation() {
 
           GPS Accuracy:
           <br />
-          {Math.round(location.accuracy)} m
+          {Math.round(
+            location.accuracy
+          )}{" "}
+          m
 
           <br />
           <br />
+
           Display Radius:
           <br />
           4 m
-          <br />
-          <br />
-
-          {location.isSnapped ? (
-            <>
-              <b>Path Snapping: Active</b>
-
-              <br />
-              Snapped to walkway:
-              <br />
-              {location.snapDistance?.toFixed(2)} m away
-            </>
-          ) : (
-            <b>Path Snapping: Not Active</b>
-          )}
         </Popup>
       </Marker>
     </>

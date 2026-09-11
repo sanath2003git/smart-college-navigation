@@ -30,6 +30,9 @@ import ThirdFloorLayers
 import FloorTransitionPrompt
   from "../../components/navigation/FloorTransitionPrompt";
 
+import InitialFloorSelection
+  from "../../components/navigation/InitialFloorSelection";
+
 import RouteLayer
   from "../../components/map/RouteLayer";
 
@@ -72,6 +75,13 @@ export default function CampusPage() {
 
     floorTransition,
     confirmFloorTransition,
+
+    // ========================================
+    // Initial Indoor Floor Selection
+    // ========================================
+
+    initialFloorSelection,
+    confirmInitialFloorSelection,
   } = useNavigation();
 
   const center = [
@@ -187,7 +197,26 @@ export default function CampusPage() {
   }, []);
 
   return (
-  <div className="flex h-full w-full flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden">
+
+      {/* =====================================
+          Initial Indoor Floor Selection
+          
+          Appears only when the user opens
+          SmartNav while already inside a building.
+          ===================================== */}
+
+      {initialFloorSelection.open && (
+        <InitialFloorSelection
+          building={
+            initialFloorSelection.building
+          }
+          onConfirm={
+            confirmInitialFloorSelection
+          }
+        />
+      )}
+
       {/* =====================================
           Floor Transition Confirmation
           ===================================== */}
@@ -208,15 +237,20 @@ export default function CampusPage() {
         />
       )}
 
+      {/* =====================================
+          Campus Map
+          ===================================== */}
+
       <MapContainer
-  center={center}
-  zoom={18}
-  minZoom={17}
-  maxZoom={22}
-  maxBounds={CAMPUS_BOUNDS}
-  maxBoundsViscosity={1.0}
-  className="min-h-0 flex-1 w-full"
->
+        center={center}
+        zoom={18}
+        minZoom={17}
+        maxZoom={22}
+        maxBounds={CAMPUS_BOUNDS}
+        maxBoundsViscosity={1.0}
+        className="min-h-0 flex-1 w-full"
+      >
+
         <TileLayer
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -300,6 +334,7 @@ export default function CampusPage() {
         <RouteLayer
           path={route}
         />
+
       </MapContainer>
     </div>
   );
