@@ -27,6 +27,7 @@ body,
 body {
   background: var(--sn-bg);
   color: var(--sn-text);
+
   font-family:
     Inter,
     ui-sans-serif,
@@ -35,6 +36,7 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
   overflow: hidden;
 }
 
@@ -51,17 +53,25 @@ input {
   width: 100%;
   height: 100%;
   min-height: 100dvh;
+
   display: flex;
   flex-direction: column;
+
   background: var(--sn-bg);
+
   overflow: hidden;
 }
 
 .smartnav-main {
   position: relative;
+
+  z-index: 1;
+
   flex: 1;
   min-height: 0;
+
   display: flex;
+
   overflow: hidden;
 }
 
@@ -72,23 +82,8 @@ input {
 .leaflet-container {
   width: 100%;
   height: 100%;
+
   font-family: inherit;
-}
-
-/* Make default Leaflet controls fit SmartNav */
-.leaflet-control-zoom {
-  border: 1px solid rgba(148, 163, 184, 0.25) !important;
-  border-radius: 14px !important;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14) !important;
-}
-
-.leaflet-control-zoom a {
-  width: 42px !important;
-  height: 42px !important;
-  line-height: 40px !important;
-  color: #0f172a !important;
-  background: rgba(255, 255, 255, 0.96) !important;
 }
 
 /* ==========================================
@@ -122,7 +117,12 @@ input {
 
 .smartnav-search-shell {
   position: relative;
-  z-index: 40;
+
+  /*
+   * Keep the complete search area above
+   * the Leaflet map.
+   */
+  z-index: 2000;
 
   width: 100%;
 
@@ -139,6 +139,10 @@ input {
 }
 
 .smartnav-search-container {
+  position: relative;
+
+  z-index: 2000;
+
   width: 100%;
   max-width: 1600px;
 
@@ -147,6 +151,8 @@ input {
 
 .smartnav-search-bar {
   position: relative;
+
+  z-index: 2000;
 
   display: flex;
   align-items: center;
@@ -180,8 +186,9 @@ input {
     0 6px 24px rgba(37, 99, 235, 0.12);
 }
 
-
-/* Search icon */
+/* ==========================================
+   SEARCH ICON
+========================================== */
 
 .smartnav-search-icon {
   display: flex;
@@ -196,11 +203,14 @@ input {
   color: #64748b;
 }
 
-
-/* Input */
+/* ==========================================
+   INPUT
+========================================== */
 
 .smartnav-search-input-wrapper {
   position: relative;
+
+  z-index: 2100;
 
   display: flex;
   flex: 1;
@@ -231,8 +241,9 @@ input {
   color: #94a3b8;
 }
 
-
-/* Hint */
+/* ==========================================
+   SEARCH HINT
+========================================== */
 
 .smartnav-search-hint {
   position: absolute;
@@ -246,13 +257,15 @@ input {
   font-size: 13px;
 }
 
-
-/* Search button */
+/* ==========================================
+   SEARCH BUTTON
+========================================== */
 
 .smartnav-search-button {
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 8px;
 
   flex-shrink: 0;
@@ -299,8 +312,9 @@ input {
   transform: scale(0.97);
 }
 
-
-/* Helper text */
+/* ==========================================
+   HELPER TEXT
+========================================== */
 
 .smartnav-search-helper {
   align-items: center;
@@ -314,13 +328,186 @@ input {
   font-size: 12px;
 }
 
+/* ==========================================
+   SEARCH SUGGESTIONS
+========================================== */
+
+.smartnav-search-suggestions {
+  position: absolute;
+
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+
+  /*
+   * Very high z-index so the dropdown
+   * appears above Leaflet/map layers.
+   */
+  z-index: 9999;
+
+  background: #ffffff;
+
+  border:
+    1px solid #dbe3f0;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 16px 35px rgba(15, 23, 42, 0.16),
+    0 5px 12px rgba(15, 23, 42, 0.08);
+
+  overflow: hidden;
+
+  max-height: 360px;
+
+  overflow-y: auto;
+}
+
+/* ==========================================
+   INDIVIDUAL SEARCH SUGGESTION
+========================================== */
+
+.smartnav-search-suggestion {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 16px;
+
+  border: 0;
+
+  border-bottom:
+    1px solid #eef2f7;
+
+  background: #ffffff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.smartnav-search-suggestion:last-child {
+  border-bottom: none;
+}
+
+.smartnav-search-suggestion:hover {
+  background: #f7faff;
+}
+
+.smartnav-search-suggestion:active {
+  background: #eef5ff;
+}
+
+/* ==========================================
+   SUGGESTION ICON
+========================================== */
+
+.smartnav-suggestion-icon {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #eef4ff;
+
+  color: #2563eb;
+}
+
+/* ==========================================
+   SUGGESTION CONTENT
+========================================== */
+
+.smartnav-suggestion-content {
+  min-width: 0;
+
+  flex: 1;
+}
+
+/* Room number + name */
+
+.smartnav-suggestion-title {
+  font-size: 14px;
+  font-weight: 600;
+
+  line-height: 1.4;
+
+  color: #172033;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+/* Building / floor / category */
+
+.smartnav-suggestion-meta {
+  margin-top: 3px;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+
+  color: #6b7280;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+/* ==========================================
+   SEARCH LOADING
+========================================== */
+
+.smartnav-search-loading {
+  padding: 18px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #64748b;
+}
+
+/* ==========================================
+   SEARCH DROPDOWN SCROLLBAR
+========================================== */
+
+.smartnav-search-suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.smartnav-search-suggestions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.smartnav-search-suggestions::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 10px;
+}
 
 /* ==========================================
    MOBILE SEARCH
 ========================================== */
 
 @media (max-width: 767px) {
-
   .smartnav-search-shell {
     padding: 8px 10px;
   }
@@ -353,10 +540,46 @@ input {
 }
 
 /* ==========================================
+   MOBILE SEARCH SUGGESTIONS
+========================================== */
+
+@media (max-width: 640px) {
+  .smartnav-search-suggestions {
+    top: calc(100% + 8px);
+
+    max-height: 320px;
+
+    border-radius: 12px;
+  }
+
+  .smartnav-search-suggestion {
+    padding: 12px;
+
+    gap: 10px;
+  }
+
+  .smartnav-suggestion-icon {
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+  }
+
+  .smartnav-suggestion-title {
+    font-size: 13px;
+  }
+
+  .smartnav-suggestion-meta {
+    font-size: 11px;
+  }
+}
+
+/* ==========================================
    SMARTNAV MAP CONTROLS
 ========================================== */
 
 /* Position controls with better spacing */
+
 .leaflet-top {
   top: 12px;
 }
@@ -365,14 +588,20 @@ input {
   left: 12px;
 }
 
-/* Zoom control container */
+/* ==========================================
+   ZOOM CONTROL
+========================================== */
+
 .leaflet-control-zoom {
   margin: 0 !important;
 
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border:
+    1px solid rgba(226, 232, 240, 0.95) !important;
+
   border-radius: 16px !important;
 
-  background: rgba(255, 255, 255, 0.96) !important;
+  background:
+    rgba(255, 255, 255, 0.96) !important;
 
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14) !important;
@@ -383,8 +612,10 @@ input {
 }
 
 /* Zoom buttons */
+
 .leaflet-control-zoom a {
   display: flex !important;
+
   align-items: center !important;
   justify-content: center !important;
 
@@ -400,6 +631,7 @@ input {
   color: #334155 !important;
 
   font-size: 22px !important;
+
   font-weight: 400 !important;
 
   transition:
@@ -414,18 +646,17 @@ input {
 }
 
 /* Divider between + and - */
+
 .leaflet-control-zoom-in {
   border-bottom:
     1px solid #e2e8f0 !important;
 }
-
 
 /* ==========================================
    MOBILE MAP CONTROLS
 ========================================== */
 
 @media (max-width: 767px) {
-
   .leaflet-top {
     top: 10px;
   }
@@ -442,6 +673,7 @@ input {
   }
 
   /* Keep Locate button comfortably above edges */
+
   .leaflet-container .absolute.bottom-5 {
     bottom: 16px !important;
   }

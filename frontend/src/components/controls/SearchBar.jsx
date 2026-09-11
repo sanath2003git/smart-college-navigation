@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, MapPin } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
@@ -11,11 +11,15 @@ import { selectBestTransition } from "../../navigation/transitionSelector";
 
 import { findRooms } from "../../services/roomService";
 import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
+import { searchDestinations } from "../../services/searchService";
 
 import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     setRoute,
@@ -33,19 +37,94 @@ export default function SearchBar() {
     setNavigationStage,
   } = useNavigation();
 
+  // -----------------------------------
+  // Live search suggestions
+  // -----------------------------------
+
+  useEffect(() => {
+    const searchQuery = query.trim();
+
+    if (!searchQuery) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSuggestions = async () => {
+      try {
+        setIsSearching(true);
+
+        const results = await searchDestinations(
+          searchQuery,
+          {
+            limit: 6,
+          }
+        );
+
+        if (!cancelled) {
+          setSuggestions(results);
+          setShowSuggestions(results.length > 0);
+        }
+      } catch (error) {
+        console.error(
+          "Search suggestions error:",
+          error
+        );
+
+        if (!cancelled) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      }
+    };
+
+    loadSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
+
+  // -----------------------------------
+  // Select suggestion
+  // -----------------------------------
+
+  const handleSuggestionClick = (destination) => {
+    setQuery(destination.roomNo);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
+  // -----------------------------------
+  // Main navigation search
+  // -----------------------------------
+
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
 
     if (!room) return;
 
+    setShowSuggestions(false);
+
     try {
       if (!currentLocation) {
-        alert("Waiting for your current location...");
+        alert(
+          "Waiting for your current location..."
+        );
         return;
       }
 
-      const currentLat = currentLocation.lat;
-      const currentLng = currentLocation.lng;
+      const currentLat =
+        currentLocation.lat;
+
+      const currentLng =
+        currentLocation.lng;
 
       // -----------------------------------
       // Clear previous navigation data
@@ -81,7 +160,8 @@ export default function SearchBar() {
         return;
       }
 
-      const destinationFeature = rooms[0];
+      const destinationFeature =
+        rooms[0];
 
       const destinationFloor =
         destinationFeature.properties.floor;
@@ -120,7 +200,8 @@ export default function SearchBar() {
       // -----------------------------------
 
       const sameBuilding =
-        currentBuilding === destinationBuilding;
+        currentBuilding ===
+        destinationBuilding;
 
       const alreadyOnGroundFloor =
         navigationStage ===
@@ -144,20 +225,25 @@ export default function SearchBar() {
         );
 
         result = await navigate({
-          stage: NAVIGATION_STAGE.GROUND_FLOOR,
+          stage:
+            NAVIGATION_STAGE.GROUND_FLOOR,
 
           start: {
             lat: currentLat,
             lng: currentLng,
           },
 
-          destination: destinationFeature,
+          destination:
+            destinationFeature,
 
-          building: destinationBuilding,
+          building:
+            destinationBuilding,
         });
 
         if (!result) {
-          alert("Unable to calculate indoor route.");
+          alert(
+            "Unable to calculate indoor route."
+          );
           return;
         }
 
@@ -189,7 +275,8 @@ export default function SearchBar() {
 
         const transition =
           await selectBestTransition({
-            building: destinationBuilding,
+            building:
+              destinationBuilding,
 
             // IMPORTANT:
             // This is the user's actual floor,
@@ -211,7 +298,8 @@ export default function SearchBar() {
           return;
         }
 
-        const stairId = transition.id;
+        const stairId =
+          transition.id;
 
         console.log(
           "Target Stair ID:",
@@ -230,7 +318,9 @@ export default function SearchBar() {
         // ---------------------------------
 
         preparedTargetStair =
-          await findStairById(stairId);
+          await findStairById(
+            stairId
+          );
 
         if (!preparedTargetStair) {
           console.error(
@@ -281,7 +371,8 @@ export default function SearchBar() {
         // ---------------------------------
 
         result = await navigate({
-          stage: NAVIGATION_STAGE.GROUND_FLOOR,
+          stage:
+            NAVIGATION_STAGE.GROUND_FLOOR,
 
           start: {
             lat: currentLat,
@@ -296,7 +387,8 @@ export default function SearchBar() {
           transitionStrategy:
             transition.strategy,
 
-          building: destinationBuilding,
+          building:
+            destinationBuilding,
         });
 
         if (!result) {
@@ -309,7 +401,8 @@ export default function SearchBar() {
         if (result.selectedTransition) {
           console.log(
             "Router Selected Transition:",
-            result.selectedTransition.properties.id
+            result.selectedTransition
+              .properties.id
           );
 
           setTargetStair(
@@ -353,6 +446,7 @@ export default function SearchBar() {
          * currentFloor = 0
          * destinationFloor = 3
          */
+
         if (
           navigationStage ===
           NAVIGATION_STAGE.OUTDOOR
@@ -369,7 +463,8 @@ export default function SearchBar() {
         );
 
         result = await navigate({
-          stage: NAVIGATION_STAGE.OUTDOOR,
+          stage:
+            NAVIGATION_STAGE.OUTDOOR,
 
           start: {
             lat: currentLat,
@@ -380,7 +475,9 @@ export default function SearchBar() {
         });
 
         if (!result) {
-          alert("Destination not found.");
+          alert(
+            "Destination not found."
+          );
           return;
         }
 
@@ -434,10 +531,14 @@ export default function SearchBar() {
           : result.destination;
 
       const building =
-        finalDestination.properties.building;
+        finalDestination
+          .properties
+          .building;
 
       const floor =
-        finalDestination.properties.floor;
+        finalDestination
+          .properties
+          .floor;
 
       // -----------------------------------
       // Destination building
@@ -482,7 +583,8 @@ export default function SearchBar() {
 
             currentFloor,
 
-            destinationFloor: floor,
+            destinationFloor:
+              floor,
 
             start: {
               lat: currentLat,
@@ -588,48 +690,126 @@ export default function SearchBar() {
   };
 
   return (
-  <div className="smartnav-search-shell">
-    <div className="smartnav-search-container">
+    <div className="smartnav-search-shell">
+      <div className="smartnav-search-container">
 
-      <div className="smartnav-search-bar">
-        {/* Search icon */}
-        <div className="smartnav-search-icon">
-          <Search size={20} strokeWidth={2.2} />
-        </div>
+        <div className="smartnav-search-bar">
 
-        {/* Input */}
-        <div className="smartnav-search-input-wrapper">
-          <input
-            type="text"
-            placeholder="Where do you want to go?"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="smartnav-search-input"
-          />
+          {/* Search icon */}
+          <div className="smartnav-search-icon">
+            <Search
+              size={20}
+              strokeWidth={2.2}
+            />
+          </div>
 
-          {!query && (
-            <span className="smartnav-search-hint hidden md:inline">
-              Search rooms, labs, classrooms...
+          {/* Input */}
+          <div className="smartnav-search-input-wrapper">
+
+            <input
+              type="text"
+              placeholder="Where do you want to go?"
+              value={query}
+              onChange={(e) =>
+                setQuery(e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (
+                  suggestions.length > 0
+                ) {
+                  setShowSuggestions(true);
+                }
+              }}
+              className="smartnav-search-input"
+            />
+
+            {!query && (
+              <span className="smartnav-search-hint hidden md:inline">
+                Search rooms, labs, classrooms...
+              </span>
+            )}
+
+            {/* -----------------------------------
+                Search Suggestions
+            ----------------------------------- */}
+
+            {showSuggestions && (
+              <div className="smartnav-search-suggestions">
+
+                {isSearching && (
+                  <div className="smartnav-search-loading">
+                    Searching...
+                  </div>
+                )}
+
+                {!isSearching &&
+                  suggestions.map(
+                    (destination) => (
+                      <button
+                        key={
+                          destination.id
+                        }
+                        type="button"
+                        className="smartnav-search-suggestion"
+                        onClick={() =>
+                          handleSuggestionClick(
+                            destination
+                          )
+                        }
+                      >
+
+                        <div className="smartnav-suggestion-icon">
+                          <MapPin
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="smartnav-suggestion-content">
+
+                          <div className="smartnav-suggestion-title">
+                            {destination.roomNo}
+                            {destination.name &&
+                              ` — ${destination.name}`}
+                          </div>
+
+                          <div className="smartnav-suggestion-meta">
+                            {destination.building}
+
+                            {destination.floorLabel &&
+                              ` · ${destination.floorLabel}`}
+
+                            {destination.category &&
+                              ` · ${destination.category}`}
+                          </div>
+
+                        </div>
+
+                      </button>
+                    )
+                  )}
+
+              </div>
+            )}
+
+          </div>
+
+          {/* Search button */}
+          <button
+            onClick={handleSearch}
+            aria-label="Start navigation"
+            className="smartnav-search-button"
+          >
+            <Search size={19} />
+
+            <span className="hidden sm:inline">
+              Search
             </span>
-          )}
+          </button>
+
         </div>
 
-        {/* Search button */}
-        <button
-          onClick={handleSearch}
-          aria-label="Start navigation"
-          className="smartnav-search-button"
-        >
-          <Search size={19} />
-
-          <span className="hidden sm:inline">
-            Search
-          </span>
-        </button>
       </div>
-
     </div>
-  </div>
-);
+  );
 }
