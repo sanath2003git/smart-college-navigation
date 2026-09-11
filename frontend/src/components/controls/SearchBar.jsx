@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, MapPin } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
 
@@ -13,11 +13,15 @@ import {
 
 import { findRooms } from "../../services/roomService";
 import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
+import { searchDestinations } from "../../services/searchService";
 
 import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     setRoute,
@@ -34,10 +38,80 @@ export default function SearchBar() {
     setNavigationStage,
   } = useNavigation();
 
+  // -----------------------------------
+  // Live search suggestions
+  // -----------------------------------
+
+  useEffect(() => {
+    const searchQuery = query.trim();
+
+    if (!searchQuery) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSuggestions = async () => {
+      try {
+        setIsSearching(true);
+
+        const results = await searchDestinations(
+          searchQuery,
+          {
+            limit: 6,
+          }
+        );
+
+        if (!cancelled) {
+          setSuggestions(results);
+          setShowSuggestions(results.length > 0);
+        }
+      } catch (error) {
+        console.error(
+          "Search suggestions error:",
+          error
+        );
+
+        if (!cancelled) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      }
+    };
+
+    loadSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
+
+  // -----------------------------------
+  // Select suggestion
+  // -----------------------------------
+
+  const handleSuggestionClick = (destination) => {
+    setQuery(destination.roomNo);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
+  // -----------------------------------
+  // Main navigation search
+  // -----------------------------------
+
   const handleSearch = async () => {
     const room = query.trim().toUpperCase();
 
     if (!room) return;
+
+    setShowSuggestions(false);
 
     try {
       if (!currentLocation) {
@@ -227,10 +301,6 @@ export default function SearchBar() {
 
         // ---------------------------------
         // Store FINAL destination
-        //
-        // M203 remains the final destination.
-        // The GF router will separately route
-        // to stairId.
         // ---------------------------------
 
         setDestination(
@@ -253,13 +323,6 @@ export default function SearchBar() {
 
         // ---------------------------------
         // Route current GF position → stair
-        //
-        // IMPORTANT:
-        // Do NOT pass destinationFeature here.
-        //
-        // navigateGroundFloor() already uses
-        // stairId to load the correct stair
-        // and choose its nearest graph node.
         // ---------------------------------
 
         result = await navigate({
@@ -292,7 +355,6 @@ export default function SearchBar() {
       // CASE 3
       // Existing outdoor flow
       //
-      // Preserve:
       // OUTDOOR → entrance → GF
       // OUTDOOR → entrance → GF → FF
       // ===================================
@@ -322,8 +384,6 @@ export default function SearchBar() {
           return;
         }
 
-        // Use exactly the entrance selected
-        // by navigationRouter.
         setTargetEntrance(
           result.entrance
         );
@@ -344,10 +404,6 @@ export default function SearchBar() {
 
       // -----------------------------------
       // Store FINAL destination
-      //
-      // For GF → FF, navigateGroundFloor()
-      // returns the original destination that
-      // was already stored above by SearchBar.
       // -----------------------------------
 
       if (
@@ -399,9 +455,6 @@ export default function SearchBar() {
 
       // -----------------------------------
       // Configure floor transition
-      //
-      // GF → FF already loaded the stair
-      // above, so don't load it twice.
       // -----------------------------------
 
       if (
@@ -504,32 +557,125 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="w-full bg-slate-100 px-6 py-4 border-b">
-      <div className="max-w-screen-2xl mx-auto">
-        <div className="flex items-center bg-white rounded-xl shadow-md px-4 py-3">
-          <Search
-            size={20}
-            className="text-gray-400 mr-3"
-          />
+    <div className="smartnav-search-shell">
+      <div className="smartnav-search-container">
 
-          <input
-            type="text"
-            placeholder="Search buildings, rooms, labs..."
-            value={query}
-            onChange={(e) =>
-              setQuery(e.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            className="flex-1 outline-none bg-transparent text-gray-700"
-          />
+        <div className="smartnav-search-bar">
 
+          {/* Search icon */}
+          <div className="smartnav-search-icon">
+            <Search
+              size={20}
+              strokeWidth={2.2}
+            />
+          </div>
+
+          {/* Input */}
+          <div className="smartnav-search-input-wrapper">
+
+            <input
+              type="text"
+              placeholder="Where do you want to go?"
+              value={query}
+              onChange={(e) =>
+                setQuery(e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (
+                  suggestions.length > 0
+                ) {
+                  setShowSuggestions(true);
+                }
+              }}
+              className="smartnav-search-input"
+            />
+
+            {!query && (
+              <span className="smartnav-search-hint hidden md:inline">
+                Search rooms, labs, classrooms...
+              </span>
+            )}
+
+            {/* -----------------------------------
+                Search Suggestions
+            ----------------------------------- */}
+
+            {showSuggestions && (
+              <div className="smartnav-search-suggestions">
+
+                {isSearching && (
+                  <div className="smartnav-search-loading">
+                    Searching...
+                  </div>
+                )}
+
+                {!isSearching &&
+                  suggestions.map(
+                    (destination) => (
+                      <button
+                        key={
+                          destination.id
+                        }
+                        type="button"
+                        className="smartnav-search-suggestion"
+                        onClick={() =>
+                          handleSuggestionClick(
+                            destination
+                          )
+                        }
+                      >
+
+                        <div className="smartnav-suggestion-icon">
+                          <MapPin
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="smartnav-suggestion-content">
+
+                          <div className="smartnav-suggestion-title">
+                            {destination.roomNo}
+                            {destination.name &&
+                              ` — ${destination.name}`}
+                          </div>
+
+                          <div className="smartnav-suggestion-meta">
+                            {destination.building}
+
+                            {destination.floorLabel &&
+                              ` · ${destination.floorLabel}`}
+
+                            {destination.category &&
+                              ` · ${destination.category}`}
+                          </div>
+
+                        </div>
+
+                      </button>
+                    )
+                  )}
+
+              </div>
+            )}
+
+          </div>
+
+          {/* Search button */}
           <button
             onClick={handleSearch}
-            className="ml-3 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            aria-label="Start navigation"
+            className="smartnav-search-button"
           >
-            Search
+            <Search size={19} />
+
+            <span className="hidden sm:inline">
+              Search
+            </span>
           </button>
+
         </div>
+
       </div>
     </div>
   );
