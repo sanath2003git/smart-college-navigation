@@ -31,13 +31,8 @@ const FLOOR_LABELS = {
 };
 
 /**
- * Searchable room categories.
- *
- * These are intentionally kept broad because the GeoJSON
- * datasets contain different category/type values.
- *
- * Structural features such as corridors, stairs and paths
- * are excluded from destination search.
+ * Structural features that should not appear
+ * as searchable destinations.
  */
 const EXCLUDED_CATEGORIES = new Set([
   "corridor",
@@ -51,6 +46,16 @@ const EXCLUDED_CATEGORIES = new Set([
   "entrance",
   "courtyard",
 ]);
+
+const EXCLUDED_NAME_KEYWORDS = [
+  "corridor",
+  "staircase",
+  "stair",
+  "ramp",
+  "walkway",
+  "entrance",
+  "courtyard",
+];
 
 const BUILDINGS = [
   {
@@ -77,6 +82,34 @@ function normalizeText(value) {
 }
 
 /**
+ * Check whether a feature represents a structural
+ * element rather than an actual destination.
+ */
+function isExcludedFeature(
+  name,
+  category
+) {
+  const normalizedName =
+    normalizeText(name);
+
+  const normalizedCategory =
+    normalizeText(category);
+
+  if (
+    EXCLUDED_CATEGORIES.has(
+      normalizedCategory
+    )
+  ) {
+    return true;
+  }
+
+  return EXCLUDED_NAME_KEYWORDS.some(
+    (keyword) =>
+      normalizedName.includes(keyword)
+  );
+}
+
+/**
  * Normalize a room feature into one common format.
  *
  * This handles both:
@@ -89,8 +122,13 @@ function normalizeText(value) {
  *   name / room_name
  *   category / type
  */
-function normalizeRoomFeature(feature, building, floorFolder) {
-  const properties = feature?.properties ?? {};
+function normalizeRoomFeature(
+  feature,
+  building,
+  floorFolder
+) {
+  const properties =
+    feature?.properties ?? {};
 
   const roomNo = String(
     properties.room_no ?? ""
@@ -112,18 +150,34 @@ function normalizeRoomFeature(feature, building, floorFolder) {
     return null;
   }
 
+  /**
+   * Remove structural features such as:
+   * corridors, stairs, ramps, etc.
+   */
   if (
-    EXCLUDED_CATEGORIES.has(
-      normalizeText(category)
+    isExcludedFeature(
+      name,
+      category
     )
   ) {
     return null;
   }
 
+  /**
+   * IMPORTANT:
+   *
+   * Do not use properties.id here.
+   *
+   * Some GeoJSON files reuse IDs between floors.
+   * The generated ID must therefore include:
+   *
+   * building + floor + room number
+   */
+  const generatedId =
+    `${building.id}-${floorFolder}-${roomNo || name}`;
+
   return {
-    id:
-      properties.id ??
-      `${building.id}-${floorFolder}-${roomNo}`,
+    id: generatedId,
 
     type: "room",
 
@@ -141,7 +195,9 @@ function normalizeRoomFeature(feature, building, floorFolder) {
 
     floorLabel:
       FLOOR_LABELS[floorFolder] ??
-      String(properties.floor ?? ""),
+      String(
+        properties.floor ?? ""
+      ),
 
     department: String(
       properties.department ?? ""
@@ -155,7 +211,8 @@ function normalizeRoomFeature(feature, building, floorFolder) {
     ).trim(),
 
     coordinates:
-      feature.geometry?.coordinates ?? null,
+      feature.geometry?.coordinates ??
+      null,
   };
 }
 
@@ -170,7 +227,8 @@ async function loadRooms(
     `${DATA_BASE}/${building.path}` +
     `/${floorFolder}/rooms.geojson`;
 
-  const response = await fetch(url);
+  const response =
+    await fetch(url);
 
   if (!response.ok) {
     throw new Error(
@@ -178,9 +236,12 @@ async function loadRooms(
     );
   }
 
-  const geojson = await response.json();
+  const geojson =
+    await response.json();
 
-  return (geojson.features ?? [])
+  return (
+    geojson.features ?? []
+  )
     .map((feature) =>
       normalizeRoomFeature(
         feature,
@@ -198,7 +259,8 @@ async function loadRooms(
  * download the same GeoJSON files while the
  * user is typing.
  */
-let destinationsPromise = null;
+let destinationsPromise =
+  null;
 
 export async function loadDestinations() {
   if (!destinationsPromise) {
@@ -256,36 +318,40 @@ export async function searchDestinations(
   const destinations =
     await loadDestinations();
 
-  const matches = destinations
-    .filter((destination) => {
-      const searchableFields = [
-        destination.roomNo,
-        destination.name,
-        destination.category,
-        destination.department,
-        destination.building,
-      ];
+  const matches =
+    destinations
+      .filter((destination) => {
+        const searchableFields = [
+          destination.roomNo,
+          destination.name,
+          destination.category,
+          destination.department,
+          destination.building,
+        ];
 
-      return searchableFields.some(
-        (field) =>
-          normalizeText(field).includes(
+        return searchableFields.some(
+          (field) =>
+            normalizeText(
+              field
+            ).includes(searchQuery)
+        );
+      })
+      .sort(
+        (a, b) =>
+          getMatchScore(
+            b,
+            searchQuery
+          ) -
+          getMatchScore(
+            a,
             searchQuery
           )
       );
-    })
-    .sort(
-      (a, b) =>
-        getMatchScore(
-          b,
-          searchQuery
-        ) -
-        getMatchScore(
-          a,
-          searchQuery
-        )
-    );
 
-  return matches.slice(0, limit);
+  return matches.slice(
+    0,
+    limit
+  );
 }
 
 /**
@@ -310,55 +376,106 @@ function getMatchScore(
       destination.category
     );
 
+  const department =
+    normalizeText(
+      destination.department
+    );
+
   const building =
     normalizeText(
       destination.building
     );
 
+  /**
+   * Exact room number
+   *
+   * M201 → M201
+   */
   if (roomNo === query) {
     return 100;
   }
 
+  /**
+   * Room number starts with query
+   *
+   * M2 → M201, M202, M203...
+   */
   if (
     roomNo.startsWith(query)
   ) {
     return 90;
   }
 
+  /**
+   * Room name starts with query
+   */
   if (
     name.startsWith(query)
   ) {
     return 80;
   }
 
+  /**
+   * Category starts with query
+   */
   if (
     category.startsWith(query)
   ) {
     return 70;
   }
 
+  /**
+   * Department starts with query
+   */
+  if (
+    department.startsWith(query)
+  ) {
+    return 65;
+  }
+
+  /**
+   * Building starts with query
+   */
   if (
     building.startsWith(query)
   ) {
     return 60;
   }
 
+  /**
+   * Partial room number
+   */
   if (
     roomNo.includes(query)
   ) {
     return 50;
   }
 
+  /**
+   * Partial room name
+   */
   if (
     name.includes(query)
   ) {
     return 40;
   }
 
+  /**
+   * Partial category
+   */
   if (
     category.includes(query)
   ) {
     return 30;
+  }
+
+  /**
+   * Partial department
+   */
+  if (
+    department.includes(query)
+  ) {
+    return 25;
   }
 
   return 10;
