@@ -5,18 +5,11 @@ import {
   useState,
 } from "react";
 
-import { snapToWalkway } from "../services/pathSnappingService";
 import { loadBuildings } from "../navigation/loadBuildings";
 import { detectCurrentBuilding } from "../navigation/buildingDetection";
 
-// GPS accuracy required before outdoor path snapping.
-const MAX_GPS_ACCURACY_FOR_SNAPPING = 25;
-
-// Maximum distance from a walkway for snapping.
-const MAX_SNAP_DISTANCE = 6;
-
 // Number of recent GPS readings used for smoothing.
-const MAX_LOCATION_HISTORY = 5;
+const MAX_LOCATION_HISTORY = 3;
 
 export const LocationContext = createContext();
 
@@ -25,7 +18,7 @@ export function LocationProvider({ children }) {
   const [rawLocation, setRawLocation] = useState(null);
   const [error, setError] = useState(null);
 
-  // Recent raw GPS readings used only for display smoothing.
+  // Recent raw GPS readings used for display smoothing.
   const locationHistoryRef = useRef([]);
 
   // Prevent older async GPS processing from overwriting newer readings.
@@ -93,7 +86,7 @@ export function LocationProvider({ children }) {
       /*
        * Always preserve the real phone GPS reading.
        *
-       * Building detection uses this value.
+       * Building detection and navigation use this value.
        */
       setRawLocation(raw);
 
@@ -104,31 +97,38 @@ export function LocationProvider({ children }) {
          */
         const buildings = await loadBuildings();
 
-        if (!isMounted || requestId !== locationRequestId.current) {
+        if (
+          !isMounted ||
+          requestId !== locationRequestId.current
+        ) {
           return;
         }
 
-        const currentBuilding = detectCurrentBuilding(
-          raw,
-          buildings
-        );
+        const currentBuilding =
+          detectCurrentBuilding(
+            raw,
+            buildings
+          );
 
-        const isInsideBuilding = Boolean(currentBuilding);
+        const isInsideBuilding =
+          Boolean(currentBuilding);
 
         /*
-         * If the indoor/outdoor state changes, clear the
-         * previous history so positions from outside don't
-         * influence indoor positioning and vice versa.
+         * If the indoor/outdoor state changes,
+         * clear previous GPS history.
          */
         if (
-          isInsideBuilding !== insideBuildingRef.current
+          isInsideBuilding !==
+          insideBuildingRef.current
         ) {
           locationHistoryRef.current = [];
-          insideBuildingRef.current = isInsideBuilding;
+
+          insideBuildingRef.current =
+            isInsideBuilding;
         }
 
         /*
-         * Add the latest raw GPS reading to the history.
+         * Add the latest raw GPS reading.
          */
         locationHistoryRef.current.push(raw);
 
@@ -144,96 +144,24 @@ export function LocationProvider({ children }) {
             locationHistoryRef.current
           );
 
-        if (!smoothed) return;
+        if (!smoothed) {
+          return;
+        }
 
         /*
-         * INDOOR
+         * IMPORTANT:
          *
-         * Never snap an indoor position to an outdoor walkway.
-         * Use the smoothed GPS position instead.
-         */
-        if (isInsideBuilding) {
-          console.log(
-            "Indoor location - path snapping disabled:",
-            currentBuilding?.properties?.name
-          );
-
-          setLocation({
-            lat: smoothed.lat,
-            lng: smoothed.lng,
-            accuracy,
-            isSnapped: false,
-            snapDistance: null,
-          });
-
-          return;
-        }
-
-        /*
-         * OUTDOOR
+         * Path snapping has been removed.
          *
-         * Don't snap when GPS accuracy is too poor.
-         */
-        if (
-          accuracy >
-          MAX_GPS_ACCURACY_FOR_SNAPPING
-        ) {
-          setLocation({
-            lat: smoothed.lat,
-            lng: smoothed.lng,
-            accuracy,
-            isSnapped: false,
-            snapDistance: null,
-          });
-
-          return;
-        }
-
-        /*
-         * Try snapping the CURRENT raw GPS position
-         * to the nearest campus walkway.
-         */
-        const snapped = await snapToWalkway(
-          latitude,
-          longitude,
-          MAX_SNAP_DISTANCE
-        );
-
-        /*
-         * Ignore stale asynchronous results.
-         */
-        if (
-          !isMounted ||
-          requestId !== locationRequestId.current
-        ) {
-          return;
-        }
-
-        if (!snapped) {
-          setLocation({
-            lat: smoothed.lat,
-            lng: smoothed.lng,
-            accuracy,
-            isSnapped: false,
-            snapDistance: null,
-          });
-
-          return;
-        }
-
-        /*
-         * Outdoor + good GPS + nearby walkway:
-         * display the snapped position.
+         * Both indoor and outdoor positions now
+         * use the GPS-based smoothed position.
          */
         setLocation({
-          lat: snapped.lat,
-          lng: snapped.lng,
+          lat: smoothed.lat,
+          lng: smoothed.lng,
           accuracy,
-          isSnapped: true,
-          snapDistance: snapped.distance,
-          rawLat: latitude,
-          rawLng: longitude,
         });
+
       } catch (err) {
         console.error(
           "Location processing failed:",
@@ -241,12 +169,13 @@ export function LocationProvider({ children }) {
         );
 
         /*
-         * If processing fails, still show a smoothed
-         * GPS position rather than hiding the marker.
+         * If building detection/loading fails,
+         * still display the GPS position.
          */
         if (
           isMounted &&
-          requestId === locationRequestId.current
+          requestId ===
+            locationRequestId.current
         ) {
           locationHistoryRef.current.push(raw);
 
@@ -267,8 +196,6 @@ export function LocationProvider({ children }) {
               lat: smoothed.lat,
               lng: smoothed.lng,
               accuracy,
-              isSnapped: false,
-              snapDistance: null,
             });
           }
         }
@@ -292,6 +219,7 @@ export function LocationProvider({ children }) {
 
     return () => {
       isMounted = false;
+
       navigator.geolocation.clearWatch(
         watchId
       );
