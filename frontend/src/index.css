@@ -1,16 +1,33 @@
 @import "tailwindcss";
 
+/* =========================================================
+   SMARTNAV DESIGN SYSTEM
+========================================================= */
+
 :root {
-  --sn-navy: #0f172a;
-  --sn-navy-soft: #1e293b;
-  --sn-blue: #2563eb;
-  --sn-teal: #0f766e;
-  --sn-bg: #f4f7fb;
-  --sn-panel: rgba(255, 255, 255, 0.96);
-  --sn-border: #e2e8f0;
-  --sn-text: #0f172a;
-  --sn-muted: #64748b;
+  --sn-navy: #142137;
+  --sn-navy-deep: #0e4f63;
+  --sn-teal: #1c7293;
+  --sn-amber: #e9a400;
+  --sn-seafoam: #6fb3b8;
+
+  --sn-paper: #f3f7f6;
+  --sn-white: #ffffff;
+
+  --sn-line: #dee7e5;
+  --sn-ink: #1b2a3a;
+  --sn-muted: #647784;
+  --sn-muted-light: #8a9aa4;
+
+  /* High-fidelity mockup uses approximately 198px */
+  --sn-sidebar-width: 198px;
+
+  --sn-navbar-height: 72px;
 }
+
+/* =========================================================
+   GLOBAL
+========================================================= */
 
 * {
   box-sizing: border-box;
@@ -25,8 +42,8 @@ body,
 }
 
 body {
-  background: var(--sn-bg);
-  color: var(--sn-text);
+  background: var(--sn-paper);
+  color: var(--sn-ink);
 
   font-family:
     Inter,
@@ -45,9 +62,13 @@ input {
   font: inherit;
 }
 
-/* ==========================================
-   SMARTNAV APP SHELL
-========================================== */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   APPLICATION SHELL
+========================================================= */
 
 .smartnav-app {
   width: 100%;
@@ -57,10 +78,263 @@ input {
   display: flex;
   flex-direction: column;
 
-  background: var(--sn-bg);
+  background: var(--sn-paper);
 
   overflow: hidden;
 }
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.smartnav-navbar {
+  position: relative;
+
+  z-index: 5000;
+
+  flex-shrink: 0;
+
+  height: var(--sn-navbar-height);
+
+  background: var(--sn-white);
+
+  border-bottom: 1px solid var(--sn-line);
+
+  box-shadow:
+    0 1px 0 rgba(20, 33, 55, 0.02);
+}
+
+.smartnav-navbar-inner {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 22px;
+
+  gap: 24px;
+}
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.smartnav-brand {
+  display: flex;
+  align-items: center;
+
+  min-width: 245px;
+
+  gap: 11px;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.smartnav-brand-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: var(--sn-navy);
+
+  color: white;
+
+  box-shadow:
+    0 6px 16px rgba(20, 33, 55, 0.18);
+}
+
+.smartnav-brand-text {
+  min-width: 0;
+}
+
+.smartnav-brand-text h1 {
+  margin: 0;
+
+  color: var(--sn-navy);
+
+  font-size: 15px;
+  font-weight: 750;
+
+  letter-spacing: -0.02em;
+
+  white-space: nowrap;
+}
+
+.smartnav-brand-text p {
+  margin: 3px 0 0;
+
+  color: var(--sn-muted);
+
+  font-size: 11px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.smartnav-navbar-nav {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  flex: 1;
+}
+
+.smartnav-navbar-link {
+  position: relative;
+
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 13px;
+
+  color: var(--sn-muted);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.smartnav-navbar-link:hover {
+  color: var(--sn-navy);
+}
+
+.smartnav-navbar-link-active {
+  color: var(--sn-teal);
+}
+
+.smartnav-navbar-link-active::after {
+  content: "";
+
+  position: absolute;
+
+  left: 13px;
+  right: 13px;
+  bottom: -1px;
+
+  height: 3px;
+
+  border-radius: 3px 3px 0 0;
+
+  background: var(--sn-teal);
+}
+
+/* =========================================================
+   NAVBAR ACTIONS
+========================================================= */
+
+.smartnav-navbar-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-left: auto;
+}
+
+.smartnav-map-status {
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--sn-line);
+
+  border-radius: 10px;
+
+  background: var(--sn-paper);
+
+  color: var(--sn-muted);
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.smartnav-map-status:hover {
+  color: var(--sn-teal);
+
+  border-color: #c8d9d8;
+
+  background: #edf5f4;
+}
+
+.smartnav-user-button {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: var(--sn-teal);
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px rgba(28, 114, 147, 0.22);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.smartnav-user-button:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 18px rgba(28, 114, 147, 0.28);
+}
+
+/* =========================================================
+   MAIN AREA
+   High-fidelity layout:
+   Navbar
+   └── Sidebar + Map directly beside each other
+========================================================= */
 
 .smartnav-main {
   position: relative;
@@ -72,106 +346,442 @@ input {
 
   display: flex;
 
+  padding: 0;
+
+  gap: 0;
+
   overflow: hidden;
 }
 
-/* ==========================================
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.smartnav-sidebar {
+  position: relative;
+
+  z-index: 3000;
+
+  width: var(--sn-sidebar-width);
+
+  height: 100%;
+
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--sn-white);
+
+  border: none;
+
+  border-right: 1px solid var(--sn-line);
+
+  border-radius: 0;
+
+  box-shadow: none;
+
+  overflow: hidden;
+
+  transition:
+    width 0.25s ease;
+}
+
+.smartnav-sidebar-collapsed {
+  width: 64px;
+}
+
+/* =========================================================
+   SIDEBAR HEADER
+========================================================= */
+
+.smartnav-sidebar-header {
+  min-height: 78px;
+
+  display: flex;
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 14px 18px;
+
+  border-bottom: 1px solid var(--sn-line);
+}
+
+.smartnav-sidebar-heading {
+  min-width: 0;
+}
+
+.smartnav-sidebar-heading > span {
+  display: block;
+
+  color: var(--sn-teal);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+}
+
+.smartnav-sidebar-heading h2 {
+  margin: 5px 0 0;
+
+  color: var(--sn-navy);
+
+  font-size: 14px;
+  font-weight: 750;
+
+  letter-spacing: -0.01em;
+}
+
+.smartnav-sidebar-toggle {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: 1px solid transparent;
+
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: var(--sn-muted-light);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.smartnav-sidebar-toggle:hover {
+  background: var(--sn-paper);
+
+  border-color: var(--sn-line);
+
+  color: var(--sn-navy);
+}
+
+/* =========================================================
+   SIDEBAR MENU
+========================================================= */
+
+.smartnav-sidebar-menu {
+  flex: 1;
+
+  padding: 8px 10px;
+
+  overflow-y: auto;
+}
+
+.smartnav-sidebar-item {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 54px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 7px 9px;
+
+  margin-bottom: 3px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.smartnav-sidebar-item:hover {
+  background: #f3f7f6;
+}
+
+.smartnav-sidebar-item-active {
+  background: #edf5f4;
+}
+
+.smartnav-sidebar-item-active:hover {
+  background: #e8f2f1;
+}
+
+.smartnav-sidebar-active-bar {
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 3px;
+  height: 27px;
+
+  transform: translateY(-50%);
+
+  border-radius: 0 3px 3px 0;
+
+  background: var(--sn-teal);
+}
+
+.smartnav-sidebar-icon {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--sn-paper);
+
+  color: var(--sn-muted);
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.smartnav-sidebar-item-active .smartnav-sidebar-icon {
+  background: #d9eceb;
+
+  color: var(--sn-teal);
+}
+
+.smartnav-sidebar-item:hover .smartnav-sidebar-icon {
+  color: var(--sn-teal);
+}
+
+.smartnav-sidebar-copy {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.smartnav-sidebar-label {
+  color: var(--sn-ink);
+
+  font-size: 12px;
+  font-weight: 650;
+
+  line-height: 1.35;
+}
+
+.smartnav-sidebar-item:not(
+    .smartnav-sidebar-item-active
+  )
+  .smartnav-sidebar-label {
+  color: #526672;
+}
+
+.smartnav-sidebar-description {
+  margin-top: 2px;
+
+  color: var(--sn-muted-light);
+
+  font-size: 10px;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.smartnav-sidebar-item-collapsed {
+  justify-content: center;
+
+  padding: 7px;
+}
+
+.smartnav-sidebar-item-collapsed .smartnav-sidebar-icon {
+  width: 38px;
+  height: 38px;
+}
+
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
+
+.smartnav-sidebar-footer {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin: 10px;
+
+  padding: 10px;
+
+  border: 1px solid var(--sn-line);
+
+  border-radius: 11px;
+
+  background: var(--sn-paper);
+}
+
+.smartnav-sidebar-status-icon {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #dff0ef;
+
+  color: var(--sn-teal);
+}
+
+.smartnav-sidebar-status-title,
+.smartnav-sidebar-status-text {
+  display: block;
+}
+
+.smartnav-sidebar-status-title {
+  color: var(--sn-ink);
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.smartnav-sidebar-status-text {
+  margin-top: 2px;
+
+  color: var(--sn-muted);
+
+  font-size: 9px;
+}
+
+/* =========================================================
+   CONTENT / MAP AREA
+========================================================= */
+
+.smartnav-content {
+  position: relative;
+
+  min-width: 0;
+  min-height: 0;
+
+  flex: 1;
+
+  overflow: hidden;
+
+  border-radius: 0;
+}
+
+.smartnav-map-area {
+  position: absolute;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius: 0;
+
+  background: #dfe8e6;
+}
+
+/* =========================================================
    MAP
-========================================== */
+========================================================= */
 
 .leaflet-container {
   width: 100%;
   height: 100%;
 
   font-family: inherit;
+
+  background: #e4ecea;
 }
 
-/* ==========================================
-   DESKTOP
-========================================== */
-
-@media (min-width: 768px) {
-  .smartnav-main {
-    padding: 12px;
-    gap: 12px;
-  }
-}
-
-/* ==========================================
-   MOBILE
-========================================== */
-
-@media (max-width: 767px) {
-  body {
-    overflow: auto;
-  }
-
-  .smartnav-main {
-    overflow: hidden;
-  }
-}
-
-/* ==========================================
-   SMARTNAV SEARCH
-========================================== */
+/* =========================================================
+   FLOATING SEARCH
+   Matches mockup:
+   top-left of map
+   approximately 420px wide
+========================================================= */
 
 .smartnav-search-shell {
-  position: relative;
+  position: absolute;
 
-  /*
-   * Keep the complete search area above
-   * the Leaflet map.
-   */
-  z-index: 2000;
+  top: 18px;
+  left: 18px;
 
-  width: 100%;
+  z-index: 4000;
 
-  padding: 10px 16px;
+  width: min(420px, calc(100% - 36px));
 
-  background:
-    rgba(248, 250, 252, 0.96);
+  padding: 0;
 
-  border-bottom:
-    1px solid rgba(226, 232, 240, 0.9);
+  background: transparent;
 
-  backdrop-filter:
-    blur(12px);
+  border: none;
+
+  backdrop-filter: none;
+
+  pointer-events: none;
 }
 
 .smartnav-search-container {
   position: relative;
 
-  z-index: 2000;
+  z-index: 4000;
 
   width: 100%;
-  max-width: 1600px;
 
-  margin: 0 auto;
+  margin: 0;
+
+  pointer-events: auto;
 }
 
 .smartnav-search-bar {
   position: relative;
 
-  z-index: 2000;
+  z-index: 4000;
 
   display: flex;
   align-items: center;
 
   width: 100%;
-  min-height: 58px;
+  min-height: 56px;
 
-  padding: 6px;
+  padding: 5px;
 
-  background:
-    rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.97);
 
-  border:
-    1px solid rgba(203, 213, 225, 0.9);
+  border: 1px solid rgba(222, 231, 229, 0.95);
 
-  border-radius: 18px;
+  border-radius: 15px;
 
   box-shadow:
-    0 4px 18px rgba(15, 23, 42, 0.07);
+    0 12px 30px rgba(20, 33, 55, 0.13),
+    0 3px 8px rgba(20, 33, 55, 0.06);
 
   transition:
     border-color 0.2s ease,
@@ -179,38 +789,38 @@ input {
 }
 
 .smartnav-search-bar:focus-within {
-  border-color:
-    rgba(37, 99, 235, 0.5);
+  border-color: rgba(28, 114, 147, 0.45);
 
   box-shadow:
-    0 6px 24px rgba(37, 99, 235, 0.12);
+    0 14px 34px rgba(20, 33, 55, 0.15),
+    0 0 0 3px rgba(28, 114, 147, 0.08);
 }
 
-/* ==========================================
+/* =========================================================
    SEARCH ICON
-========================================== */
+========================================================= */
 
 .smartnav-search-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   width: 42px;
   height: 42px;
 
   flex-shrink: 0;
 
-  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--sn-muted);
 }
 
-/* ==========================================
-   INPUT
-========================================== */
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
 
 .smartnav-search-input-wrapper {
   position: relative;
 
-  z-index: 2100;
+  z-index: 4100;
 
   display: flex;
   flex: 1;
@@ -221,29 +831,28 @@ input {
 
 .smartnav-search-input {
   width: 100%;
-
   height: 44px;
+
+  padding: 0 8px;
 
   border: none;
   outline: none;
 
   background: transparent;
 
-  color: #0f172a;
+  color: var(--sn-ink);
 
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-
-  padding: 0 8px;
 }
 
 .smartnav-search-input::placeholder {
-  color: #94a3b8;
+  color: #94a3a8;
 }
 
-/* ==========================================
+/* =========================================================
    SEARCH HINT
-========================================== */
+========================================================= */
 
 .smartnav-search-hint {
   position: absolute;
@@ -252,120 +861,111 @@ input {
 
   pointer-events: none;
 
-  color: #94a3b8;
+  color: #94a3a8;
 
-  font-size: 13px;
+  font-size: 12px;
 }
 
-/* ==========================================
+/* =========================================================
    SEARCH BUTTON
-========================================== */
+========================================================= */
 
 .smartnav-search-button {
+  height: 44px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  gap: 8px;
+  gap: 7px;
 
   flex-shrink: 0;
 
-  height: 44px;
-
-  padding: 0 18px;
+  padding: 0 17px;
 
   border: none;
 
-  border-radius: 13px;
+  border-radius: 11px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #2563eb,
-      #1d4ed8
-    );
+  background: var(--sn-teal);
 
   color: white;
 
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 650;
 
   cursor: pointer;
 
   box-shadow:
-    0 4px 12px rgba(37, 99, 235, 0.22);
+    0 5px 13px rgba(28, 114, 147, 0.23);
 
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    background 0.2s ease;
+    background-color 0.2s ease;
 }
 
 .smartnav-search-button:hover {
+  background: var(--sn-navy-deep);
+
   transform: translateY(-1px);
 
   box-shadow:
-    0 7px 18px rgba(37, 99, 235, 0.28);
+    0 7px 18px rgba(28, 114, 147, 0.28);
 }
 
 .smartnav-search-button:active {
   transform: scale(0.97);
 }
 
-/* ==========================================
-   HELPER TEXT
-========================================== */
+/* =========================================================
+   SEARCH HELPER
+========================================================= */
 
 .smartnav-search-helper {
   align-items: center;
   gap: 6px;
 
-  padding:
-    7px 12px 0 12px;
+  padding: 7px 12px 0;
 
-  color: #64748b;
+  color: var(--sn-muted);
 
-  font-size: 12px;
+  font-size: 11px;
 }
 
-/* ==========================================
+/* =========================================================
    SEARCH SUGGESTIONS
-========================================== */
+========================================================= */
 
 .smartnav-search-suggestions {
   position: absolute;
 
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
 
-  /*
-   * Very high z-index so the dropdown
-   * appears above Leaflet/map layers.
-   */
   z-index: 9999;
-
-  background: #ffffff;
-
-  border:
-    1px solid #dbe3f0;
-
-  border-radius: 14px;
-
-  box-shadow:
-    0 16px 35px rgba(15, 23, 42, 0.16),
-    0 5px 12px rgba(15, 23, 42, 0.08);
-
-  overflow: hidden;
 
   max-height: 360px;
 
   overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid var(--sn-line);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 18px 38px rgba(20, 33, 55, 0.16),
+    0 5px 12px rgba(20, 33, 55, 0.07);
+
+  overflow-x: hidden;
 }
 
-/* ==========================================
-   INDIVIDUAL SEARCH SUGGESTION
-========================================== */
+/* =========================================================
+   SEARCH SUGGESTION
+========================================================= */
 
 .smartnav-search-suggestion {
   width: 100%;
@@ -378,9 +978,7 @@ input {
   padding: 13px 16px;
 
   border: 0;
-
-  border-bottom:
-    1px solid #eef2f7;
+  border-bottom: 1px solid #edf2f1;
 
   background: #ffffff;
 
@@ -389,8 +987,7 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
+    background-color 0.15s ease;
 }
 
 .smartnav-search-suggestion:last-child {
@@ -398,16 +995,12 @@ input {
 }
 
 .smartnav-search-suggestion:hover {
-  background: #f7faff;
+  background: #f4f9f8;
 }
 
 .smartnav-search-suggestion:active {
-  background: #eef5ff;
+  background: #eaf3f2;
 }
-
-/* ==========================================
-   SUGGESTION ICON
-========================================== */
 
 .smartnav-suggestion-icon {
   width: 36px;
@@ -421,14 +1014,10 @@ input {
 
   border-radius: 10px;
 
-  background: #eef4ff;
+  background: #e6f1f0;
 
-  color: #2563eb;
+  color: var(--sn-teal);
 }
-
-/* ==========================================
-   SUGGESTION CONTENT
-========================================== */
 
 .smartnav-suggestion-content {
   min-width: 0;
@@ -436,15 +1025,13 @@ input {
   flex: 1;
 }
 
-/* Room number + name */
-
 .smartnav-suggestion-title {
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--sn-ink);
+
+  font-size: 13px;
+  font-weight: 650;
 
   line-height: 1.4;
-
-  color: #172033;
 
   white-space: nowrap;
 
@@ -452,17 +1039,15 @@ input {
 
   text-overflow: ellipsis;
 }
-
-/* Building / floor / category */
 
 .smartnav-suggestion-meta {
   margin-top: 3px;
 
-  font-size: 12px;
+  color: var(--sn-muted);
+
+  font-size: 11px;
 
   line-height: 1.4;
-
-  color: #6b7280;
 
   white-space: nowrap;
 
@@ -470,24 +1055,20 @@ input {
 
   text-overflow: ellipsis;
 }
-
-/* ==========================================
-   SEARCH LOADING
-========================================== */
 
 .smartnav-search-loading {
   padding: 18px;
 
   text-align: center;
 
-  font-size: 13px;
+  color: var(--sn-muted);
 
-  color: #64748b;
+  font-size: 12px;
 }
 
-/* ==========================================
-   SEARCH DROPDOWN SCROLLBAR
-========================================== */
+/* =========================================================
+   SEARCH SCROLLBAR
+========================================================= */
 
 .smartnav-search-suggestions::-webkit-scrollbar {
   width: 6px;
@@ -498,54 +1079,287 @@ input {
 }
 
 .smartnav-search-suggestions::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #c8d5d3;
 
   border-radius: 10px;
 }
 
-/* ==========================================
-   MOBILE SEARCH
-========================================== */
+/* =========================================================
+   LEAFLET CONTROLS
+   Move default Leaflet zoom control from top-left
+   to top-right.
+========================================================= */
 
-@media (max-width: 767px) {
-  .smartnav-search-shell {
-    padding: 8px 10px;
+/*
+   Leaflet normally renders:
+   .leaflet-top.leaflet-left
+
+   We reposition that corner to the right because
+   the actual ZoomControl is created by Leaflet.
+*/
+
+.leaflet-top {
+  top: 18px;
+}
+
+.leaflet-top.leaflet-left {
+  left: auto !important;
+  right: 18px !important;
+}
+
+/*
+   Keep the zoom control visually close to
+   the high-fidelity mockup.
+*/
+
+.leaflet-control-zoom {
+  margin: 0 !important;
+
+  border: 1px solid rgba(222, 231, 229, 0.95) !important;
+
+  border-radius: 10px !important;
+
+  background: rgba(255, 255, 255, 0.97) !important;
+
+  box-shadow:
+    0 8px 20px rgba(20, 33, 55, 0.14) !important;
+
+  overflow: hidden;
+
+  backdrop-filter: blur(8px);
+}
+
+.leaflet-control-zoom a {
+  width: 36px !important;
+  height: 36px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  line-height: normal !important;
+
+  border: none !important;
+
+  background: #ffffff !important;
+
+  color: var(--sn-navy) !important;
+
+  font-size: 16px !important;
+
+  font-weight: 700 !important;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #f3f7f6 !important;
+
+  color: var(--sn-teal) !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: 1px solid var(--sn-line) !important;
+}
+
+/* =========================================================
+   MOBILE / TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+  .smartnav-brand {
+    min-width: 220px;
   }
 
-  .smartnav-search-bar {
-    min-height: 52px;
+  .smartnav-navbar-link {
+    padding: 0 9px;
 
-    border-radius: 16px;
+    font-size: 12px;
   }
 
-  .smartnav-search-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .smartnav-search-input {
-    height: 40px;
-
-    font-size: 14px;
-  }
-
-  .smartnav-search-button {
-    width: 42px;
-    height: 42px;
-
-    padding: 0;
-
-    border-radius: 12px;
+  .smartnav-map-status {
+    display: none;
   }
 }
 
-/* ==========================================
-   MOBILE SEARCH SUGGESTIONS
-========================================== */
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+  :root {
+    --sn-navbar-height: 60px;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  .smartnav-navbar-inner {
+    padding: 0 12px;
+  }
+
+  .smartnav-brand {
+    min-width: 0;
+
+    gap: 9px;
+  }
+
+  .smartnav-brand-icon {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+  }
+
+  .smartnav-brand-text h1 {
+    font-size: 12px;
+  }
+
+  .smartnav-brand-text p {
+    font-size: 9px;
+  }
+
+  .smartnav-navbar-nav {
+    display: none;
+  }
+
+  .smartnav-user-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  /*
+     On mobile the map can have a small outer margin
+     for the phone-style presentation.
+  */
+
+  .smartnav-main {
+    padding: 8px;
+
+    gap: 0;
+  }
+
+  .smartnav-sidebar {
+    display: none;
+  }
+
+  .smartnav-content {
+    border-radius: 14px;
+  }
+
+  .smartnav-map-area {
+    border-radius: 14px;
+  }
+
+  /* ---------------------------------------------
+     Mobile search
+  --------------------------------------------- */
+
+  .smartnav-search-shell {
+    top: 12px;
+    left: 12px;
+
+    width: calc(100% - 24px);
+  }
+
+  .smartnav-search-bar {
+    min-height: 50px;
+
+    border-radius: 13px;
+  }
+
+  .smartnav-search-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .smartnav-search-input {
+    height: 39px;
+
+    font-size: 13px;
+  }
+
+  .smartnav-search-button {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    border-radius: 10px;
+  }
+
+  .smartnav-search-button span {
+    display: none;
+  }
+
+  /* ---------------------------------------------
+     Mobile Leaflet zoom
+  --------------------------------------------- */
+
+  /* ---------------------------------------------
+   Mobile Leaflet zoom
+   Place zoom below the floating search bar
+--------------------------------------------- */
+
+.leaflet-top {
+  top: 10px;
+}
+
+/*
+   Search occupies the top area of the map.
+   Move the Leaflet zoom control below it so
+   the two controls never overlap.
+*/
+.leaflet-top.leaflet-left {
+  left: auto !important;
+  right: 10px !important;
+
+  top: 76px !important;
+}
+
+.leaflet-control-zoom {
+  margin: 0 !important;
+
+  border-radius: 9px !important;
+}
+
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+
+  font-size: 17px !important;
+}
+
+  .leaflet-control-zoom a {
+    width: 34px !important;
+    height: 34px !important;
+
+    font-size: 17px !important;
+  }
+
+  /* ---------------------------------------------
+     Locate button
+  --------------------------------------------- */
+
+  .leaflet-container .absolute.bottom-5 {
+    bottom: 16px !important;
+  }
+
+  .leaflet-container .absolute.right-5 {
+    right: 16px !important;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
 
 @media (max-width: 640px) {
   .smartnav-search-suggestions {
-    top: calc(100% + 8px);
+    top: calc(100% + 7px);
 
     max-height: 320px;
 
@@ -566,119 +1380,10 @@ input {
   }
 
   .smartnav-suggestion-title {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .smartnav-suggestion-meta {
-    font-size: 11px;
-  }
-}
-
-/* ==========================================
-   SMARTNAV MAP CONTROLS
-========================================== */
-
-/* Position controls with better spacing */
-
-.leaflet-top {
-  top: 12px;
-}
-
-.leaflet-left {
-  left: 12px;
-}
-
-/* ==========================================
-   ZOOM CONTROL
-========================================== */
-
-.leaflet-control-zoom {
-  margin: 0 !important;
-
-  border:
-    1px solid rgba(226, 232, 240, 0.95) !important;
-
-  border-radius: 16px !important;
-
-  background:
-    rgba(255, 255, 255, 0.96) !important;
-
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.14) !important;
-
-  overflow: hidden;
-
-  backdrop-filter: blur(12px);
-}
-
-/* Zoom buttons */
-
-.leaflet-control-zoom a {
-  display: flex !important;
-
-  align-items: center !important;
-  justify-content: center !important;
-
-  width: 44px !important;
-  height: 44px !important;
-
-  line-height: normal !important;
-
-  border: none !important;
-
-  background: transparent !important;
-
-  color: #334155 !important;
-
-  font-size: 22px !important;
-
-  font-weight: 400 !important;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.leaflet-control-zoom a:hover {
-  background: #f1f5f9 !important;
-
-  color: #2563eb !important;
-}
-
-/* Divider between + and - */
-
-.leaflet-control-zoom-in {
-  border-bottom:
-    1px solid #e2e8f0 !important;
-}
-
-/* ==========================================
-   MOBILE MAP CONTROLS
-========================================== */
-
-@media (max-width: 767px) {
-  .leaflet-top {
-    top: 10px;
-  }
-
-  .leaflet-left {
-    left: 10px;
-  }
-
-  .leaflet-control-zoom a {
-    width: 40px !important;
-    height: 40px !important;
-
-    font-size: 20px !important;
-  }
-
-  /* Keep Locate button comfortably above edges */
-
-  .leaflet-container .absolute.bottom-5 {
-    bottom: 16px !important;
-  }
-
-  .leaflet-container .absolute.right-5 {
-    right: 16px !important;
+    font-size: 10px;
   }
 }
