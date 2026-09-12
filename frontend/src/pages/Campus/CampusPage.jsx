@@ -76,10 +76,6 @@ export default function CampusPage() {
     floorTransition,
     confirmFloorTransition,
 
-    // ========================================
-    // Initial Indoor Floor Selection
-    // ========================================
-
     initialFloorSelection,
     confirmInitialFloorSelection,
   } = useNavigation();
@@ -90,57 +86,175 @@ export default function CampusPage() {
   ];
 
   // ==========================================
-  // Automatic Building Detection
+  // Navigation / Building Detection Hooks
   // ==========================================
 
   useCurrentBuilding();
 
-  // ==========================================
-  // Automatic Indoor Entry
-  // ==========================================
-
   useIndoorEntry();
-
-  // ==========================================
-  // Outdoor → Ground Floor
-  // ==========================================
 
   useNavigationStage();
 
-  // ==========================================
-  // Floor Transition
-  // ==========================================
-
   useFloorTransition();
-
-  // ==========================================
-  // Destination Arrival
-  // ==========================================
 
   useDestinationArrival();
 
   // ==========================================
-  // Building Click
+  // Building Interaction
   // ==========================================
 
   const handleBuildingClick = (
     feature,
     layer
   ) => {
-    layer.on({
-      click: () => {
-        const slug =
-          feature.properties.slug;
+    // ----------------------------------------
+    // Normal building style
+    // ----------------------------------------
 
-        if (slug) {
-          navigate(`/${slug}`);
+    const normalStyle = {
+      color: "#4F8F8A",
+      weight: 2,
+      opacity: 1,
+      fillColor: "#A9CEC6",
+      fillOpacity: 1,
+    };
+
+    // ----------------------------------------
+    // Hovered building style
+    // ----------------------------------------
+
+    const hoverStyle = {
+      color: "#0E4F63",
+      weight: 4,
+      opacity: 1,
+      fillColor: "#82B8AE",
+      fillOpacity: 1,
+    };
+
+    // ----------------------------------------
+    // Selected building style
+    // ----------------------------------------
+
+    const selectedStyle = {
+      color: "#0E4F63",
+      weight: 4,
+      opacity: 1,
+      fillColor: "#6FB3B8",
+      fillOpacity: 1,
+    };
+
+    // ========================================
+    // Leaflet Events
+    // ========================================
+
+    layer.on({
+
+      // --------------------------------------
+      // Mouse enters building
+      // --------------------------------------
+
+      mouseover: () => {
+        layer.setStyle(
+          hoverStyle
+        );
+
+        if (
+          typeof layer.bringToFront ===
+          "function"
+        ) {
+          layer.bringToFront();
+        }
+
+        const element =
+          layer.getElement?.();
+
+        if (element) {
+          element.style.cursor =
+            "pointer";
+        }
+      },
+
+      // --------------------------------------
+      // Mouse leaves building
+      // --------------------------------------
+
+      mouseout: () => {
+        layer.setStyle(
+          normalStyle
+        );
+      },
+
+      // --------------------------------------
+      // Building clicked
+      // --------------------------------------
+
+      click: () => {
+        layer.setStyle(
+          selectedStyle
+        );
+
+        const buildingName =
+          feature.properties?.name;
+
+        console.log(
+          "Building clicked:",
+          buildingName
+        );
+
+        // ====================================
+        // Building → Page Route Mapping
+        // ====================================
+
+        switch (buildingName) {
+
+          case "Mechanical Block":
+            navigate("/mechanical");
+            break;
+
+          case "Chemical Block":
+            navigate("/chemical");
+            break;
+
+          case "Main Block":
+            navigate("/main");
+            break;
+
+          case "Central Library":
+            navigate("/library");
+            break;
+
+          case "Workshop Block":
+            navigate("/workshop");
+            break;
+
+          case "Workshop (Electrical)":
+            navigate(
+              "/electrical-workshop"
+            );
+            break;
+
+          case "Architecture Block":
+            navigate(
+              "/architecture"
+            );
+            break;
+
+          case "Interdisciplinary Research Block (RUSA)":
+            navigate("/research");
+            break;
+
+          default:
+            console.warn(
+              "No route configured for building:",
+              buildingName
+            );
         }
       },
     });
   };
 
   // ==========================================
-  // Load Navigation Graphs
+  // Navigation Graph Initialization
   // ==========================================
 
   useEffect(() => {
@@ -185,6 +299,7 @@ export default function CampusPage() {
         console.log(
           "=========================================="
         );
+
       } catch (err) {
         console.error(
           "Navigation Error:",
@@ -196,14 +311,15 @@ export default function CampusPage() {
     initializeNavigation();
   }, []);
 
+  // ==========================================
+  // Render
+  // ==========================================
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
 
       {/* =====================================
-          Initial Indoor Floor Selection
-          
-          Appears only when the user opens
-          SmartNav while already inside a building.
+          Initial Floor Selection
           ===================================== */}
 
       {initialFloorSelection.open && (
@@ -218,7 +334,7 @@ export default function CampusPage() {
       )}
 
       {/* =====================================
-          Floor Transition Confirmation
+          Floor Transition Prompt
           ===================================== */}
 
       {floorTransition.open && (
@@ -226,11 +342,9 @@ export default function CampusPage() {
           nextFloor={
             floorTransition.nextFloor
           }
-
           transitionType={
             floorTransition.transitionType
           }
-
           onConfirm={
             confirmFloorTransition
           }
@@ -238,7 +352,7 @@ export default function CampusPage() {
       )}
 
       {/* =====================================
-          Campus Map
+          Leaflet Campus Map
           ===================================== */}
 
       <MapContainer
@@ -251,14 +365,18 @@ export default function CampusPage() {
         className="min-h-0 flex-1 w-full"
       >
 
+        {/* ===================================
+            OpenStreetMap Base Layer
+            =================================== */}
+
         <TileLayer
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* =====================================
-            Always Visible
-            ===================================== */}
+        {/* ===================================
+            Permanent Campus Layers
+            =================================== */}
 
         <PermanentLayers
           handleBuildingClick={
@@ -266,18 +384,18 @@ export default function CampusPage() {
           }
         />
 
-        {/* =====================================
-            Outdoor
-            ===================================== */}
+        {/* ===================================
+            Outdoor Layers
+            =================================== */}
 
         {navigationStage ===
           NAVIGATION_STAGE.OUTDOOR && (
           <OutdoorLayers />
         )}
 
-        {/* =====================================
+        {/* ===================================
             Ground Floor
-            ===================================== */}
+            =================================== */}
 
         {navigationStage ===
           NAVIGATION_STAGE.GROUND_FLOOR && (
@@ -288,9 +406,9 @@ export default function CampusPage() {
           />
         )}
 
-        {/* =====================================
+        {/* ===================================
             First Floor
-            ===================================== */}
+            =================================== */}
 
         {navigationStage ===
           NAVIGATION_STAGE.FIRST_FLOOR && (
@@ -301,9 +419,9 @@ export default function CampusPage() {
           />
         )}
 
-        {/* =====================================
+        {/* ===================================
             Second Floor
-            ===================================== */}
+            =================================== */}
 
         {navigationStage ===
           NAVIGATION_STAGE.SECOND_FLOOR && (
@@ -314,9 +432,9 @@ export default function CampusPage() {
           />
         )}
 
-        {/* =====================================
+        {/* ===================================
             Third Floor
-            ===================================== */}
+            =================================== */}
 
         {navigationStage ===
           NAVIGATION_STAGE.THIRD_FLOOR && (
@@ -327,9 +445,9 @@ export default function CampusPage() {
           />
         )}
 
-        {/* =====================================
+        {/* ===================================
             Navigation Route
-            ===================================== */}
+            =================================== */}
 
         <RouteLayer
           path={route}

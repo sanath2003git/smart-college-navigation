@@ -1,8 +1,17 @@
 import { useEffect, useRef } from "react";
-import { useNavigation } from "./useNavigation";
-import { loadBuildings } from "../navigation/loadBuildings";
-import { detectCurrentBuilding } from "../navigation/buildingDetection";
 
+import { useNavigation } from "./useNavigation";
+
+import {
+  loadBuildings,
+} from "../navigation/loadBuildings";
+
+import {
+  detectCurrentBuilding,
+} from "../navigation/buildingDetection";
+
+// Number of confirmations required when
+// changing buildings during normal navigation.
 const REQUIRED_CONFIRMATIONS = 3;
 
 export default function useCurrentBuilding() {
@@ -12,62 +21,174 @@ export default function useCurrentBuilding() {
     setCurrentBuilding,
   } = useNavigation();
 
-  // Keeps track of consecutive detections.
-  const candidateBuildingRef = useRef(null);
-  const candidateCountRef = useRef(0);
+  // ==========================================
+  // Building candidate
+  // ==========================================
+
+  const candidateBuildingRef =
+    useRef(null);
+
+  const candidateCountRef =
+    useRef(0);
+
+  // ==========================================
+  // Initial building detection
+  //
+  // Used only for the first meaningful GPS
+  // detection after the app opens.
+  //
+  // This allows the floor-selection dialog
+  // to appear quickly when the user starts
+  // SmartNav inside a building.
+  // ==========================================
+
+  const initialDetectionCompletedRef =
+    useRef(false);
 
   useEffect(() => {
-    if (!currentLocation) return;
+    if (!currentLocation) {
+      return;
+    }
 
     async function detectBuilding() {
       try {
-        const buildings = await loadBuildings();
+        const buildings =
+          await loadBuildings();
 
-        const building = detectCurrentBuilding(
-          currentLocation,
-          buildings
-        );
+        const building =
+          detectCurrentBuilding(
+            currentLocation,
+            buildings
+          );
 
         const detectedBuilding =
-          building?.properties.name ?? null;
+          building?.properties?.name ??
+          null;
 
-        /*
-         * No building detected.
-         *
-         * Do not immediately switch outside because
-         * a single bad GPS reading can occur indoors.
-         */
+        // ======================================
+        // No building detected
+        // ======================================
+
         if (!detectedBuilding) {
-          candidateBuildingRef.current = null;
-          candidateCountRef.current = 0;
+          candidateBuildingRef.current =
+            null;
+
+          candidateCountRef.current =
+            0;
+
+          /*
+           * Only mark initial detection as
+           * completed after we have received
+           * a meaningful building/outdoor
+           * result.
+           *
+           * This prevents the first GPS reading
+           * being outside from permanently
+           * disabling initial indoor detection.
+           */
+          if (
+            !initialDetectionCompletedRef.current
+          ) {
+            console.log(
+              "Initial building detection: outside building"
+            );
+          } else {
+            console.log(
+              "Building detection: no building detected"
+            );
+          }
+
+          return;
+        }
+
+        console.log(
+          "Building detected:",
+          detectedBuilding
+        );
+
+        // ======================================
+        // INITIAL DETECTION
+        // ======================================
+        //
+        // If SmartNav starts while the user is
+        // already inside a building, confirm
+        // immediately instead of waiting for
+        // three GPS readings.
+        // ======================================
+
+        if (
+          !initialDetectionCompletedRef.current
+        ) {
+          console.log(
+            "========== INITIAL BUILDING DETECTION =========="
+          );
 
           console.log(
-            "Building detection: no building detected"
+            "Initial building:",
+            detectedBuilding
+          );
+
+          console.log(
+            "Confirming immediately."
+          );
+
+          setCurrentBuilding(
+            detectedBuilding
+          );
+
+          initialDetectionCompletedRef.current =
+            true;
+
+          candidateBuildingRef.current =
+            null;
+
+          candidateCountRef.current =
+            0;
+
+          console.log(
+            "Initial building confirmed:",
+            detectedBuilding
+          );
+
+          console.log(
+            "================================================="
           );
 
           return;
         }
 
-        /*
-         * Same building as the current confirmed building.
-         */
-        if (detectedBuilding === currentBuilding) {
-          candidateBuildingRef.current = detectedBuilding;
-          candidateCountRef.current = 0;
+        // ======================================
+        // Same building
+        // ======================================
+
+        if (
+          detectedBuilding ===
+          currentBuilding
+        ) {
+          candidateBuildingRef.current =
+            detectedBuilding;
+
+          candidateCountRef.current =
+            0;
 
           return;
         }
 
-        /*
-         * New building candidate.
-         */
+        // ======================================
+        // New building candidate
+        // ======================================
+
         if (
-          candidateBuildingRef.current === detectedBuilding
+          candidateBuildingRef.current ===
+          detectedBuilding
         ) {
           candidateCountRef.current += 1;
         } else {
-          candidateBuildingRef.current = detectedBuilding;
-          candidateCountRef.current = 1;
+          candidateBuildingRef.current =
+            detectedBuilding;
+
+          candidateCountRef.current =
+            1;
         }
 
         console.log(
@@ -75,10 +196,10 @@ export default function useCurrentBuilding() {
             `(${candidateCountRef.current}/${REQUIRED_CONFIRMATIONS})`
         );
 
-        /*
-         * Confirm the building only after several
-         * consecutive GPS readings agree.
-         */
+        // ======================================
+        // Confirm normal building change
+        // ======================================
+
         if (
           candidateCountRef.current >=
           REQUIRED_CONFIRMATIONS
@@ -88,11 +209,17 @@ export default function useCurrentBuilding() {
             detectedBuilding
           );
 
-          setCurrentBuilding(detectedBuilding);
+          setCurrentBuilding(
+            detectedBuilding
+          );
 
-          candidateBuildingRef.current = null;
-          candidateCountRef.current = 0;
+          candidateBuildingRef.current =
+            null;
+
+          candidateCountRef.current =
+            0;
         }
+
       } catch (error) {
         console.error(
           "Building detection failed:",
@@ -102,6 +229,7 @@ export default function useCurrentBuilding() {
     }
 
     detectBuilding();
+
   }, [
     currentLocation,
     currentBuilding,
