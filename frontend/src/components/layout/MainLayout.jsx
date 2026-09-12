@@ -6,13 +6,13 @@ export default function MainLayout({ children }) {
     <div className="smartnav-app">
       <Navbar />
 
-      <SearchBar />
-
-      <div className="smartnav-main">
-        <main className="flex-1 min-w-0 min-h-0 overflow-hidden">
+      <main className="smartnav-content">
+        <div className="smartnav-map-area">
           {children}
-        </main>
-      </div>
+        </div>
+
+        <SearchBar />
+      </main>
     </div>
   );
 }
