@@ -1387,3 +1387,53 @@ button {
     font-size: 10px;
   }
 }
+
+/* =========================================================
+   BUILDING LABELS
+========================================================= */
+
+.smartnav-building-label {
+  background: transparent !important;
+
+  border: none !important;
+
+  box-shadow: none !important;
+
+  color: var(--sn-navy) !important;
+
+  font-size: 11px !important;
+
+  font-weight: 750 !important;
+
+  line-height: 1.2 !important;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  text-shadow:
+    -1px -1px 0 #ffffff,
+     1px -1px 0 #ffffff,
+    -1px  1px 0 #ffffff,
+     1px  1px 0 #ffffff,
+     0 1px 3px rgba(255, 255, 255, 0.9);
+}
+
+/* Remove Leaflet tooltip arrow */
+.smartnav-building-label::before {
+  display: none !important;
+}
+
+/* =========================================================
+   MOBILE BUILDING LABELS
+========================================================= */
+
+@media (max-width: 767px) {
+  .smartnav-building-label {
+    font-size: 9px !important;
+
+    font-weight: 700 !important;
+  }
+}

@@ -27,37 +27,6 @@ export function LocationProvider({ children }) {
   // Track whether the user is currently inside a building.
   const insideBuildingRef = useRef(false);
 
-  /**
-   * Calculate a smoothed position from recent GPS readings.
-   *
-   * More accurate readings receive more weight.
-   */
-  function getSmoothedLocation(readings) {
-    if (!readings.length) {
-      return null;
-    }
-
-    let totalWeight = 0;
-    let weightedLat = 0;
-    let weightedLng = 0;
-
-    for (const reading of readings) {
-      // Prevent extremely accurate readings from dominating completely.
-      const accuracy = Math.max(reading.accuracy, 5);
-
-      const weight = 1 / (accuracy * accuracy);
-
-      weightedLat += reading.lat * weight;
-      weightedLng += reading.lng * weight;
-      totalWeight += weight;
-    }
-
-    return {
-      lat: weightedLat / totalWeight,
-      lng: weightedLng / totalWeight,
-    };
-  }
-
   useEffect(() => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported.");
@@ -66,8 +35,30 @@ export function LocationProvider({ children }) {
 
     let isMounted = true;
 
+    // =========================================================
+    // PRELOAD BUILDING DATA
+    // =========================================================
+    //
+    // Start loading building GeoJSON immediately when the
+    // LocationProvider starts.
+    //
+    // This means building detection does not have to wait
+    // unnecessarily for the application to progress further.
+    //
+    loadBuildings().catch((err) => {
+      console.error(
+        "Building data preload failed:",
+        err
+      );
+    });
+
+    // =========================================================
+    // PROCESS GPS LOCATION
+    // =========================================================
+
     async function processLocation(position) {
-      const requestId = ++locationRequestId.current;
+      const requestId =
+        ++locationRequestId.current;
 
       const {
         latitude,
@@ -81,7 +72,9 @@ export function LocationProvider({ children }) {
         accuracy,
       };
 
-      if (!isMounted) return;
+      if (!isMounted) {
+        return;
+      }
 
       /*
        * Always preserve the real GPS reading.
@@ -94,12 +87,21 @@ export function LocationProvider({ children }) {
         /*
          * Determine whether the RAW GPS position is inside
          * a mapped building.
+         *
+         * loadBuildings() is cached, so once the preload
+         * has completed this should return the cached data.
          */
-        const buildings = await loadBuildings();
+        const buildings =
+          await loadBuildings();
 
+        /*
+         * Ignore this result if a newer GPS request has
+         * already started.
+         */
         if (
           !isMounted ||
-          requestId !== locationRequestId.current
+          requestId !==
+            locationRequestId.current
         ) {
           return;
         }
@@ -114,10 +116,14 @@ export function LocationProvider({ children }) {
           Boolean(currentBuilding);
 
         /*
-         * If the indoor/outdoor state changes,
-         * clear previous GPS history.
+         * --------------------------------------------------
+         * INDOOR / OUTDOOR STATE CHANGE
+         * --------------------------------------------------
          *
-         * This prevents outdoor readings from affecting
+         * Clear the previous smoothing history when the
+         * user changes between indoor and outdoor.
+         *
+         * This prevents old outdoor readings from affecting
          * the first indoor position and vice versa.
          */
         if (
@@ -137,9 +143,9 @@ export function LocationProvider({ children }) {
          *
          * Use the latest RAW GPS position directly.
          *
-         * This prevents the blue marker from being pulled
-         * toward previous GPS readings by the smoothing
-         * algorithm.
+         * This keeps the indoor blue marker responsive
+         * and prevents previous outdoor readings from
+         * pulling the marker away from the actual position.
          */
         if (isInsideBuilding) {
           setLocation({
@@ -167,6 +173,10 @@ export function LocationProvider({ children }) {
           locationHistoryRef.current.shift();
         }
 
+        /*
+         * Calculate the weighted average of the
+         * recent GPS readings.
+         */
         const smoothed =
           getSmoothedLocation(
             locationHistoryRef.current
@@ -196,11 +206,12 @@ export function LocationProvider({ children }) {
         /*
          * If building detection/loading fails,
          * fall back to the existing outdoor smoothing
-         * behavior rather than losing the GPS position.
+         * behavior instead of losing the GPS position.
          */
         if (
           isMounted &&
-          requestId === locationRequestId.current
+          requestId ===
+            locationRequestId.current
         ) {
           locationHistoryRef.current.push(raw);
 
@@ -227,20 +238,30 @@ export function LocationProvider({ children }) {
       }
     }
 
+    // =========================================================
+    // GPS WATCHER
+    // =========================================================
+
     const watchId =
       navigator.geolocation.watchPosition(
         processLocation,
+
         (err) => {
           if (isMounted) {
             setError(err.message);
           }
         },
+
         {
           enableHighAccuracy: true,
           maximumAge: 1000,
           timeout: 10000,
         }
       );
+
+    // =========================================================
+    // CLEANUP
+    // =========================================================
 
     return () => {
       isMounted = false;
@@ -250,6 +271,10 @@ export function LocationProvider({ children }) {
       );
     };
   }, []);
+
+  // ===========================================================
+  // CONTEXT VALUE
+  // ===========================================================
 
   return (
     <LocationContext.Provider
@@ -262,4 +287,55 @@ export function LocationProvider({ children }) {
       {children}
     </LocationContext.Provider>
   );
+}
+
+/**
+ * Calculate a smoothed position from recent GPS readings.
+ *
+ * More accurate readings receive more weight.
+ */
+function getSmoothedLocation(readings) {
+  if (!readings.length) {
+    return null;
+  }
+
+  let totalWeight = 0;
+  let weightedLat = 0;
+  let weightedLng = 0;
+
+  for (const reading of readings) {
+    /*
+     * Prevent extremely accurate readings from
+     * dominating the calculation completely.
+     */
+    const accuracy =
+      Math.max(
+        reading.accuracy,
+        5
+      );
+
+    const weight =
+      1 /
+      (accuracy * accuracy);
+
+    weightedLat +=
+      reading.lat *
+      weight;
+
+    weightedLng +=
+      reading.lng *
+      weight;
+
+    totalWeight += weight;
+  }
+
+  return {
+    lat:
+      weightedLat /
+      totalWeight,
+
+    lng:
+      weightedLng /
+      totalWeight,
+  };
 }

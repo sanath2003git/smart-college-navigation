@@ -7,47 +7,67 @@ export default function PermanentLayers({
 }) {
   return (
     <>
-      {/* Campus Boundary */}
+      {/* =====================================
+          Campus Boundary
+          ===================================== */}
+
       <GeoJsonLayer
         url="/data/campus/campus_outline.geojson"
         interactive={false}
         style={{
-          color: "#1b5e20",
+          color: "#8FB8AF",
           weight: 3,
-          fillColor: "#a5d6a7",
+          opacity: 1,
+          fillColor: "#DCEAE6",
           fillOpacity: 1,
         }}
       />
 
-      {/* Campus Areas */}
+      {/* =====================================
+          Campus Areas
+          ===================================== */}
+
       <GeoJsonLayer
         url="/data/campus/areas.geojson"
         interactive={false}
         style={{
-          color: "#2e7d32",
-          weight: 0.3,
-          fillColor: "#81c784",
-          fillOpacity: 0.35,
+          color: "#8FB8AF",
+          weight: 1,
+          opacity: 0.8,
+          fillColor: "#A8D1C8",
+          fillOpacity: 0.75,
         }}
       />
 
-      {/* Buildings */}
+      {/* =====================================
+          Buildings
+          + Building Names
+          ===================================== */}
+
       <GeoJsonLayer
         url="/data/campus/buildings.geojson"
         interactive={true}
         onEachFeature={handleBuildingClick}
+        labelProperty="name"
         style={{
-          color: "#388095",
+          color: "#4F8F8A",
           weight: 2,
-          fillColor: "#62b2cb",
-          fillOpacity: 0.5,
+          opacity: 1,
+          fillColor: "#A9CEC6",
+          fillOpacity: 1,
         }}
       />
 
-      {/* Current Location */}
+      {/* =====================================
+          Current Location
+          ===================================== */}
+
       <CurrentLocation />
 
-      {/* Locate Button */}
+      {/* =====================================
+          Locate Button
+          ===================================== */}
+
       <LocateButton />
     </>
   );

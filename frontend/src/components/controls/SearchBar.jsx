@@ -724,12 +724,6 @@ export default function SearchBar() {
               className="smartnav-search-input"
             />
 
-            {!query && (
-              <span className="smartnav-search-hint hidden md:inline">
-                Search rooms, labs, classrooms...
-              </span>
-            )}
-
             {/* -----------------------------------
                 Search Suggestions
             ----------------------------------- */}

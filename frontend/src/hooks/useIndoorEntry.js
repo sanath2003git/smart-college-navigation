@@ -1,5 +1,11 @@
-import { useEffect, useRef } from "react";
-import { useNavigation } from "./useNavigation";
+import {
+  useEffect,
+  useRef,
+} from "react";
+
+import {
+  useNavigation,
+} from "./useNavigation";
 
 export default function useIndoorEntry() {
   const {
@@ -16,26 +22,24 @@ export default function useIndoorEntry() {
   } = useNavigation();
 
   // ==========================================
-  // Previous Building
+  // Previous building
   // ==========================================
 
-  const previousBuilding = useRef(null);
+  const previousBuilding =
+    useRef(null);
 
   // ==========================================
-  // Initial Location Check
-  //
-  // Used to distinguish:
-  //
-  // 1. User opened SmartNav INSIDE a building
-  //
-  // 2. User opened SmartNav OUTSIDE and later
-  //    entered a building.
+  // Initial location state
   // ==========================================
 
-  const initialLocationChecked = useRef(false);
+  const initialLocationChecked =
+    useRef(false);
 
   useEffect(() => {
-    console.log("========== INDOOR ENTRY ==========");
+
+    console.log(
+      "========== INDOOR ENTRY =========="
+    );
 
     console.log(
       "Current Building:",
@@ -54,7 +58,8 @@ export default function useIndoorEntry() {
 
     console.log(
       "Destination:",
-      destination?.properties?.room_no ?? null
+      destination?.properties?.room_no ??
+        null
     );
 
     console.log(
@@ -67,49 +72,53 @@ export default function useIndoorEntry() {
       initialLocationChecked.current
     );
 
-    console.log("===============================");
+    console.log(
+      "Initial Floor Selection:",
+      initialFloorSelection
+    );
+
+    console.log(
+      "================================="
+    );
 
     // ========================================
-    // Wait until GPS/building detection gives
-    // us a meaningful result.
-    //
-    // currentBuilding === null can mean:
-    // - user is outside
-    // - GPS has not detected building yet
-    //
-    // We use the first confirmed building
-    // detection to determine initial state.
+    // No building detected
     // ========================================
 
     if (!currentBuilding) {
-      /*
-       * If the app has already confirmed the user
-       * was inside a building and they subsequently
-       * leave it, handle the outdoor transition.
-       */
+
       const exitedBuilding =
-        previousBuilding.current !== null &&
+        previousBuilding.current !==
+          null &&
         currentBuilding === null;
 
       if (exitedBuilding) {
+
         console.log(
           "========== BUILDING EXIT =========="
         );
 
         /*
-         * Only automatically leave indoor mode
-         * when we are currently on Ground Floor.
+         * Only automatically leave indoor
+         * navigation from Ground Floor.
          */
+
         if (
-          navigationStage === "GROUND_FLOOR"
+          navigationStage ===
+          "GROUND_FLOOR"
         ) {
+
           console.log(
             "Exiting Building..."
           );
 
-          setSelectedBuilding(null);
+          setSelectedBuilding(
+            null
+          );
 
-          setNavigationStage("OUTDOOR");
+          setNavigationStage(
+            "OUTDOOR"
+          );
         }
 
         console.log(
@@ -124,27 +133,33 @@ export default function useIndoorEntry() {
     }
 
     // ========================================
-    // Destination / Navigation Mode
-    //
-    // When a destination exists, the user is
-    // actively navigating. Don't show the
-    // initial floor-selection prompt here.
+    // Destination navigation mode
     // ========================================
 
     if (destination) {
+
       console.log(
-        "Indoor Entry: Navigation mode, skipping initial floor selection."
+        "Indoor Entry: Navigation mode."
+      );
+
+      console.log(
+        "Skipping initial floor selection."
       );
 
       /*
-       * If this is a navigation route entering
-       * a building, preserve the existing behavior.
+       * Navigation entering a destination
+       * building.
        */
+
       if (
-        navigationStage === "OUTDOOR" &&
-        previousBuilding.current !== null &&
-        previousBuilding.current !== currentBuilding
+        navigationStage ===
+          "OUTDOOR" &&
+        previousBuilding.current !==
+          null &&
+        previousBuilding.current !==
+          currentBuilding
       ) {
+
         console.log(
           "Navigation: Entered destination building."
         );
@@ -169,17 +184,17 @@ export default function useIndoorEntry() {
 
     // ========================================
     // INITIAL INDOOR DETECTION
+    // ========================================
     //
-    // If the FIRST confirmed location is
-    // already inside a building, the user
-    // probably opened SmartNav indoors.
-    //
-    // Ask them to select their floor.
+    // This happens when SmartNav opens and
+    // the first confirmed building is already
+    // detected.
     // ========================================
 
     if (
       !initialLocationChecked.current
     ) {
+
       console.log(
         "========== INITIAL INDOOR DETECTION =========="
       );
@@ -190,23 +205,25 @@ export default function useIndoorEntry() {
       );
 
       /*
-       * Mark the initial location as checked
-       * before opening the prompt.
+       * Mark initial location as checked
+       * before opening the dialog.
        */
+
       initialLocationChecked.current =
         true;
 
       /*
-       * Tell the renderer which building is
-       * currently occupied.
+       * Store the detected building.
        */
+
       setSelectedBuilding(
         currentBuilding
       );
 
       /*
-       * Open floor selection prompt.
+       * Open floor selection immediately.
        */
+
       setInitialFloorSelection({
         open: true,
         building: currentBuilding,
@@ -227,24 +244,17 @@ export default function useIndoorEntry() {
     }
 
     // ========================================
-    // OUTDOOR → BUILDING ENTRY
-    //
-    // If the user was previously outside and
-    // is now detected inside a building,
-    // automatically load Ground Floor.
+    // OUTDOOR → BUILDING
     // ========================================
 
     const enteredBuilding =
       previousBuilding.current === null &&
       initialLocationChecked.current;
 
-    /*
-     * We also handle a transition between
-     * buildings while already using the app.
-     */
     const changedBuilding =
       previousBuilding.current !== null &&
-      previousBuilding.current !== currentBuilding;
+      previousBuilding.current !==
+        currentBuilding;
 
     console.log(
       "Entered Building:",
@@ -257,13 +267,17 @@ export default function useIndoorEntry() {
     );
 
     // ========================================
-    // Outdoor → Indoor
+    // Enter building during normal usage
     // ========================================
 
     if (
       navigationStage === "OUTDOOR" &&
-      (enteredBuilding || changedBuilding)
+      (
+        enteredBuilding ||
+        changedBuilding
+      )
     ) {
+
       console.log(
         "========== OUTDOOR → INDOOR =========="
       );
@@ -277,20 +291,9 @@ export default function useIndoorEntry() {
         "Automatically loading Ground Floor."
       );
 
-      // --------------------------------------
-      // Select building
-      // --------------------------------------
-
       setSelectedBuilding(
         currentBuilding
       );
-
-      // --------------------------------------
-      // Set Ground Floor
-      //
-      // Your existing navigation state uses
-      // GROUND_FLOOR as the indoor stage.
-      // --------------------------------------
 
       setNavigationStage(
         "GROUND_FLOOR"
@@ -302,8 +305,7 @@ export default function useIndoorEntry() {
     }
 
     // ========================================
-    // Save current building for the next GPS
-    // reading.
+    // Save building for next GPS update
     // ========================================
 
     previousBuilding.current =
