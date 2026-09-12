@@ -8,7 +8,7 @@ import {
 import { loadBuildings } from "../navigation/loadBuildings";
 import { detectCurrentBuilding } from "../navigation/buildingDetection";
 
-// Number of recent GPS readings used for smoothing.
+// Number of recent GPS readings used for outdoor smoothing.
 const MAX_LOCATION_HISTORY = 3;
 
 export const LocationContext = createContext();
@@ -18,7 +18,7 @@ export function LocationProvider({ children }) {
   const [rawLocation, setRawLocation] = useState(null);
   const [error, setError] = useState(null);
 
-  // Recent raw GPS readings used for display smoothing.
+  // Recent raw GPS readings used for outdoor display smoothing.
   const locationHistoryRef = useRef([]);
 
   // Prevent older async GPS processing from overwriting newer readings.
@@ -84,7 +84,7 @@ export function LocationProvider({ children }) {
       if (!isMounted) return;
 
       /*
-       * Always preserve the real phone GPS reading.
+       * Always preserve the real GPS reading.
        *
        * Building detection and navigation use this value.
        */
@@ -116,6 +116,9 @@ export function LocationProvider({ children }) {
         /*
          * If the indoor/outdoor state changes,
          * clear previous GPS history.
+         *
+         * This prevents outdoor readings from affecting
+         * the first indoor position and vice versa.
          */
         if (
           isInsideBuilding !==
@@ -128,7 +131,32 @@ export function LocationProvider({ children }) {
         }
 
         /*
-         * Add the latest raw GPS reading.
+         * --------------------------------------------------
+         * INDOOR MODE
+         * --------------------------------------------------
+         *
+         * Use the latest RAW GPS position directly.
+         *
+         * This prevents the blue marker from being pulled
+         * toward previous GPS readings by the smoothing
+         * algorithm.
+         */
+        if (isInsideBuilding) {
+          setLocation({
+            lat: raw.lat,
+            lng: raw.lng,
+            accuracy: raw.accuracy,
+          });
+
+          return;
+        }
+
+        /*
+         * --------------------------------------------------
+         * OUTDOOR MODE
+         * --------------------------------------------------
+         *
+         * Keep the existing 3-reading smoothing behavior.
          */
         locationHistoryRef.current.push(raw);
 
@@ -149,17 +177,14 @@ export function LocationProvider({ children }) {
         }
 
         /*
-         * IMPORTANT:
-         *
          * Path snapping has been removed.
          *
-         * Both indoor and outdoor positions now
-         * use the GPS-based smoothed position.
+         * Outdoor position uses GPS-based smoothing only.
          */
         setLocation({
           lat: smoothed.lat,
           lng: smoothed.lng,
-          accuracy,
+          accuracy: raw.accuracy,
         });
 
       } catch (err) {
@@ -170,12 +195,12 @@ export function LocationProvider({ children }) {
 
         /*
          * If building detection/loading fails,
-         * still display the GPS position.
+         * fall back to the existing outdoor smoothing
+         * behavior rather than losing the GPS position.
          */
         if (
           isMounted &&
-          requestId ===
-            locationRequestId.current
+          requestId === locationRequestId.current
         ) {
           locationHistoryRef.current.push(raw);
 
@@ -195,7 +220,7 @@ export function LocationProvider({ children }) {
             setLocation({
               lat: smoothed.lat,
               lng: smoothed.lng,
-              accuracy,
+              accuracy: raw.accuracy,
             });
           }
         }
