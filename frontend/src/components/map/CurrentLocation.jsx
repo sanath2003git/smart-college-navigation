@@ -10,72 +10,96 @@ import L from "leaflet";
 
 import { useLocation } from "../../hooks/useLocation";
 import { useNavigation } from "../../hooks/useNavigation";
+import useDeviceHeading from "../../hooks/useDeviceHeading";
 
 // ==========================================
 // SmartNav Current Location Icon
 // ==========================================
 
-const userIcon = L.divIcon({
-  className: "smartnav-current-location-icon",
+const createUserIcon = (heading) => {
+  const rotation = heading ?? 0;
 
-  html: `
-    <div
-      style="
-        position: relative;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      "
-    >
+  return L.divIcon({
+    className: "smartnav-current-location-icon",
 
-      <!-- Outer location halo -->
-      <div
-        style="
-          position: absolute;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          background: rgba(37, 99, 235, 0.14);
-        "
-      ></div>
-
-      <!-- White border -->
+    html: `
       <div
         style="
           position: relative;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #FFFFFF;
+          width: 70px;
+          height: 70px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow:
-            0 2px 8px rgba(20, 33, 55, 0.28);
         "
       >
 
-        <!-- Blue GPS dot -->
+        <!-- Direction cone -->
         <div
           style="
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #2563EB;
+            position: absolute;
+            width: 0;
+            height: 0;
+            left: 50%;
+            top: 50%;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 55px solid rgba(37, 99, 235, 0.16);
+            transform-origin: 50% 100%;
+            transform:
+              translate(-50%, -100%)
+              rotate(${rotation}deg);
+            pointer-events: none;
           "
         ></div>
 
+        <!-- Outer location halo -->
+        <div
+          style="
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.14);
+          "
+        ></div>
+
+        <!-- White border -->
+        <div
+          style="
+            position: relative;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+              0 2px 8px rgba(20, 33, 55, 0.28);
+            z-index: 2;
+          "
+        >
+
+          <!-- Blue GPS dot -->
+          <div
+            style="
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+              background: #2563EB;
+            "
+          ></div>
+
+        </div>
+
       </div>
+    `,
 
-    </div>
-  `,
-
-  iconSize: [24, 24],
-
-  iconAnchor: [12, 12],
-});
+    iconSize: [70, 70],
+    iconAnchor: [35, 35],
+  });
+};
 
 export default function CurrentLocation() {
   const {
@@ -86,6 +110,8 @@ export default function CurrentLocation() {
   const {
     setCurrentLocation,
   } = useNavigation();
+
+  const heading = useDeviceHeading();
 
   // ========================================
   // Navigation continues using RAW GPS
@@ -140,7 +166,7 @@ export default function CurrentLocation() {
           location.lat,
           location.lng,
         ]}
-        icon={userIcon}
+        icon={createUserIcon(heading)}
         pane="markerPane"
         zIndexOffset={10000}
       >

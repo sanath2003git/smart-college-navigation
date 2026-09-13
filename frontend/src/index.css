@@ -1333,13 +1333,6 @@ button {
   font-size: 17px !important;
 }
 
-  .leaflet-control-zoom a {
-    width: 34px !important;
-    height: 34px !important;
-
-    font-size: 17px !important;
-  }
-
   /* ---------------------------------------------
      Locate button
   --------------------------------------------- */
@@ -1436,4 +1429,16 @@ button {
 
     font-weight: 700 !important;
   }
+}
+
+/* =========================================================
+   SELECTED DESTINATION
+========================================================= */
+
+.smartnav-search-bar-selected {
+  border-color: rgba(28, 114, 147, 0.55);
+
+  box-shadow:
+    0 14px 34px rgba(20, 33, 55, 0.15),
+    0 0 0 3px rgba(28, 114, 147, 0.08);
 }
