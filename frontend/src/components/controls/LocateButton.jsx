@@ -1,22 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
 import { Crosshair } from "lucide-react";
 
 import { useLocation } from "../../hooks/useLocation";
+import useDeviceHeading from "../../hooks/useDeviceHeading";
 
 export default function LocateButton() {
   const map = useMap();
 
   const { location } = useLocation();
 
+  const heading = useDeviceHeading();
+
   const [isCentered, setIsCentered] = useState(true);
 
+  // Heading when the user last re-centered
+  const centeredHeadingRef = useRef(null);
+
   // ==========================================
-  // Check whether map is centered on GPS
+  // Calculate shortest heading difference
+  // ==========================================
+
+  const getHeadingDifference = (from, to) => {
+    return Math.abs(
+      ((to - from + 540) % 360) - 180
+    );
+  };
+
+  // ==========================================
+  // Check map + heading state
   // ==========================================
 
   const checkCentered = () => {
     if (!location) return;
+
+    // ----------------------------------------
+    // 1. Check map position
+    // ----------------------------------------
 
     const center = map.getCenter();
 
@@ -25,12 +45,56 @@ export default function LocateButton() {
       [location.lat, location.lng]
     );
 
-    // Consider map centered if within 30 meters
-    setIsCentered(distance <= 30);
+    const mapIsCentered = distance <= 30;
+
+    // ----------------------------------------
+    // 2. Check device heading
+    // ----------------------------------------
+
+    let headingIsCentered = true;
+
+    if (
+      heading !== null &&
+      centeredHeadingRef.current !== null
+    ) {
+      const headingDifference =
+        getHeadingDifference(
+          centeredHeadingRef.current,
+          heading
+        );
+
+      // Allow up to 20° heading change
+      headingIsCentered =
+        headingDifference <= 20;
+    }
+
+    // ----------------------------------------
+    // 3. Final state
+    // ----------------------------------------
+
+    setIsCentered(
+      mapIsCentered &&
+      headingIsCentered
+    );
   };
 
   // ==========================================
-  // Detect user moving the map
+  // Initialize heading baseline
+  // ==========================================
+
+  useEffect(() => {
+    if (
+      heading !== null &&
+      centeredHeadingRef.current === null
+    ) {
+      centeredHeadingRef.current = heading;
+    }
+
+    checkCentered();
+  }, [heading, location]);
+
+  // ==========================================
+  // Detect map movement
   // ==========================================
 
   useEffect(() => {
@@ -45,14 +109,19 @@ export default function LocateButton() {
     return () => {
       map.off("moveend", handleMapMove);
     };
-  }, [map, location]);
+  }, [map, location, heading]);
 
   // ==========================================
-  // Re-center map
+  // Re-center
   // ==========================================
 
   const handleLocate = () => {
     if (!location) return;
+
+    // Update heading baseline
+    if (heading !== null) {
+      centeredHeadingRef.current = heading;
+    }
 
     map.flyTo(
       [location.lat, location.lng],
