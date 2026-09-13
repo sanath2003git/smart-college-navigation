@@ -74,6 +74,8 @@ export default function useMapFollow() {
       location.lng
     );
 
+    // GPS updates only move the camera.
+    // Current zoom level is preserved.
     map.panTo(targetLatLng, {
       animate: true,
       duration: 0.4,
@@ -86,7 +88,7 @@ export default function useMapFollow() {
   ]);
 
   // ==========================================
-  // Start following
+  // Start following / Re-center
   // ==========================================
 
   const startFollowing = useCallback(() => {
@@ -100,10 +102,16 @@ export default function useMapFollow() {
       location.lng
     );
 
-    map.panTo(targetLatLng, {
-      animate: true,
-      duration: 0.8,
-    });
+    // Re-center always restores the
+    // navigation zoom level.
+    map.flyTo(
+      targetLatLng,
+      21.5,
+      {
+        animate: true,
+        duration: 1.2,
+      }
+    );
   }, [
     map,
     location,
