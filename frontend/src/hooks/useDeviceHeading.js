@@ -33,7 +33,7 @@ export default function useDeviceHeading() {
       // Android / other browsers
       // ------------------------------------------
       else if (typeof event.alpha === "number") {
-        nextHeading = 360 - event.alpha;
+        nextHeading = 360 - event.alpha + 90;
       }
 
       if (nextHeading === null) {
