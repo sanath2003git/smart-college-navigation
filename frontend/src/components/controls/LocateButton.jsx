@@ -4,6 +4,7 @@ import { Crosshair } from "lucide-react";
 
 import { useLocation } from "../../hooks/useLocation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
+import useMapFollow from "../../hooks/useMapFollow";
 
 export default function LocateButton() {
   const map = useMap();
@@ -11,6 +12,12 @@ export default function LocateButton() {
   const { location } = useLocation();
 
   const heading = useDeviceHeading();
+
+  const {
+    isFollowing,
+    startFollowing,
+    stopFollowing,
+  } = useMapFollow();
 
   const [isCentered, setIsCentered] = useState(true);
 
@@ -34,10 +41,6 @@ export default function LocateButton() {
   const checkCentered = () => {
     if (!location) return;
 
-    // ----------------------------------------
-    // 1. Check map position
-    // ----------------------------------------
-
     const center = map.getCenter();
 
     const distance = map.distance(
@@ -46,10 +49,6 @@ export default function LocateButton() {
     );
 
     const mapIsCentered = distance <= 30;
-
-    // ----------------------------------------
-    // 2. Check device heading
-    // ----------------------------------------
 
     let headingIsCentered = true;
 
@@ -63,14 +62,9 @@ export default function LocateButton() {
           heading
         );
 
-      // Allow up to 20° heading change
       headingIsCentered =
         headingDifference <= 20;
     }
-
-    // ----------------------------------------
-    // 3. Final state
-    // ----------------------------------------
 
     setIsCentered(
       mapIsCentered &&
@@ -94,7 +88,7 @@ export default function LocateButton() {
   }, [heading, location]);
 
   // ==========================================
-  // Detect map movement
+  // Detect manual map movement
   // ==========================================
 
   useEffect(() => {
@@ -112,7 +106,7 @@ export default function LocateButton() {
   }, [map, location, heading]);
 
   // ==========================================
-  // Re-center
+  // Locate / Start Follow Mode
   // ==========================================
 
   const handleLocate = () => {
@@ -123,29 +117,39 @@ export default function LocateButton() {
       centeredHeadingRef.current = heading;
     }
 
-    map.flyTo(
-      [location.lat, location.lng],
-      21.5,
-      {
-        animate: true,
-        duration: 1.2,
-      }
-    );
+    // Start following the user
+    startFollowing();
+  };
+
+  // ==========================================
+  // Stop following
+  // ==========================================
+
+  const handleStopFollowing = () => {
+    stopFollowing();
   };
 
   return (
     <button
       type="button"
-      onClick={handleLocate}
+      onClick={
+        isFollowing
+          ? handleStopFollowing
+          : handleLocate
+      }
       title={
-        isCentered
-          ? "Locate Me"
-          : "Re-center on your location"
+        isFollowing
+          ? "Stop following"
+          : isCentered
+            ? "Locate Me"
+            : "Re-center on your location"
       }
       aria-label={
-        isCentered
-          ? "Locate Me"
-          : "Re-center on your location"
+        isFollowing
+          ? "Stop following"
+          : isCentered
+            ? "Locate Me"
+            : "Re-center on your location"
       }
       className={`
         absolute
@@ -175,15 +179,20 @@ export default function LocateButton() {
         focus:ring-offset-2
 
         ${
-          isCentered
+          isFollowing
             ? `
-              border-slate-200
-              shadow-[0_4px_14px_rgba(20,33,55,0.18)]
+              border-blue-300
+              shadow-[0_5px_18px_rgba(37,99,235,0.30)]
             `
-            : `
-              border-blue-200
-              shadow-[0_5px_16px_rgba(37,99,235,0.25)]
-            `
+            : isCentered
+              ? `
+                border-slate-200
+                shadow-[0_4px_14px_rgba(20,33,55,0.18)]
+              `
+              : `
+                border-blue-200
+                shadow-[0_5px_16px_rgba(37,99,235,0.25)]
+              `
         }
 
         hover:bg-slate-50
@@ -191,8 +200,20 @@ export default function LocateButton() {
       `}
     >
       <Crosshair
-        size={isCentered ? 20 : 22}
-        strokeWidth={isCentered ? 2.2 : 2.5}
+        size={
+          isFollowing
+            ? 23
+            : isCentered
+              ? 20
+              : 22
+        }
+        strokeWidth={
+          isFollowing
+            ? 2.6
+            : isCentered
+              ? 2.2
+              : 2.5
+        }
         className="text-blue-600"
       />
     </button>
