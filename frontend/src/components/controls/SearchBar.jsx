@@ -20,6 +20,7 @@ export default function SearchBar() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState(null);
 
   const {
     setRoute,
@@ -96,6 +97,7 @@ export default function SearchBar() {
   // -----------------------------------
 
   const handleSuggestionClick = (destination) => {
+    setSelectedDestination(destination);
     setQuery(destination.roomNo);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -693,7 +695,13 @@ export default function SearchBar() {
     <div className="smartnav-search-shell">
       <div className="smartnav-search-container">
 
-        <div className="smartnav-search-bar">
+        <div
+          className={`smartnav-search-bar ${
+            selectedDestination
+              ? "smartnav-search-bar-selected"
+              : ""
+          }`}
+        >
 
           {/* Search icon */}
           <div className="smartnav-search-icon">
@@ -710,9 +718,10 @@ export default function SearchBar() {
               type="text"
               placeholder="Where do you want to go?"
               value={query}
-              onChange={(e) =>
-                setQuery(e.target.value)
-              }
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedDestination(null);
+              }}
               onKeyDown={handleKeyDown}
               onFocus={() => {
                 if (
@@ -763,6 +772,7 @@ export default function SearchBar() {
 
                           <div className="smartnav-suggestion-title">
                             {destination.roomNo}
+
                             {destination.name &&
                               ` — ${destination.name}`}
                           </div>
