@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useDeviceHeading() {
   const [heading, setHeading] = useState(null);
 
+  const headingRef = useRef(null);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // ------------------------------------------
+    // Circular angle difference
+    // Handles 359° → 0° correctly.
+    // ------------------------------------------
+    const shortestAngleDifference = (from, to) => {
+      return ((to - from + 540) % 360) - 180;
+    };
 
     const handleOrientation = (event) => {
       let nextHeading = null;
 
-      // iPhone / iPad
+      // ------------------------------------------
+      // iOS Safari
+      // ------------------------------------------
       if (
         typeof event.webkitCompassHeading === "number" &&
         event.webkitCompassAccuracy !== -1
@@ -17,66 +29,117 @@ export default function useDeviceHeading() {
         nextHeading = event.webkitCompassHeading;
       }
 
+      // ------------------------------------------
       // Android / other browsers
+      // ------------------------------------------
       else if (typeof event.alpha === "number") {
         nextHeading = 360 - event.alpha;
       }
 
-      if (nextHeading === null) return;
+      if (nextHeading === null) {
+        return;
+      }
 
       nextHeading = (nextHeading + 360) % 360;
 
-      setHeading(nextHeading);
+      // ------------------------------------------
+      // First valid reading
+      // ------------------------------------------
+      if (headingRef.current === null) {
+        headingRef.current = nextHeading;
+        setHeading(nextHeading);
+        return;
+      }
+
+      // ------------------------------------------
+      // Circular smoothing
+      // ------------------------------------------
+
+      const currentHeading = headingRef.current;
+
+      const difference = shortestAngleDifference(
+        currentHeading,
+        nextHeading
+      );
+
+      // Smoothing factor.
+      // Lower = smoother but slower.
+      // Higher = faster but more sensitive to noise.
+      const SMOOTHING_FACTOR = 0.18;
+
+      const smoothedHeading =
+        currentHeading +
+        difference * SMOOTHING_FACTOR;
+
+      const normalizedHeading =
+        (smoothedHeading + 360) % 360;
+
+      headingRef.current = normalizedHeading;
+
+      setHeading(normalizedHeading);
     };
 
-    const addListeners = () => {
+    let orientationEvent = "deviceorientation";
+
+    const addOrientationListener = () => {
       window.addEventListener(
-        "deviceorientationabsolute",
+        orientationEvent,
         handleOrientation,
         true
       );
+    };
 
-      window.addEventListener(
-        "deviceorientation",
+    const removeOrientationListener = () => {
+      window.removeEventListener(
+        orientationEvent,
         handleOrientation,
         true
       );
     };
 
-    // iOS requires permission.
-    if (
-      typeof DeviceOrientationEvent !== "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission === "function"
-    ) {
-      DeviceOrientationEvent.requestPermission()
-        .then((permission) => {
+    // ------------------------------------------
+    // iOS requires explicit permission.
+    // ------------------------------------------
+
+    const requestPermission = async () => {
+      if (
+        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission ===
+          "function"
+      ) {
+        try {
+          const permission =
+            await DeviceOrientationEvent.requestPermission();
+
           if (permission === "granted") {
-            addListeners();
+            addOrientationListener();
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error(
             "Device orientation permission failed:",
             error
           );
-        });
-    } else {
-      // Android and browsers without an explicit permission API
-      addListeners();
-    }
+        }
+
+        return;
+      }
+
+      // ------------------------------------------
+      // Android / browsers
+      // Prefer absolute orientation when available.
+      // ------------------------------------------
+
+      if ("ondeviceorientationabsolute" in window) {
+        orientationEvent = "deviceorientationabsolute";
+      }
+
+      addOrientationListener();
+    };
+
+    requestPermission();
 
     return () => {
-      window.removeEventListener(
-        "deviceorientationabsolute",
-        handleOrientation,
-        true
-      );
-
-      window.removeEventListener(
-        "deviceorientation",
-        handleOrientation,
-        true
-      );
+      removeOrientationListener();
     };
   }, []);
 
