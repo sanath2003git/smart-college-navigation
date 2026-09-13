@@ -200,6 +200,15 @@ export default function CurrentLocation() {
           Display Radius:
           <br />
           4 m
+
+          <br />
+          <br />
+
+          Device Heading:
+          <br />
+          {heading !== null
+            ? `${Math.round(heading)}°`
+            : "Unavailable"}
         </Popup>
       </Marker>
     </>
