@@ -21,7 +21,30 @@ export default function useMapFollow() {
   }, [isFollowing]);
 
   // ==========================================
-  // Stop following when user manually pans
+  // Calculate camera position
+  // ==========================================
+
+  const getFollowTarget = useCallback(
+    (lat, lng) => {
+      const mapSize = map.getSize();
+
+      // Keep user slightly below center
+      const verticalOffset = mapSize.y * 0.12;
+
+      const userPoint = map.latLngToContainerPoint([
+        lat,
+        lng,
+      ]);
+
+      userPoint.y += verticalOffset;
+
+      return map.containerPointToLatLng(userPoint);
+    },
+    [map]
+  );
+
+  // ==========================================
+  // Stop following when user manually drags
   // ==========================================
 
   useEffect(() => {
@@ -40,33 +63,27 @@ export default function useMapFollow() {
   }, [map]);
 
   // ==========================================
-  // Follow current GPS location
+  // Follow GPS location
   // ==========================================
 
   useEffect(() => {
     if (!isFollowing || !location) return;
 
-    const mapSize = map.getSize();
-
-    // Put the user slightly below the
-    // vertical center of the screen.
-    const verticalOffset = mapSize.y * 0.12;
-
-    const targetPoint = map.latLngToContainerPoint([
+    const targetLatLng = getFollowTarget(
       location.lat,
-      location.lng,
-    ]);
-
-    targetPoint.y += verticalOffset;
-
-    const targetLatLng =
-      map.containerPointToLatLng(targetPoint);
+      location.lng
+    );
 
     map.panTo(targetLatLng, {
       animate: true,
       duration: 0.4,
     });
-  }, [map, location, isFollowing]);
+  }, [
+    map,
+    location,
+    isFollowing,
+    getFollowTarget,
+  ]);
 
   // ==========================================
   // Start following
@@ -78,25 +95,20 @@ export default function useMapFollow() {
     isFollowingRef.current = true;
     setIsFollowing(true);
 
-    const mapSize = map.getSize();
-
-    const verticalOffset = mapSize.y * 0.12;
-
-    const targetPoint = map.latLngToContainerPoint([
+    const targetLatLng = getFollowTarget(
       location.lat,
-      location.lng,
-    ]);
-
-    targetPoint.y += verticalOffset;
-
-    const targetLatLng =
-      map.containerPointToLatLng(targetPoint);
+      location.lng
+    );
 
     map.panTo(targetLatLng, {
       animate: true,
       duration: 0.8,
     });
-  }, [map, location]);
+  }, [
+    map,
+    location,
+    getFollowTarget,
+  ]);
 
   // ==========================================
   // Stop following
