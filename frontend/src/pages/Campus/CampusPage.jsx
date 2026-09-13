@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 
 import "leaflet/dist/leaflet.css";
 
+import "leaflet";
+import "@tomickigrzegorz/leaflet-rotate";
+
 import PermanentLayers
   from "../../components/layers/PermanentLayers";
 
@@ -59,6 +62,9 @@ import useCurrentBuilding
 
 import useIndoorEntry
   from "../../hooks/useIndoorEntry";
+
+import MapRotation
+  from "../../components/map/MapRotation";  
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -356,14 +362,21 @@ export default function CampusPage() {
           ===================================== */}
 
       <MapContainer
-        center={center}
-        zoom={18}
-        minZoom={17}
-        maxZoom={22}
-        maxBounds={CAMPUS_BOUNDS}
-        maxBoundsViscosity={1.0}
-        className="min-h-0 flex-1 w-full"
-      >
+  center={center}
+  zoom={18}
+  minZoom={17}
+  maxZoom={22}
+  maxBounds={CAMPUS_BOUNDS}
+  maxBoundsViscosity={1.0}
+
+  rotate={true}
+  bearing={0}
+  touchRotate={false}
+  dragRotate={false}
+  shiftKeyRotate={false}
+
+  className="min-h-0 flex-1 w-full"
+>
 
         {/* ===================================
             OpenStreetMap Base Layer
