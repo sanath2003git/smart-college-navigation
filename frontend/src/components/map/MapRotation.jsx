@@ -3,7 +3,7 @@ import { useMap } from "react-leaflet";
 
 import useDeviceHeading from "../../hooks/useDeviceHeading";
 
-export default function MapRotation() {
+export default function MapRotation({ active }) {
   const map = useMap();
 
   const heading = useDeviceHeading();
@@ -13,6 +13,20 @@ export default function MapRotation() {
   // ==========================================
 
   useEffect(() => {
+    if (!active) {
+      if (
+        typeof map.stopHeadingUp === "function"
+      ) {
+        map.stopHeadingUp();
+      }
+
+      if (typeof map.setBearing === "function") {
+        map.setBearing(0);
+      }
+
+      return;
+    }
+
     if (heading === null) {
       return;
     }
@@ -28,7 +42,7 @@ export default function MapRotation() {
       ease: 0.12,
       deadzone: 0.5,
     });
-  }, [map, heading]);
+  }, [map, heading, active]);
 
   // ==========================================
   // Stop heading-up mode on unmount

@@ -5,6 +5,7 @@ import { Crosshair } from "lucide-react";
 import { useLocation } from "../../hooks/useLocation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
 import useMapFollow from "../../hooks/useMapFollow";
+import MapRotation from "../map/MapRotation";
 
 export default function LocateButton() {
   const map = useMap();
@@ -130,28 +131,31 @@ export default function LocateButton() {
   };
 
   return (
-    <button
-      type="button"
-      onClick={
-        isFollowing
-          ? handleStopFollowing
-          : handleLocate
-      }
-      title={
-        isFollowing
-          ? "Stop following"
-          : isCentered
-            ? "Locate Me"
-            : "Re-center on your location"
-      }
-      aria-label={
-        isFollowing
-          ? "Stop following"
-          : isCentered
-            ? "Locate Me"
-            : "Re-center on your location"
-      }
-      className={`
+    <>
+      <MapRotation active={isFollowing} />
+
+      <button
+        type="button"
+        onClick={
+          isFollowing
+            ? handleStopFollowing
+            : handleLocate
+        }
+        title={
+          isFollowing
+            ? "Stop following"
+            : isCentered
+              ? "Locate Me"
+              : "Re-center on your location"
+        }
+        aria-label={
+          isFollowing
+            ? "Stop following"
+            : isCentered
+              ? "Locate Me"
+              : "Re-center on your location"
+        }
+        className={`
         absolute
         bottom-5
         right-5
@@ -197,25 +201,26 @@ export default function LocateButton() {
 
         hover:bg-slate-50
         hover:shadow-[0_6px_18px_rgba(20,33,55,0.22)]
-      `}
-    >
-      <Crosshair
-        size={
-          isFollowing
-            ? 23
-            : isCentered
-              ? 20
-              : 22
-        }
-        strokeWidth={
-          isFollowing
-            ? 2.6
-            : isCentered
-              ? 2.2
-              : 2.5
-        }
-        className="text-blue-600"
-      />
-    </button>
+        `}
+      >
+        <Crosshair
+          size={
+            isFollowing
+              ? 23
+              : isCentered
+                ? 20
+                : 22
+          }
+          strokeWidth={
+            isFollowing
+              ? 2.6
+              : isCentered
+                ? 2.2
+                : 2.5
+          }
+          className="text-blue-600"
+        />
+      </button>
+    </>
   );
 }

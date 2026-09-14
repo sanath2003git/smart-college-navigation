@@ -63,9 +63,6 @@ import useCurrentBuilding
 import useIndoorEntry
   from "../../hooks/useIndoorEntry";
 
-import MapRotation
-  from "../../components/map/MapRotation";  
-
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
   [8.9162, 76.6352],
@@ -386,8 +383,6 @@ export default function CampusPage() {
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-
-        <MapRotation />
 
         {/* ===================================
             Permanent Campus Layers
