@@ -106,7 +106,7 @@ export default function useMapFollow() {
     // navigation zoom level.
     map.flyTo(
       targetLatLng,
-      21.5,
+      22,
       {
         animate: true,
         duration: 1.2,
