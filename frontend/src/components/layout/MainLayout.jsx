@@ -1,7 +1,12 @@
 import Navbar from "./Navbar";
 import SearchBar from "../controls/SearchBar";
+import ActiveNavigationPanel from "../navigation/ActiveNavigationPanel";
+import { useNavigation } from "../../hooks/useNavigation";
 
 export default function MainLayout({ children }) {
+  const { route, destination } = useNavigation();
+  const isNavigating = Boolean(route && route.length > 0 && destination);
+
   return (
     <div className="smartnav-app">
       <Navbar />
@@ -11,7 +16,11 @@ export default function MainLayout({ children }) {
           {children}
         </div>
 
-        <SearchBar />
+        {isNavigating ? (
+          <ActiveNavigationPanel />
+        ) : (
+          <SearchBar />
+        )}
       </main>
     </div>
   );
