@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import NavigationContext from "./NavigationContext";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
 
@@ -352,6 +352,93 @@ export function NavigationProvider({ children }) {
     );
   };
 
+  // ==========================================
+  // Cancel Navigation (Manual Cancellation)
+  // Context-aware: preserves indoor building and floor if indoors
+  // ==========================================
+
+  const cancelNavigation = useCallback(() => {
+    // Clear active navigation route and targets
+    setRoute([]);
+    setDestination(null);
+    setTargetEntrance(null);
+    setTargetStair(null);
+    setFloorTransition({
+      open: false,
+      currentFloor: null,
+      nextFloor: null,
+      transitionId: null,
+      transitionType: null,
+    });
+    setPendingFloorTransition(null);
+
+    // Determine context (Indoors vs Outdoors)
+    // 1. currentBuilding from GPS building polygon detection, OR
+    // 2. navigationStage has entered an indoor floor stage (!== OUTDOOR)
+    const isIndoors =
+      Boolean(currentBuilding) || navigationStage !== NAVIGATION_STAGE.OUTDOOR;
+
+    const indoorBuilding =
+      currentBuilding ||
+      (navigationStage !== NAVIGATION_STAGE.OUTDOOR ? selectedBuilding : null);
+
+    if (isIndoors && indoorBuilding) {
+      // Case B: User is indoors and their building and floor are known
+      const activeFloor =
+        userFloor !== null && userFloor !== undefined
+          ? Number(userFloor)
+          : Number(currentFloor ?? 0);
+
+      const activeStage = getNavigationStageForFloor(activeFloor);
+
+      setSelectedBuilding(indoorBuilding);
+      setCurrentFloor(activeFloor);
+      setNavigationStage(activeStage);
+    } else {
+      // Case A: User is outdoors
+      setSelectedBuilding(null);
+      setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
+    }
+  }, [
+    currentBuilding,
+    navigationStage,
+    selectedBuilding,
+    currentFloor,
+    userFloor,
+  ]);
+
+  // ==========================================
+  // Complete Navigation (Destination Reached)
+  // ==========================================
+
+  const completeNavigation = useCallback((options = {}) => {
+    setRoute([]);
+    setDestination(null);
+    setTargetEntrance(null);
+    setTargetStair(null);
+    setFloorTransition({
+      open: false,
+      currentFloor: null,
+      nextFloor: null,
+      transitionId: null,
+      transitionType: null,
+    });
+    setPendingFloorTransition(null);
+
+    // If explicit building / stage / floor options are provided, apply them
+    if (options.building !== undefined) {
+      setSelectedBuilding(options.building);
+    }
+    if (options.stage !== undefined) {
+      setNavigationStage(options.stage);
+    }
+    if (options.floor !== undefined && options.floor !== null) {
+      setCurrentFloor(Number(options.floor));
+    }
+    // Otherwise, current selectedBuilding, navigationStage, and currentFloor
+    // remain preserved, keeping indoor floor layers visible after arrival!
+  }, []);
+
   return (
     <NavigationContext.Provider
       value={{
@@ -442,6 +529,13 @@ export function NavigationProvider({ children }) {
         setPendingFloorTransition,
 
         confirmFloorTransition,
+
+        // ======================================
+        // Cancel / Complete Navigation
+        // ======================================
+
+        cancelNavigation,
+        completeNavigation,
       }}
     >
       {children}

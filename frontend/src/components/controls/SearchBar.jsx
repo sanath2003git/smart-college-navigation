@@ -12,7 +12,7 @@ import { selectBestTransition } from "../../navigation/transitionSelector";
 import { findRooms } from "../../services/roomService";
 import { getBuildingFromRoom } from "../../services/buildingRoomLookup";
 import { searchDestinations } from "../../services/searchService";
-
+import DestinationPanel from "./DestinationPanel";
 import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
@@ -675,6 +675,8 @@ export default function SearchBar() {
       console.log(
         "============================================"
       );
+      setSelectedDestination(null);
+      setQuery("");
     } catch (err) {
       console.error(
         "Search navigation error:",
@@ -811,9 +813,22 @@ export default function SearchBar() {
             </span>
           </button>
 
-        </div>
+                </div>
 
       </div>
+
+      <DestinationPanel
+        destination={selectedDestination}
+        currentLocation={currentLocation}
+        onStartNavigation={handleSearch}
+        onClose={() => {
+          setSelectedDestination(null);
+          setQuery("");
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }}
+      />
+
     </div>
   );
 }
