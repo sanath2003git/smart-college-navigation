@@ -353,6 +353,28 @@ export function NavigationProvider({ children }) {
   };
 
   // ==========================================
+  // Cancel Floor Transition
+  // ==========================================
+
+  const cancelFloorTransition = useCallback(() => {
+    console.log(
+      "Floor transition cancelled."
+    );
+
+    setFloorTransition({
+      open: false,
+      currentFloor: null,
+      nextFloor: null,
+      transitionId: null,
+      transitionType: null,
+    });
+
+    setPendingFloorTransition(
+      null
+    );
+  }, []);
+
+  // ==========================================
   // Cancel Navigation (Manual Cancellation)
   // Context-aware: preserves indoor building and floor if indoors
   // ==========================================
@@ -529,6 +551,9 @@ export function NavigationProvider({ children }) {
         setPendingFloorTransition,
 
         confirmFloorTransition,
+        cancelFloorTransition,
+
+        getNavigationStageForFloor,
 
         // ======================================
         // Cancel / Complete Navigation

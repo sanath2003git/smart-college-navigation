@@ -4,6 +4,7 @@ import LocateButton from "../controls/LocateButton";
 
 export default function PermanentLayers({
   handleBuildingClick,
+  activeBuilding = null,
 }) {
   return (
     <>
@@ -48,7 +49,12 @@ export default function PermanentLayers({
         url="/data/campus/buildings.geojson"
         interactive={true}
         onEachFeature={handleBuildingClick}
-        labelProperty="name"
+        labelProperty={(feat) => {
+          if (activeBuilding && feat?.properties?.name === activeBuilding) {
+            return null;
+          }
+          return feat?.properties?.name || null;
+        }}
         style={{
           color: "#4F8F8A",
           weight: 2,

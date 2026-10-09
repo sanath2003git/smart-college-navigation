@@ -33,6 +33,9 @@ import ThirdFloorLayers
 import FloorTransitionPrompt
   from "../../components/navigation/FloorTransitionPrompt";
 
+import FloorSelector
+  from "../../components/navigation/FloorSelector";
+
 import InitialFloorSelection
   from "../../components/navigation/InitialFloorSelection";
 
@@ -77,14 +80,22 @@ export default function CampusPage() {
   const {
     navigationStage,
     selectedBuilding,
+    currentBuilding,
+    currentFloor,
     route,
 
     floorTransition,
     confirmFloorTransition,
+    cancelFloorTransition,
 
     initialFloorSelection,
     confirmInitialFloorSelection,
   } = useNavigation();
+
+  const activeIndoorBuilding =
+    selectedBuilding ||
+    currentBuilding ||
+    (navigationStage !== NAVIGATION_STAGE.OUTDOOR ? "Mechanical Block" : null);
 
   const center = [
     8.9138,
@@ -322,7 +333,7 @@ export default function CampusPage() {
   // ==========================================
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
+    <div className="relative flex h-full w-full flex-col overflow-hidden">
 
       {/* =====================================
           Initial Floor Selection
@@ -345,6 +356,9 @@ export default function CampusPage() {
 
       {floorTransition.open && (
         <FloorTransitionPrompt
+          currentFloor={
+            floorTransition.currentFloor ?? currentFloor
+          }
           nextFloor={
             floorTransition.nextFloor
           }
@@ -354,8 +368,17 @@ export default function CampusPage() {
           onConfirm={
             confirmFloorTransition
           }
+          onCancel={
+            cancelFloorTransition
+          }
         />
       )}
+
+      {/* =====================================
+          Indoor Floor Navigation UI
+          ===================================== */}
+
+      <FloorSelector />
 
       {/* =====================================
           Leaflet Campus Map
@@ -395,6 +418,11 @@ export default function CampusPage() {
           handleBuildingClick={
             handleBuildingClick
           }
+          activeBuilding={
+            navigationStage !== NAVIGATION_STAGE.OUTDOOR
+              ? activeIndoorBuilding
+              : null
+          }
         />
 
         {/* ===================================
@@ -414,7 +442,7 @@ export default function CampusPage() {
           NAVIGATION_STAGE.GROUND_FLOOR && (
           <GroundFloorLayers
             building={
-              selectedBuilding
+              activeIndoorBuilding
             }
           />
         )}
@@ -427,7 +455,7 @@ export default function CampusPage() {
           NAVIGATION_STAGE.FIRST_FLOOR && (
           <FirstFloorLayers
             building={
-              selectedBuilding
+              activeIndoorBuilding
             }
           />
         )}
@@ -440,7 +468,7 @@ export default function CampusPage() {
           NAVIGATION_STAGE.SECOND_FLOOR && (
           <SecondFloorLayers
             building={
-              selectedBuilding
+              activeIndoorBuilding
             }
           />
         )}
@@ -453,7 +481,7 @@ export default function CampusPage() {
           NAVIGATION_STAGE.THIRD_FLOOR && (
           <ThirdFloorLayers
             building={
-              selectedBuilding
+              activeIndoorBuilding
             }
           />
         )}

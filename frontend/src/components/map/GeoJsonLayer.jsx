@@ -9,6 +9,7 @@ export default function GeoJsonLayer({
   onEachFeature,
   interactive = true,
   labelProperty = null,
+  labelClassName = "smartnav-building-label",
 }) {
   const [data, setData] = useState(null);
 
@@ -89,14 +90,14 @@ export default function GeoJsonLayer({
     }
 
     // ----------------------------------------
-    // Building label
+    // Feature label (Buildings or Rooms)
     // ----------------------------------------
 
     if (labelProperty) {
-      const label =
-        feature?.properties?.[
-          labelProperty
-        ];
+      const label = resolveLabel(
+        feature,
+        labelProperty
+      );
 
       if (label) {
         layer.bindTooltip(
@@ -105,7 +106,7 @@ export default function GeoJsonLayer({
             permanent: true,
             direction: "center",
             className:
-              "smartnav-building-label",
+              labelClassName || "smartnav-building-label",
             interactive: false,
             opacity: 1,
           }
@@ -116,6 +117,7 @@ export default function GeoJsonLayer({
 
   return (
     <GeoJSON
+      key={url}
       data={data}
       style={style}
       interactive={interactive}
@@ -128,4 +130,48 @@ export default function GeoJsonLayer({
       }
     />
   );
+}
+
+// ==========================================
+// Label Resolver Helper
+//
+// Resolves actual room number or room name
+// from feature properties.
+// ==========================================
+
+function resolveLabel(feature, prop) {
+  if (!feature || !feature.properties) return null;
+  const props = feature.properties;
+
+  if (typeof prop === "function") {
+    return prop(feature);
+  }
+
+  if (Array.isArray(prop)) {
+    for (const key of prop) {
+      const val = props[key];
+      if (val !== null && val !== undefined && String(val).trim() !== "") {
+        return String(val).trim();
+      }
+    }
+    return null;
+  }
+
+  if (typeof prop === "string") {
+    const directVal = props[prop];
+    if (directVal !== null && directVal !== undefined && String(directVal).trim() !== "") {
+      return String(directVal).trim();
+    }
+
+    // Fallback for room layers: if room_no is not present or null on this feature
+    // (e.g. stairs, lifts, corridors, porticos), fallback to name or room_name
+    if (prop === "room_no" || prop === "room" || prop === "room_name") {
+      const fallback = props.room_no || props.name || props.room_name;
+      if (fallback !== null && fallback !== undefined && String(fallback).trim() !== "") {
+        return String(fallback).trim();
+      }
+    }
+  }
+
+  return null;
 }
