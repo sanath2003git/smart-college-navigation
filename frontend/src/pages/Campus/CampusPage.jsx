@@ -45,23 +45,8 @@ import { loadGraphs }
 import { useNavigation }
   from "../../hooks/useNavigation";
 
-import { useNavigationStage }
-  from "../../hooks/useNavigationStage";
-
-import { useFloorTransition }
-  from "../../hooks/useFloorTransition";
-
-import { useDestinationArrival }
-  from "../../hooks/useDestinationArrival";
-
 import { NAVIGATION_STAGE }
   from "../../constants/navigationStages";
-
-import useCurrentBuilding
-  from "../../hooks/useCurrentBuilding";
-
-import useIndoorEntry
-  from "../../hooks/useIndoorEntry";
 
 import MapRotation
   from "../../components/map/MapRotation";  
@@ -96,19 +81,6 @@ export default function CampusPage() {
     76.6323,
   ];
 
-  // ==========================================
-  // Navigation / Building Detection Hooks
-  // ==========================================
-
-  useCurrentBuilding();
-
-  useIndoorEntry();
-
-  useNavigationStage();
-
-  useFloorTransition();
-
-  useDestinationArrival();
 
   // ==========================================
   // Building Interaction
