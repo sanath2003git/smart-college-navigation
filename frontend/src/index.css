@@ -2635,7 +2635,7 @@ button {
 
 .building-explorer-topbar {
   position: absolute;
-  top: 18px;
+  top: 76px;
   left: 18px;
   display: flex;
   align-items: center;
@@ -2680,20 +2680,39 @@ button {
   transform: translateX(-2px);
 }
 
-.building-explorer-floorsel {
+/* Building & Active Floor Tag in Topbar */
+.building-explorer-tag {
+  background: #ffffff;
+  border: 1px solid var(--sn-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(20, 33, 55, 0.14);
+  padding: 5px 14px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: auto;
 }
 
-.building-explorer-floorsel .floor-selector {
-  position: static;
-  box-shadow: 0 8px 20px rgba(20, 33, 55, 0.14);
+.bet-title {
+  font-family: 'Archivo', Inter, sans-serif;
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--sn-navy);
+  line-height: 1.25;
 }
 
-.building-explorer-floorsel .building-tag2 {
-  position: static;
-  box-shadow: 0 8px 20px rgba(20, 33, 55, 0.14);
+.bet-floor {
+  font-size: 10px;
+  color: var(--sn-muted);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* Building Explorer Floor Selector (shares .m-floorsel and .m-floorsel-btn with campus map) */
+.building-explorer-floorsel {
+  top: 76px;
+  bottom: auto;
+  right: 14px;
 }
 
 /* Informational Overlay for Buildings Without Mapped Floor Data */
@@ -2780,7 +2799,7 @@ button {
   }
 
   .building-explorer-topbar {
-    top: 14px;
+    top: 76px;
     left: 14px;
     gap: 8px;
   }
@@ -2792,13 +2811,27 @@ button {
     border-radius: 8px;
   }
 
-  .building-explorer-m-floorsel .m-buildingtag {
-    top: 14px;
-    left: 130px;
+  .building-explorer-tag {
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+
+  .bet-title {
+    font-size: 11px;
+  }
+
+  .bet-floor {
+    font-size: 9px;
+  }
+
+  .building-explorer-floorsel {
+    top: 76px;
+    bottom: auto;
+    right: 14px;
   }
 
   .building-no-data-overlay {
-    top: 62px;
+    top: 124px;
     left: 14px;
     right: 14px;
     width: auto;

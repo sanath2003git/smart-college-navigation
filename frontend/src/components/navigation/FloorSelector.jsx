@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../hooks/useNavigation";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
-const FLOORS = [
+export const FLOORS = [
   { value: 0, code: "GF", label: "Ground", name: "Ground Floor" },
   { value: 1, code: "FF", label: "First", name: "First Floor" },
   { value: 2, code: "SF", label: "Second", name: "Second Floor" },
-  { value: 3, code: "TF", label: "Third", name: "Third Floor" },
+  { value: 3, code: "TF", label: "Top", name: "Top Floor" },
 ];
 
 export default function FloorSelector({
@@ -48,10 +48,6 @@ export default function FloorSelector({
     }
 
     const activeFloorNum = Number(activeFloor ?? 0);
-    const currentFloorObj =
-      floorsToDisplay.find((f) => f.value === activeFloorNum) ||
-      floorsToDisplay[0] ||
-      FLOORS[0];
 
     const exploreBuildingName =
       typeof building === "string"
@@ -65,122 +61,29 @@ export default function FloorSelector({
       }
     };
 
-    const desktopSubtitle =
-      activeFloorNum === 0
-        ? "Ground Floor · Indoor Map"
-        : `${currentFloorObj.name} · Indoor Map`;
-
-    const mobileSubtitle =
-      activeFloorNum === 0
-        ? "Ground Floor"
-        : currentFloorObj.name;
-
     return (
-      <>
-        {/* DESKTOP INDOOR FLOOR NAV (EXPLORATION) */}
-        <div className="smartnav-desktop-indoor-ui building-explorer-floorsel">
-          {/* Horizontal Floor Selector */}
-          <div className="floor-selector" role="toolbar" aria-label="Indoor floor selector">
-            {floorsToDisplay.map((f) => {
-              const isActive = f.value === activeFloorNum;
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  onClick={() => handleExploreFloorSelect(f.value)}
-                  className={`fs-item ${isActive ? "active" : ""}`}
-                  aria-pressed={isActive}
-                  aria-label={`Switch to ${f.name}`}
-                >
-                  <div className="n">{f.code}</div>
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Building Tag */}
-          <div className="building-tag2">
-            <div className="n">{exploreBuildingName}</div>
-            <div className="s">{desktopSubtitle}</div>
-          </div>
-
-          {/* Indoor Map Legend */}
-          <div className="plan-legend">
-            <div className="pl-row">
-              <div className="sw2" style={{ background: "#E9A400" }} />
-              Active route
-            </div>
-            <div className="pl-row">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 21V9l8-6 8 6v12" />
-                <path d="M9 21v-6h6v6" />
-              </svg>
-              Destination room
-            </div>
-            <div className="pl-row">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 21h4v-4h4v-4h4V9h4V3" />
-              </svg>
-              Staircase
-            </div>
-            <div className="pl-row">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 21c-4.4-3.6-7-7-7-10a7 7 0 1 1 14 0c0 3-2.6 6.4-7 10z" />
-                <circle cx="12" cy="11" r="2.4" />
-              </svg>
-              Your position
-            </div>
-          </div>
-        </div>
-
-        {/* MOBILE INDOOR FLOOR NAV (EXPLORATION) */}
-        <div className="smartnav-mobile-indoor-ui building-explorer-m-floorsel">
-          <div className="m-buildingtag">
-            <div className="n">{exploreBuildingName}</div>
-            <div className="s">{mobileSubtitle}</div>
-          </div>
-
-          <div className="m-floorsel" role="toolbar" aria-label="Mobile floor selector">
-            {floorsToDisplay.map((f) => {
-              const isActive = f.value === activeFloorNum;
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  onClick={() => handleExploreFloorSelect(f.value)}
-                  className={`m-floorsel-btn ${isActive ? "active" : ""}`}
-                  aria-pressed={isActive}
-                  aria-label={`Switch to ${f.name}`}
-                >
-                  {f.code}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </>
+      <div
+        className="m-floorsel building-explorer-floorsel"
+        role="toolbar"
+        aria-label={`${exploreBuildingName} floor selector`}
+      >
+        {floorsToDisplay.map((f) => {
+          const isActive = f.value === activeFloorNum;
+          return (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => handleExploreFloorSelect(f.value)}
+              className={`m-floorsel-btn ${isActive ? "active" : ""}`}
+              aria-pressed={isActive}
+              aria-label={`Switch to ${f.name}`}
+              title={f.name}
+            >
+              {f.code}
+            </button>
+          );
+        })}
+      </div>
     );
   }
 

@@ -10,7 +10,7 @@ import GroundFloorLayers from "../layers/GroundFloorLayers";
 import FirstFloorLayers from "../layers/FirstFloorLayers";
 import SecondFloorLayers from "../layers/SecondFloorLayers";
 import ThirdFloorLayers from "../layers/ThirdFloorLayers";
-import FloorSelector from "../navigation/FloorSelector";
+import FloorSelector, { FLOORS } from "../navigation/FloorSelector";
 import { BUILDING_CONFIGS } from "../../constants/buildingConfigs";
 
 /**
@@ -121,6 +121,9 @@ export default function BuildingFloorExplorer({ buildingName }) {
     setSelectedFloor(config.defaultFloor ?? 0);
   }, [buildingName, config.defaultFloor]);
 
+  const currentFloorObj =
+    FLOORS.find((f) => f.value === selectedFloor) || FLOORS[0];
+
   /**
    * Handle building polygon interaction in building explorer.
    * Navigates to a different building's page when clicked/tapped, while
@@ -182,7 +185,7 @@ export default function BuildingFloorExplorer({ buildingName }) {
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       {/* =======================================================
-          TOP BAR CONTROLS (Back to Campus + Reused FloorSelector)
+          TOP BAR CONTROLS (Back to Campus + Building Floor Tag)
       ======================================================= */}
       <div className="building-explorer-topbar">
         <button
@@ -195,17 +198,30 @@ export default function BuildingFloorExplorer({ buildingName }) {
           <span>Campus Map</span>
         </button>
 
-        {/* Display shared FloorSelector only for buildings with floor data */}
+        {/* Building & Active Floor Tag for Buildings with Floor Data */}
         {hasFloorData && (
-          <FloorSelector
-            mode="explore"
-            building={config.name}
-            availableFloors={config.availableFloors}
-            activeFloor={selectedFloor}
-            onFloorChange={setSelectedFloor}
-          />
+          <div className="building-explorer-tag">
+            <div className="bet-title">{config.name}</div>
+            <div className="bet-floor">
+              {currentFloorObj ? currentFloorObj.name : "Ground Floor"} · Indoor Map
+            </div>
+          </div>
         )}
       </div>
+
+      {/* =======================================================
+          VERTICAL FLOOR SELECTOR (Buildings with floor data)
+          Rendered over the map along the right side
+      ======================================================= */}
+      {hasFloorData && (
+        <FloorSelector
+          mode="explore"
+          building={config.name}
+          availableFloors={config.availableFloors}
+          activeFloor={selectedFloor}
+          onFloorChange={setSelectedFloor}
+        />
+      )}
 
       {/* =======================================================
           INFORMATIONAL OVERLAY (Buildings without floor data)
@@ -237,6 +253,7 @@ export default function BuildingFloorExplorer({ buildingName }) {
         maxBounds={config.bounds}
         maxBoundsViscosity={1.0}
         inertia={false}
+        zoomControl={false}
         rotate={true}
         bearing={0}
         touchRotate={false}
