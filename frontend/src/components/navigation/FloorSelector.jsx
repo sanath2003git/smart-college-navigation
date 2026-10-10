@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigation } from "../../hooks/useNavigation";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
 
@@ -8,7 +9,11 @@ const FLOORS = [
   { value: 3, code: "TF", label: "Third", name: "Third Floor" },
 ];
 
-export default function FloorSelector() {
+export default function FloorSelector({
+  building,
+  onConfirm,
+  onCancel,
+} = {}) {
   const {
     navigationStage,
     setNavigationStage,
@@ -18,14 +23,31 @@ export default function FloorSelector() {
     currentFloor,
     setCurrentFloor,
     getNavigationStageForFloor,
+    initialFloorSelection,
+    confirmInitialFloorSelection,
+    cancelInitialFloorSelection,
   } = useNavigation();
 
-  // Only render when inside an indoor floor view
+  // Local state for initial floor selection (starts at null to prevent premature default)
+  const [selectedInitialFloor, setSelectedInitialFloor] = useState(null);
+
+  const isInitialOpen = initialFloorSelection?.open;
+
+  // Reset selectedInitialFloor to null whenever the initial selection prompt opens
+  useEffect(() => {
+    if (isInitialOpen) {
+      setSelectedInitialFloor(null);
+    }
+  }, [isInitialOpen]);
+
   const isIndoor = navigationStage !== NAVIGATION_STAGE.OUTDOOR;
-  if (!isIndoor) {
+
+  // Do not render if outdoors and no initial floor selection is open
+  if (!isIndoor && !isInitialOpen) {
     return null;
   }
 
+  // Determine building name
   const buildingName =
     typeof selectedBuilding === "string"
       ? selectedBuilding
@@ -33,6 +55,223 @@ export default function FloorSelector() {
         currentBuilding ||
         "Mechanical Block";
 
+  const initialBuilding =
+    building ||
+    initialFloorSelection?.building ||
+    selectedBuilding ||
+    currentBuilding ||
+    "Mechanical Block";
+
+  const initialBuildingName =
+    typeof initialBuilding === "string"
+      ? initialBuilding
+      : initialBuilding?.properties?.name || "Mechanical Block";
+
+  // Initial floor selection confirm & cancel handlers
+  const handleConfirmInitial = () => {
+    if (selectedInitialFloor === null || selectedInitialFloor === undefined) {
+      return;
+    }
+    if (onConfirm) {
+      onConfirm(selectedInitialFloor);
+    } else if (confirmInitialFloorSelection) {
+      confirmInitialFloorSelection(selectedInitialFloor);
+    }
+  };
+
+  const handleCancelInitial = () => {
+    if (onCancel) {
+      onCancel();
+    } else if (cancelInitialFloorSelection) {
+      cancelInitialFloorSelection();
+    }
+  };
+
+  // =========================================================
+  // INITIAL FLOOR SELECTION MODE
+  // Screen 4 styling integrated into unified FloorSelector
+  // =========================================================
+  if (isInitialOpen) {
+    const selectedFloorObj = FLOORS.find(
+      (f) => f.value === selectedInitialFloor
+    );
+
+    return (
+      <>
+        {/* =====================================================
+            Desktop Initial Floor Selection Modal (Screen 4 UI)
+        ===================================================== */}
+        <div
+          className="ft-overlay smartnav-desktop-ft"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && handleCancelInitial) {
+              handleCancelInitial();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="init-floor-title-desktop"
+        >
+          <div className="ft-card init-floor-card">
+            <div className="init-floor-header">
+              <div className="init-floor-badge-icon" aria-hidden="true">
+                <BuildingIcon />
+              </div>
+              <button
+                type="button"
+                className="ft-close-btn"
+                onClick={handleCancelInitial}
+                aria-label="Dismiss floor selection"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div id="init-floor-title-desktop" className="init-floor-title">
+              You're inside {initialBuildingName}
+            </div>
+
+            <p className="init-floor-desc">
+              Select your current floor to start indoor navigation.
+            </p>
+
+            {/* Reused FloorSelector buttons matching Screen 4 */}
+            <div className="init-floor-selector-container">
+              <div
+                className="floor-selector init-inline-floorsel"
+                role="radiogroup"
+                aria-label="Floor selection"
+              >
+                {FLOORS.map((f) => {
+                  const isSelected = selectedInitialFloor === f.value;
+                  return (
+                    <button
+                      key={f.value}
+                      type="button"
+                      onClick={() => setSelectedInitialFloor(f.value)}
+                      className={`fs-item ${isSelected ? "active" : ""}`}
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={`Select ${f.name}`}
+                    >
+                      <div className="n">{f.code}</div>
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Selected floor summary */}
+            <div className="init-floor-preview">
+              <div className="ifp-label">Selected Floor</div>
+              <div className="ifp-value">
+                {selectedFloorObj ? selectedFloorObj.name : "None selected"}
+              </div>
+            </div>
+
+            {/* Confirm / Continue button */}
+            <button
+              type="button"
+              className="ft-btn"
+              disabled={selectedInitialFloor === null}
+              onClick={handleConfirmInitial}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+
+        {/* =====================================================
+            Mobile Initial Floor Selection Sheet (Screen 4 UI)
+        ===================================================== */}
+        <div
+          className="m-ft-overlay smartnav-mobile-ft"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && handleCancelInitial) {
+              handleCancelInitial();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="init-floor-title-mobile"
+        >
+          <div className="m-ft-sheet init-floor-sheet">
+            <div className="m-handle" />
+
+            <div className="init-floor-header">
+              <div className="init-floor-badge-icon" aria-hidden="true">
+                <BuildingIcon />
+              </div>
+              <button
+                type="button"
+                className="ft-close-btn"
+                onClick={handleCancelInitial}
+                aria-label="Dismiss floor selection"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div id="init-floor-title-mobile" className="init-floor-title">
+              You're inside {initialBuildingName}
+            </div>
+
+            <p className="init-floor-desc">
+              Select your current floor to start indoor navigation.
+            </p>
+
+            {/* Mobile Floor Selection Buttons */}
+            <div className="init-floor-selector-container">
+              <div
+                className="floor-selector init-inline-floorsel"
+                role="radiogroup"
+                aria-label="Floor selection"
+              >
+                {FLOORS.map((f) => {
+                  const isSelected = selectedInitialFloor === f.value;
+                  return (
+                    <button
+                      key={f.value}
+                      type="button"
+                      onClick={() => setSelectedInitialFloor(f.value)}
+                      className={`fs-item ${isSelected ? "active" : ""}`}
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={`Select ${f.name}`}
+                    >
+                      <div className="n">{f.code}</div>
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="init-floor-preview">
+              <div className="ifp-label">Selected Floor</div>
+              <div className="ifp-value">
+                {selectedFloorObj ? selectedFloorObj.name : "None selected"}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="ft-btn"
+              disabled={selectedInitialFloor === null}
+              onClick={handleConfirmInitial}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // =========================================================
+  // NORMAL INDOOR FLOOR SELECTION MODE
+  // =========================================================
   const activeFloorNum = Number(currentFloor ?? 0);
   const currentFloorObj =
     FLOORS.find((f) => f.value === activeFloorNum) || FLOORS[0];
@@ -189,4 +428,46 @@ function getStageFallback(floor) {
     default:
       return NAVIGATION_STAGE.GROUND_FLOOR;
   }
+}
+
+function BuildingIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="24"
+      height="24"
+    >
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" />
+      <path d="M16 6h.01" />
+      <path d="M8 10h.01" />
+      <path d="M16 10h.01" />
+      <path d="M8 14h.01" />
+      <path d="M16 14h.01" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="18"
+      height="18"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
 }

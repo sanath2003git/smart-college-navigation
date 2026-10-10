@@ -36,9 +36,6 @@ import FloorTransitionPrompt
 import FloorSelector
   from "../../components/navigation/FloorSelector";
 
-import InitialFloorSelection
-  from "../../components/navigation/InitialFloorSelection";
-
 import RouteLayer
   from "../../components/map/RouteLayer";
 
@@ -87,9 +84,6 @@ export default function CampusPage() {
     floorTransition,
     confirmFloorTransition,
     cancelFloorTransition,
-
-    initialFloorSelection,
-    confirmInitialFloorSelection,
   } = useNavigation();
 
   const activeIndoorBuilding =
@@ -334,21 +328,6 @@ export default function CampusPage() {
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
-
-      {/* =====================================
-          Initial Floor Selection
-          ===================================== */}
-
-      {initialFloorSelection.open && (
-        <InitialFloorSelection
-          building={
-            initialFloorSelection.building
-          }
-          onConfirm={
-            confirmInitialFloorSelection
-          }
-        />
-      )}
 
       {/* =====================================
           Floor Transition Prompt
