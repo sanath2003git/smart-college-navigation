@@ -25,6 +25,8 @@ export default function GroundFloorLayers({
           <GeoJsonLayer
             url="/data/chemical/ground_floor/rooms.geojson"
             interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
             style={{
               color: "#388095",
               weight: 1,
@@ -53,6 +55,8 @@ export default function GroundFloorLayers({
           <GeoJsonLayer
             url="/data/mechanical/ground_floor/rooms.geojson"
             interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
             style={{
               color: "#388095",
               weight: 1,

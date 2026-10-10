@@ -26,6 +26,8 @@ export default function FirstFloorLayers({
           <GeoJsonLayer
             url="/data/chemical/first_floor/rooms.geojson"
             interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
             style={{
               color: "#00acc1",
               weight: 1,
@@ -57,6 +59,8 @@ export default function FirstFloorLayers({
           <GeoJsonLayer
             url="/data/mechanical/first_floor/rooms.geojson"
             interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
             style={{
               color: "#388095",
               weight: 1,

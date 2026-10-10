@@ -26,6 +26,8 @@ export default function SecondFloorLayers({
           <GeoJsonLayer
             url="/data/mechanical/second_floor/rooms.geojson"
             interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
             style={{
               color: "#388095",
               weight: 1,
