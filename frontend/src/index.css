@@ -2629,6 +2629,147 @@ button {
   transform: none !important;
 }
 
+/* =========================================================
+   BUILDING FLOOR EXPLORER
+========================================================= */
+
+.building-explorer-topbar {
+  position: absolute;
+  top: 76px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1100;
+  pointer-events: auto;
+}
+
+.smartnav-back-to-campus-btn {
+  height: 40px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--sn-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(20, 33, 55, 0.14);
+  color: var(--sn-navy);
+  font-family: 'Archivo', Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.smartnav-back-to-campus-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--sn-navy-deep);
+  transition: transform 0.15s ease;
+}
+
+.smartnav-back-to-campus-btn:hover {
+  background: var(--sn-paper);
+  color: var(--sn-navy-deep);
+  border-color: #cbd5e1;
+}
+
+.smartnav-back-to-campus-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+/* Building & Active Floor Tag in Topbar */
+.building-explorer-tag {
+  background: #ffffff;
+  border: 1px solid var(--sn-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(20, 33, 55, 0.14);
+  padding: 5px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.bet-title {
+  font-family: 'Archivo', Inter, sans-serif;
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--sn-navy);
+  line-height: 1.25;
+}
+
+.bet-floor {
+  font-size: 10px;
+  color: var(--sn-muted);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* Building Explorer Floor Selector (shares .m-floorsel and .m-floorsel-btn with campus map) */
+.building-explorer-floorsel {
+  top: 76px;
+  bottom: auto;
+  right: 14px;
+}
+
+/* Informational Overlay for Buildings Without Mapped Floor Data */
+.building-no-data-overlay {
+  position: absolute;
+  top: 72px;
+  left: 18px;
+  width: 320px;
+  max-width: calc(100vw - 36px);
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 14px 34px rgba(20, 33, 55, 0.18);
+  border: 1px solid var(--sn-line);
+  z-index: 1100;
+  pointer-events: auto;
+  animation: ftCardPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bndo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bndo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(14, 79, 99, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bndo-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--sn-navy-deep);
+}
+
+.bndo-title {
+  font-family: 'Archivo', Inter, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--sn-navy);
+  line-height: 1.2;
+}
+
+.bndo-desc {
+  font-size: 12px;
+  color: var(--sn-muted);
+  margin-top: 10px;
+  line-height: 1.45;
+}
+
 /* Responsive UI toggles */
 .smartnav-desktop-indoor-ui,
 .smartnav-desktop-ft {
@@ -2656,4 +2797,54 @@ button {
   .smartnav-mobile-ft {
     display: block !important;
   }
-}
+
+  .building-explorer-topbar {
+    top: 76px;
+    left: 14px;
+    gap: 8px;
+  }
+
+  .smartnav-back-to-campus-btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .building-explorer-tag {
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+
+  .bet-title {
+    font-size: 11px;
+  }
+
+  .bet-floor {
+    font-size: 9px;
+  }
+
+  .building-explorer-floorsel {
+    top: 76px;
+    bottom: auto;
+    right: 14px;
+  }
+
+  .building-no-data-overlay {
+    top: 124px;
+    left: 14px;
+    right: 14px;
+    width: auto;
+    padding: 14px 16px;
+  }
+}
+
+/* Building Polygon Interaction Affordances */
+.navigable-building-polygon {
+  cursor: pointer !important;
+}
+
+.active-building-polygon {
+  cursor: default !important;
+}
+
