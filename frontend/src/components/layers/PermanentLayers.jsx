@@ -5,6 +5,7 @@ import LocateButton from "../controls/LocateButton";
 export default function PermanentLayers({
   handleBuildingClick,
   activeBuilding = null,
+  showControls = true,
 }) {
   return (
     <>
@@ -55,12 +56,20 @@ export default function PermanentLayers({
           }
           return feat?.properties?.name || null;
         }}
-        style={{
-          color: "#4F8F8A",
-          weight: 2,
-          opacity: 1,
-          fillColor: "#A9CEC6",
-          fillOpacity: 1,
+        style={(feature) => {
+          const isActive =
+            activeBuilding &&
+            feature?.properties?.name === activeBuilding;
+          return {
+            color: isActive ? "#0E4F63" : "#4F8F8A",
+            weight: isActive ? 3 : 2,
+            opacity: 1,
+            fillColor: isActive ? "#82B8AE" : "#A9CEC6",
+            fillOpacity: 1,
+            className: isActive
+              ? "active-building-polygon"
+              : "navigable-building-polygon",
+          };
         }}
       />
 
@@ -74,7 +83,7 @@ export default function PermanentLayers({
           Locate Button
           ===================================== */}
 
-      <LocateButton />
+      {showControls && <LocateButton />}
     </>
   );
 }

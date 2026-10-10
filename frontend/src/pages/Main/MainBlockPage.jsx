@@ -1,3 +1,5 @@
+import BuildingFloorExplorer from "../../components/building/BuildingFloorExplorer";
+
 export default function MainBlockPage() {
-  return <h1>Main Block</h1>;
+  return <BuildingFloorExplorer buildingName="Main Block" />;
 }

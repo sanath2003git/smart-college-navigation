@@ -10,7 +10,11 @@ const FLOORS = [
 ];
 
 export default function FloorSelector({
+  mode = "navigation",
   building,
+  availableFloors = null,
+  activeFloor = null,
+  onFloorChange = null,
   onConfirm,
   onCancel,
 } = {}) {
@@ -27,6 +31,162 @@ export default function FloorSelector({
     confirmInitialFloorSelection,
     cancelInitialFloorSelection,
   } = useNavigation();
+
+  // =========================================================
+  // EXPLORATION MODE (Building Floor Explorer)
+  // Used on dedicated building explorer pages.
+  // Independent of GPS, userFloor, navigationStage, and active routing.
+  // =========================================================
+  if (mode === "explore") {
+    const floorsToDisplay =
+      availableFloors && availableFloors.length > 0
+        ? FLOORS.filter((f) => availableFloors.includes(f.value))
+        : FLOORS;
+
+    if (floorsToDisplay.length === 0) {
+      return null;
+    }
+
+    const activeFloorNum = Number(activeFloor ?? 0);
+    const currentFloorObj =
+      floorsToDisplay.find((f) => f.value === activeFloorNum) ||
+      floorsToDisplay[0] ||
+      FLOORS[0];
+
+    const exploreBuildingName =
+      typeof building === "string"
+        ? building
+        : building?.properties?.name || "Building";
+
+    const handleExploreFloorSelect = (floorNum) => {
+      if (floorNum === activeFloorNum) return;
+      if (onFloorChange) {
+        onFloorChange(floorNum);
+      }
+    };
+
+    const desktopSubtitle =
+      activeFloorNum === 0
+        ? "Ground Floor · Indoor Map"
+        : `${currentFloorObj.name} · Indoor Map`;
+
+    const mobileSubtitle =
+      activeFloorNum === 0
+        ? "Ground Floor"
+        : currentFloorObj.name;
+
+    return (
+      <>
+        {/* DESKTOP INDOOR FLOOR NAV (EXPLORATION) */}
+        <div className="smartnav-desktop-indoor-ui building-explorer-floorsel">
+          {/* Horizontal Floor Selector */}
+          <div className="floor-selector" role="toolbar" aria-label="Indoor floor selector">
+            {floorsToDisplay.map((f) => {
+              const isActive = f.value === activeFloorNum;
+              return (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => handleExploreFloorSelect(f.value)}
+                  className={`fs-item ${isActive ? "active" : ""}`}
+                  aria-pressed={isActive}
+                  aria-label={`Switch to ${f.name}`}
+                >
+                  <div className="n">{f.code}</div>
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Building Tag */}
+          <div className="building-tag2">
+            <div className="n">{exploreBuildingName}</div>
+            <div className="s">{desktopSubtitle}</div>
+          </div>
+
+          {/* Indoor Map Legend */}
+          <div className="plan-legend">
+            <div className="pl-row">
+              <div className="sw2" style={{ background: "#E9A400" }} />
+              Active route
+            </div>
+            <div className="pl-row">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 21V9l8-6 8 6v12" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
+              Destination room
+            </div>
+            <div className="pl-row">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 21h4v-4h4v-4h4V9h4V3" />
+              </svg>
+              Staircase
+            </div>
+            <div className="pl-row">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 21c-4.4-3.6-7-7-7-10a7 7 0 1 1 14 0c0 3-2.6 6.4-7 10z" />
+                <circle cx="12" cy="11" r="2.4" />
+              </svg>
+              Your position
+            </div>
+          </div>
+        </div>
+
+        {/* MOBILE INDOOR FLOOR NAV (EXPLORATION) */}
+        <div className="smartnav-mobile-indoor-ui building-explorer-m-floorsel">
+          <div className="m-buildingtag">
+            <div className="n">{exploreBuildingName}</div>
+            <div className="s">{mobileSubtitle}</div>
+          </div>
+
+          <div className="m-floorsel" role="toolbar" aria-label="Mobile floor selector">
+            {floorsToDisplay.map((f) => {
+              const isActive = f.value === activeFloorNum;
+              return (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => handleExploreFloorSelect(f.value)}
+                  className={`m-floorsel-btn ${isActive ? "active" : ""}`}
+                  aria-pressed={isActive}
+                  aria-label={`Switch to ${f.name}`}
+                >
+                  {f.code}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // =========================================================
+  // NAVIGATION MODE (Live Campus Navigation & Detection)
+  // =========================================================
 
   // Local state for initial floor selection (starts at null to prevent premature default)
   const [selectedInitialFloor, setSelectedInitialFloor] = useState(null);
@@ -89,7 +249,6 @@ export default function FloorSelector({
 
   // =========================================================
   // INITIAL FLOOR SELECTION MODE
-  // Screen 4 styling integrated into unified FloorSelector
   // =========================================================
   if (isInitialOpen) {
     const selectedFloorObj = FLOORS.find(
@@ -98,9 +257,7 @@ export default function FloorSelector({
 
     return (
       <>
-        {/* =====================================================
-            Desktop Initial Floor Selection Modal (Screen 4 UI)
-        ===================================================== */}
+        {/* Desktop Initial Floor Selection Modal */}
         <div
           className="ft-overlay smartnav-desktop-ft"
           onClick={(e) => {
@@ -182,9 +339,7 @@ export default function FloorSelector({
           </div>
         </div>
 
-        {/* =====================================================
-            Mobile Initial Floor Selection Sheet (Screen 4 UI)
-        ===================================================== */}
+        {/* Mobile Initial Floor Selection Sheet */}
         <div
           className="m-ft-overlay smartnav-mobile-ft"
           onClick={(e) => {
@@ -270,7 +425,7 @@ export default function FloorSelector({
   }
 
   // =========================================================
-  // NORMAL INDOOR FLOOR SELECTION MODE
+  // NORMAL INDOOR FLOOR SELECTION MODE (CampusPage Live Nav)
   // =========================================================
   const activeFloorNum = Number(currentFloor ?? 0);
   const currentFloorObj =
@@ -302,9 +457,7 @@ export default function FloorSelector({
 
   return (
     <>
-      {/* =========================================================
-          DESKTOP INDOOR FLOOR NAV (Screen 4)
-      ========================================================= */}
+      {/* DESKTOP INDOOR FLOOR NAV */}
       <div className="smartnav-desktop-indoor-ui">
         {/* Horizontal Floor Selector */}
         <div className="floor-selector" role="toolbar" aria-label="Indoor floor selector">
@@ -382,9 +535,7 @@ export default function FloorSelector({
         </div>
       </div>
 
-      {/* =========================================================
-          MOBILE INDOOR FLOOR NAV (Screen 4 Mobile)
-      ========================================================= */}
+      {/* MOBILE INDOOR FLOOR NAV */}
       <div className="smartnav-mobile-indoor-ui">
         {/* Mobile Building Tag */}
         <div className="m-buildingtag">
