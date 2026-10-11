@@ -1,15 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { useNavigation } from "./useNavigation";
 
 import { shouldEnterBuilding } from "../navigation/navigationStageManager";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
+import { BUILDING_CONFIGS } from "../constants/buildingConfigs";
 import { navigate } from "../navigation/navigationRouter";
 import { speak } from "../services/voiceService";
 import { selectBestTransition } from "../navigation/transitionSelector";
 import { findStairById } from "../services/stairService";
 
 export function useNavigationStage() {
+  const routerNavigate = useNavigate();
+  const location = useLocation();
+
   const {
     currentLocation,
 
@@ -24,11 +29,21 @@ export function useNavigationStage() {
     navigationStage,
     setNavigationStage,
 
+    setSelectedBuilding,
+
     // IMPORTANT:
     // Store the selected stair/lift in navigation state
     // so useFloorTransition can use it.
     setTargetStair,
   } = useNavigation();
+
+  const handoffInProgressRef = useRef(false);
+
+  useEffect(() => {
+    if (navigationStage !== NAVIGATION_STAGE.OUTDOOR) {
+      handoffInProgressRef.current = false;
+    }
+  }, [navigationStage, destination]);
 
   useEffect(() => {
     async function handleStageTransition() {
@@ -149,6 +164,12 @@ export function useNavigationStage() {
       if (!reachedEntrance) {
         return;
       }
+
+      if (handoffInProgressRef.current) {
+        return;
+      }
+
+      handoffInProgressRef.current = true;
 
       // -----------------------------------
       // Entrance reached
@@ -326,6 +347,8 @@ export function useNavigationStage() {
           "Failed to calculate Ground Floor route."
         );
 
+        handoffInProgressRef.current = false;
+
         return;
       }
 
@@ -373,9 +396,38 @@ export function useNavigationStage() {
         NAVIGATION_STAGE.GROUND_FLOOR
       );
 
+      if (typeof setSelectedBuilding === "function") {
+        setSelectedBuilding(building);
+      }
+
       console.log(
         "Navigation stage changed to GROUND_FLOOR"
       );
+
+      // ===================================
+      // Destination Building Page Handoff
+      // ===================================
+
+      const buildingConfig = building ? BUILDING_CONFIGS[building] : null;
+      const targetRoute = buildingConfig?.route;
+      const hasFloorData = Boolean(
+        buildingConfig?.hasFloorData &&
+        Array.isArray(buildingConfig.availableFloors) &&
+        buildingConfig.availableFloors.length > 0
+      );
+
+      if (targetRoute && hasFloorData) {
+        console.log(
+          `Entrance handoff: Navigating to building page ${targetRoute}`
+        );
+        if (location.pathname !== targetRoute) {
+          routerNavigate(targetRoute);
+        }
+      } else {
+        console.log(
+          `Entrance handoff: Building ${building} has no supported building page with floor data. Preserving current page.`
+        );
+      }
     }
 
     handleStageTransition();
@@ -388,5 +440,8 @@ export function useNavigationStage() {
     setNavigationStage,
     setRoute,
     setTargetStair,
+    setSelectedBuilding,
+    routerNavigate,
+    location.pathname,
   ]);
 }

@@ -9,7 +9,10 @@ import {
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
 
 import { aStar } from "./astar";
-import { findNearestNode } from "./findNearestNode";
+import {
+  findNearestNode,
+  findGoalNodeForFeature,
+} from "./findNearestNode";
 
 import { findRooms } from "../services/roomService";
 
@@ -315,16 +318,10 @@ async function findBestTransitionRoute({
       continue;
     }
 
-    const [
-      lng,
-      lat,
-    ] = feature.geometry.coordinates;
-
     const goalNode =
-      findNearestNode(
+      findGoalNodeForFeature(
         graph,
-        lat,
-        lng
+        feature
       );
 
     if (!goalNode) {
@@ -546,17 +543,10 @@ async function navigateGroundFloor(
     targetFeature
   );
 
-  const [
-    goalLng,
-    goalLat,
-  ] =
-    targetFeature.geometry.coordinates;
-
   const goalNode =
-    findNearestNode(
+    findGoalNodeForFeature(
       graph,
-      goalLat,
-      goalLng
+      targetFeature
     );
 
   console.log(
@@ -719,17 +709,10 @@ async function navigateFloor({
     return null;
   }
 
-  const [
-    goalLng,
-    goalLat,
-  ] =
-    destination.geometry.coordinates;
-
   const goalNode =
-    findNearestNode(
+    findGoalNodeForFeature(
       graph,
-      goalLat,
-      goalLng
+      destination
     );
 
   console.log(

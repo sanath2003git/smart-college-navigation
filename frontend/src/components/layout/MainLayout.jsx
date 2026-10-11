@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import SearchBar from "../controls/SearchBar";
 import ActiveNavigationPanel from "../navigation/ActiveNavigationPanel";
+import NavigationLifecycleController from "../navigation/NavigationLifecycleController";
 import { useNavigation } from "../../hooks/useNavigation";
 
 export default function MainLayout({ children }) {
@@ -9,6 +10,7 @@ export default function MainLayout({ children }) {
 
   return (
     <div className="smartnav-app">
+      <NavigationLifecycleController />
       <Navbar />
 
       <main className="smartnav-content">
