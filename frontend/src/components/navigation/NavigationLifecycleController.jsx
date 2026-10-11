@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import useCurrentBuilding from "../../hooks/useCurrentBuilding";
 import useIndoorEntry from "../../hooks/useIndoorEntry";
 import { useNavigationStage } from "../../hooks/useNavigationStage";
 import { useFloorTransition } from "../../hooks/useFloorTransition";
 import { useDestinationArrival } from "../../hooks/useDestinationArrival";
+import { useLocation } from "../../hooks/useLocation";
+import { useNavigation } from "../../hooks/useNavigation";
 
 /**
  * Headless controller that manages navigation lifecycle hooks across routes.
@@ -12,6 +15,21 @@ import { useDestinationArrival } from "../../hooks/useDestinationArrival";
  * continue executing seamlessly across React Router page changes (e.g. '/' and building routes).
  */
 export default function NavigationLifecycleController() {
+  const { rawLocation } = useLocation();
+  const { setCurrentLocation, currentLocation } = useNavigation();
+
+  // Continuously sync raw GPS location into navigation context across all pages
+  useEffect(() => {
+    if (
+      rawLocation &&
+      (!currentLocation ||
+        currentLocation.lat !== rawLocation.lat ||
+        currentLocation.lng !== rawLocation.lng)
+    ) {
+      setCurrentLocation(rawLocation);
+    }
+  }, [rawLocation, currentLocation, setCurrentLocation]);
+
   useCurrentBuilding();
   useIndoorEntry();
   useNavigationStage();

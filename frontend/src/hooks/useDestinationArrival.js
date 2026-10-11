@@ -71,6 +71,7 @@ export function useDestinationArrival() {
     navigationStage,
     currentFloor,
     selectedBuilding,
+    targetEntrance,
     targetStair,
     floorTransition,
     pendingFloorTransition,
@@ -101,7 +102,16 @@ export function useDestinationArrival() {
       destination.properties?.floor ?? destination.properties?.level;
 
     // Indoor building guards:
-    if (building) {
+    // Only apply if the destination is an indoor room requiring an entrance transition
+    const isIndoorDestination = Boolean(
+      targetEntrance ||
+      destination.properties?.room_no ||
+      destination.properties?.hasIndoorMap ||
+      (!destination.properties?.isOutdoorVenue &&
+        (building === "Mechanical Block" || building === "Chemical Block"))
+    );
+
+    if (isIndoorDestination) {
       // Must not be still on the outdoor walkway approaching the entrance
       if (navigationStage === NAVIGATION_STAGE.OUTDOOR) {
         return;
@@ -147,7 +157,7 @@ export function useDestinationArrival() {
 
     const destinationLabel = room ? `, ${room}` : "";
 
-    const isIndoor = Boolean(building);
+    const isIndoor = isIndoorDestination;
 
     speak(`You have arrived at your destination${destinationLabel}.`, {
       milestone: true,
@@ -170,6 +180,7 @@ export function useDestinationArrival() {
     navigationStage,
     currentFloor,
     selectedBuilding,
+    targetEntrance,
     targetStair,
     floorTransition?.open,
     pendingFloorTransition,
