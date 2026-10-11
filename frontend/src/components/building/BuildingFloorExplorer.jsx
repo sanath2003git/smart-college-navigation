@@ -11,6 +11,9 @@ import FirstFloorLayers from "../layers/FirstFloorLayers";
 import SecondFloorLayers from "../layers/SecondFloorLayers";
 import ThirdFloorLayers from "../layers/ThirdFloorLayers";
 import FloorSelector, { FLOORS } from "../navigation/FloorSelector";
+import RouteLayer from "../map/RouteLayer";
+import FloorTransitionPrompt from "../navigation/FloorTransitionPrompt";
+import { useNavigation } from "../../hooks/useNavigation";
 import { BUILDING_CONFIGS } from "../../constants/buildingConfigs";
 
 /**
@@ -114,15 +117,65 @@ export default function BuildingFloorExplorer({ buildingName }) {
     Array.isArray(config.availableFloors) &&
     config.availableFloors.length > 0;
 
-  // Local exploration floor selection (isolated from navigation state)
+  const {
+    route,
+    destination,
+    selectedBuilding,
+    currentFloor: navFloor,
+    setCurrentFloor,
+    setNavigationStage,
+    getNavigationStageForFloor,
+    floorTransition,
+    confirmFloorTransition,
+    cancelFloorTransition,
+  } = useNavigation();
+
+  // Local exploration floor selection (used when not actively navigating this building)
   const [selectedFloor, setSelectedFloor] = useState(config.defaultFloor ?? 0);
 
   useEffect(() => {
     setSelectedFloor(config.defaultFloor ?? 0);
   }, [buildingName, config.defaultFloor]);
 
+  const isNavigatingThisBuilding = Boolean(
+    route &&
+    route.length > 0 &&
+    destination &&
+    (selectedBuilding === config.name || destination?.properties?.building === config.name)
+  );
+
+  const displayedFloor = isNavigatingThisBuilding
+    ? Number(navFloor ?? 0)
+    : selectedFloor;
+
+  // Keep local selectedFloor in sync with navigation floor during active navigation
+  useEffect(() => {
+    if (isNavigatingThisBuilding && navFloor !== undefined && navFloor !== null) {
+      setSelectedFloor(Number(navFloor));
+    }
+  }, [isNavigatingThisBuilding, navFloor]);
+
+  const isRouteOnDisplayedFloor =
+    isNavigatingThisBuilding &&
+    displayedFloor === Number(navFloor ?? 0);
+
   const currentFloorObj =
-    FLOORS.find((f) => f.value === selectedFloor) || FLOORS[0];
+    FLOORS.find((f) => f.value === displayedFloor) || FLOORS[0];
+
+  const handleFloorChange = (newFloor) => {
+    setSelectedFloor(newFloor);
+    if (isNavigatingThisBuilding) {
+      if (typeof setCurrentFloor === "function") {
+        setCurrentFloor(newFloor);
+      }
+      if (
+        typeof setNavigationStage === "function" &&
+        typeof getNavigationStageForFloor === "function"
+      ) {
+        setNavigationStage(getNavigationStageForFloor(newFloor));
+      }
+    }
+  };
 
   /**
    * Handle building polygon interaction in building explorer.
@@ -203,11 +256,34 @@ export default function BuildingFloorExplorer({ buildingName }) {
           <div className="building-explorer-tag">
             <div className="bet-title">{config.name}</div>
             <div className="bet-floor">
-              {currentFloorObj ? currentFloorObj.name : "Ground Floor"} · Indoor Map
+              {currentFloorObj ? currentFloorObj.name : "Ground Floor"} · {isNavigatingThisBuilding ? "Indoor Navigation" : "Indoor Map"}
             </div>
           </div>
         )}
       </div>
+
+      {/* =======================================================
+          FLOOR TRANSITION PROMPT
+          ======================================================= */}
+      {floorTransition?.open && (
+        <FloorTransitionPrompt
+          currentFloor={
+            floorTransition.currentFloor ?? displayedFloor
+          }
+          nextFloor={
+            floorTransition.nextFloor
+          }
+          transitionType={
+            floorTransition.transitionType
+          }
+          onConfirm={
+            confirmFloorTransition
+          }
+          onCancel={
+            cancelFloorTransition
+          }
+        />
+      )}
 
       {/* =======================================================
           VERTICAL FLOOR SELECTOR (Buildings with floor data)
@@ -218,8 +294,8 @@ export default function BuildingFloorExplorer({ buildingName }) {
           mode="explore"
           building={config.name}
           availableFloors={config.availableFloors}
-          activeFloor={selectedFloor}
-          onFloorChange={setSelectedFloor}
+          activeFloor={displayedFloor}
+          onFloorChange={handleFloorChange}
         />
       )}
 
@@ -283,17 +359,22 @@ export default function BuildingFloorExplorer({ buildingName }) {
         />
 
         {/* Indoor Floor Layers (Rendered above PermanentLayers when floor data exists) */}
-        {hasFloorData && selectedFloor === 0 && (
+        {hasFloorData && displayedFloor === 0 && (
           <GroundFloorLayers building={config.name} />
         )}
-        {hasFloorData && selectedFloor === 1 && (
+        {hasFloorData && displayedFloor === 1 && (
           <FirstFloorLayers building={config.name} />
         )}
-        {hasFloorData && selectedFloor === 2 && (
+        {hasFloorData && displayedFloor === 2 && (
           <SecondFloorLayers building={config.name} />
         )}
-        {hasFloorData && selectedFloor === 3 && (
+        {hasFloorData && displayedFloor === 3 && (
           <ThirdFloorLayers building={config.name} />
+        )}
+
+        {/* Navigation Route */}
+        {isNavigatingThisBuilding && isRouteOnDisplayedFloor && (
+          <RouteLayer path={route} />
         )}
       </MapContainer>
     </div>
