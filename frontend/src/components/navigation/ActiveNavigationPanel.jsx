@@ -1,59 +1,49 @@
-import { useMemo } from "react";
 import {
   ArrowUp,
+  ArrowUpLeft,
+  ArrowUpRight,
   Check,
-  CornerDownRight,
+  CornerUpLeft,
+  CornerUpRight,
+  DoorOpen,
+  Footprints,
   MapPin,
+  RotateCcw,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import { useNavigation } from "../../hooks/useNavigation";
+import { useNavigationInstructions } from "../../hooks/useNavigationInstructions";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
+import { getFloorLabel } from "../../services/navigationInstructionService";
 
-function distanceInMeters(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function calculateRouteDistance(path) {
-  if (!path || path.length < 2) return null;
-
-  let totalMeters = 0;
-  for (let i = 0; i < path.length - 1; i++) {
-    const [lat1, lng1] = path[i].split(",").map(Number);
-    const [lat2, lng2] = path[i + 1].split(",").map(Number);
-    if (!isNaN(lat1) && !isNaN(lng1) && !isNaN(lat2) && !isNaN(lng2)) {
-      totalMeters += distanceInMeters(lat1, lng1, lat2, lng2);
-    }
+function getManeuverIcon(iconName, type) {
+  switch (iconName) {
+    case "corner-up-left":
+      return CornerUpLeft;
+    case "corner-up-right":
+      return CornerUpRight;
+    case "arrow-up-left":
+      return ArrowUpLeft;
+    case "arrow-up-right":
+      return ArrowUpRight;
+    case "log-in":
+      return DoorOpen;
+    case "footprints":
+      return Footprints;
+    case "map-pin":
+      return MapPin;
+    default:
+      if (type === "TURN_LEFT" || type === "SHARP_LEFT") return CornerUpLeft;
+      if (type === "TURN_RIGHT" || type === "SHARP_RIGHT") return CornerUpRight;
+      if (type === "SLIGHT_LEFT") return ArrowUpLeft;
+      if (type === "SLIGHT_RIGHT") return ArrowUpRight;
+      if (type === "ENTER_BUILDING" || type === "APPROACH_ENTRANCE") return DoorOpen;
+      if (type === "PROCEED_TO_STAIRS" || type === "CHANGE_FLOOR") return Footprints;
+      if (type === "ARRIVE") return MapPin;
+      return ArrowUp;
   }
-  return totalMeters;
-}
-
-function formatDistance(meters) {
-  if (meters === null || isNaN(meters)) return "--";
-  if (meters < 1000) return `${Math.round(meters)} m`;
-  return `${(meters / 1000).toFixed(1)} km`;
-}
-
-function calculateETA(meters) {
-  if (meters === null || isNaN(meters)) return "--";
-  // Walking speed constant standard in project: 50m / minute (from DestinationPanel.jsx)
-  const minutes = Math.max(1, Math.ceil(meters / 50));
-  return `${minutes} min`;
-}
-
-function getFloorLabel(floor) {
-  if (floor === 0 || floor === "0") return "Ground Floor";
-  if (floor === 1 || floor === "1") return "First Floor";
-  if (floor === 2 || floor === "2") return "Second Floor";
-  if (floor === 3 || floor === "3") return "Third Floor";
-  return floor !== undefined && floor !== null ? `Floor ${floor}` : "Ground Floor";
 }
 
 export default function ActiveNavigationPanel() {
@@ -66,16 +56,29 @@ export default function ActiveNavigationPanel() {
     currentBuilding,
     targetEntrance,
     targetStair,
+    cancelNavigation: contextCancel,
     setRoute,
     setDestination,
     setTargetEntrance,
     setTargetStair,
     setSelectedBuilding,
+    setCurrentFloor,
     setNavigationStage,
     setFloorTransition,
     setPendingFloorTransition,
-    cancelNavigation: contextCancel,
   } = useNavigation();
+
+  const {
+    currentInstruction,
+    nextInstruction,
+    distanceToNextAction,
+    formattedDistance,
+    formattedNextDistance,
+    formattedETA,
+    isMuted,
+    toggleMute,
+    repeatInstruction,
+  } = useNavigationInstructions();
 
   // If no active navigation session exists, do not render
   if (!route || route.length === 0 || !destination) {
@@ -116,10 +119,6 @@ export default function ActiveNavigationPanel() {
     }
   };
 
-  const routeMeters = useMemo(() => calculateRouteDistance(route), [route]);
-  const formattedDistance = formatDistance(routeMeters);
-  const formattedETA = calculateETA(routeMeters);
-
   const roomCode =
     destination?.properties?.room_no ??
     destination?.properties?.room ??
@@ -146,26 +145,32 @@ export default function ActiveNavigationPanel() {
   const isIndoor = !isOutdoor;
   const hasStairTransition = Boolean(targetStair);
 
-  // Derive current instruction based on genuine navigation stage and targets
-  let instructionTitle = "";
-  let instructionMeta = "";
-  let InstructionIcon = ArrowUp;
+  // Maneuver Icon
+  const InstructionIcon = getManeuverIcon(
+    currentInstruction?.iconName,
+    currentInstruction?.type
+  );
 
-  if (isOutdoor) {
-    instructionTitle = `Head toward ${destinationBuilding} entrance`;
-    instructionMeta = targetEntrance?.properties?.name
-      ? `Via ${targetEntrance.properties.name} · Final: ${roomCode}`
-      : `Follow outdoor walkway · Final: ${roomCode}`;
-    InstructionIcon = ArrowUp;
-  } else if (hasStairTransition) {
-    instructionTitle = `Proceed to ${targetStair?.properties?.name || targetStair?.properties?.id || "stairs / lift"}`;
-    instructionMeta = `Transition to ${getFloorLabel(destinationFloor)} for ${roomCode}`;
-    InstructionIcon = CornerDownRight;
-  } else {
-    instructionTitle = `Follow corridor to ${roomCode}`;
-    instructionMeta = `${destinationBuilding}${roomName ? ` · ${roomName}` : ""}`;
-    InstructionIcon = MapPin;
-  }
+  // Fallback labels if instruction is not yet generated
+  const displayTitle =
+    currentInstruction?.primaryText ||
+    (isOutdoor
+      ? `Head toward ${destinationBuilding} entrance`
+      : hasStairTransition
+      ? `Proceed to ${targetStair?.properties?.name || "stairs / lift"}`
+      : `Follow corridor to ${roomCode}`);
+
+  const displayMeta =
+    currentInstruction?.secondaryText ||
+    `${destinationBuilding} · ${getFloorLabel(destinationFloor)}${roomName ? ` · ${roomName}` : ""}`;
+
+  // Next Action distance label
+  const distanceBadgeText =
+    distanceToNextAction !== null && distanceToNextAction !== undefined
+      ? distanceToNextAction < 8
+        ? "Now"
+        : `In ${formattedNextDistance}`
+      : null;
 
   // High-level milestone stages derived from engine capabilities
   const steps = [
@@ -213,18 +218,54 @@ export default function ActiveNavigationPanel() {
 
         <div className="smartnav-nav-seg">
           <div className="smartnav-nav-l">Destination</div>
-          <div className="smartnav-nav-v">{roomCode}</div>
+          <div className="smartnav-nav-v">
+            {roomCode}
+            <span className="smartnav-dest-sub">
+              {" "}· {destinationBuilding} ({getFloorLabel(destinationFloor)})
+            </span>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="smartnav-nav-cancel"
-          aria-label="Cancel navigation"
-        >
-          <X size={13} strokeWidth={2.4} />
-          <span>Cancel Navigation</span>
-        </button>
+        <div className="smartnav-nav-controls">
+          {/* Voice Repeat Button */}
+          <button
+            type="button"
+            onClick={repeatInstruction}
+            className="smartnav-voice-btn"
+            title="Repeat voice instruction"
+            aria-label="Repeat voice instruction"
+          >
+            <RotateCcw size={13} strokeWidth={2.4} />
+            <span>Repeat</span>
+          </button>
+
+          {/* Voice Mute / Unmute Button */}
+          <button
+            type="button"
+            onClick={toggleMute}
+            className={`smartnav-voice-btn ${isMuted ? "muted" : ""}`}
+            title={isMuted ? "Unmute voice guidance" : "Mute voice guidance"}
+            aria-label={isMuted ? "Unmute voice guidance" : "Mute voice guidance"}
+          >
+            {isMuted ? (
+              <VolumeX size={15} strokeWidth={2.4} />
+            ) : (
+              <Volume2 size={15} strokeWidth={2.4} />
+            )}
+            <span>{isMuted ? "Muted" : "Voice"}</span>
+          </button>
+
+          {/* Cancel Navigation Button */}
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="smartnav-nav-cancel"
+            aria-label="Cancel navigation"
+          >
+            <X size={13} strokeWidth={2.4} />
+            <span>Cancel Navigation</span>
+          </button>
+        </div>
       </div>
 
       {/* =========================================================
@@ -233,14 +274,30 @@ export default function ActiveNavigationPanel() {
       <aside className="smartnav-instr-panel" aria-label="Navigation guidance">
         <div className="smartnav-instr-current">
           <div className="smartnav-instr-ic" aria-hidden="true">
-            <InstructionIcon size={17} strokeWidth={2.4} />
+            <InstructionIcon size={18} strokeWidth={2.4} />
           </div>
-          <div>
-            <div className="smartnav-instr-txt">{instructionTitle}</div>
-            <div className="smartnav-instr-meta">{instructionMeta}</div>
+          <div className="min-w-0 flex-1">
+            {distanceBadgeText && (
+              <div className="smartnav-instr-dist-badge">
+                {distanceBadgeText}
+              </div>
+            )}
+            <div className="smartnav-instr-txt">{displayTitle}</div>
+            <div className="smartnav-instr-meta">{displayMeta}</div>
           </div>
         </div>
 
+        {/* Upcoming Action Preview */}
+        {nextInstruction && (
+          <div className="smartnav-instr-next">
+            <span className="smartnav-instr-next-label">Next:</span>
+            <span className="truncate">
+              {nextInstruction.actionTitle} · {nextInstruction.primaryText}
+            </span>
+          </div>
+        )}
+
+        {/* Milestone Steps List */}
         <div className="smartnav-instr-list">
           {steps.map((step) => (
             <div
@@ -274,30 +331,71 @@ export default function ActiveNavigationPanel() {
           <div className="smartnav-m-v">{formattedETA}</div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="smartnav-m-cancel-chip"
-          aria-label="Cancel navigation"
-        >
-          <X size={12} strokeWidth={2.4} />
-          <span>Cancel</span>
-        </button>
+        <div className="smartnav-m-controls-row">
+          {/* Mobile Voice Repeat */}
+          <button
+            type="button"
+            onClick={repeatInstruction}
+            className="smartnav-m-icon-btn"
+            title="Repeat voice instruction"
+            aria-label="Repeat voice instruction"
+          >
+            <RotateCcw size={13} strokeWidth={2.4} />
+          </button>
+
+          {/* Mobile Voice Mute */}
+          <button
+            type="button"
+            onClick={toggleMute}
+            className={`smartnav-m-icon-btn ${isMuted ? "muted" : ""}`}
+            title={isMuted ? "Unmute voice guidance" : "Mute voice guidance"}
+            aria-label={isMuted ? "Unmute voice guidance" : "Mute voice guidance"}
+          >
+            {isMuted ? (
+              <VolumeX size={14} strokeWidth={2.4} />
+            ) : (
+              <Volume2 size={14} strokeWidth={2.4} />
+            )}
+          </button>
+
+          {/* Mobile Cancel */}
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="smartnav-m-cancel-chip"
+            aria-label="Cancel navigation"
+          >
+            <X size={12} strokeWidth={2.4} />
+            <span>Cancel</span>
+          </button>
+        </div>
       </div>
 
       <div className="smartnav-m-sheet">
         <div className="smartnav-m-handle" aria-hidden="true" />
         <div className="smartnav-m-instr-row">
           <div className="smartnav-m-instr-ic" aria-hidden="true">
-            <InstructionIcon size={16} strokeWidth={2.4} />
+            <InstructionIcon size={17} strokeWidth={2.4} />
           </div>
           <div className="smartnav-m-instr-content">
-            <div className="smartnav-m-instr-title">{instructionTitle}</div>
-            <div className="smartnav-m-instr-sub">
-              {instructionMeta}
-            </div>
+            {distanceBadgeText && (
+              <div className="smartnav-instr-dist-badge">
+                {distanceBadgeText}
+              </div>
+            )}
+            <div className="smartnav-m-instr-title">{displayTitle}</div>
+            <div className="smartnav-m-instr-sub">{displayMeta}</div>
           </div>
         </div>
+
+        {nextInstruction && (
+          <div className="smartnav-m-next-row">
+            <span className="smartnav-instr-next-label">Next:</span>
+            <span className="truncate">
+              {nextInstruction.actionTitle} · {nextInstruction.primaryText}
+            </span>
+          </div>
+        )}
 
         <button
           type="button"
