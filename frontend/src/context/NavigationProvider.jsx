@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import NavigationContext from "./NavigationContext";
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
+import { speak, resetVoiceGuidance } from "../services/voiceService";
+import { getFloorLabel } from "../services/navigationInstructionService";
 
 export function NavigationProvider({ children }) {
   // ==========================================
@@ -268,6 +270,12 @@ export function NavigationProvider({ children }) {
       route: nextRoute,
     } = pendingFloorTransition;
 
+    const floorLabel = getFloorLabel(nextFloor);
+    speak(
+      `You have reached the ${floorLabel}. Continue to your destination.`,
+      { milestone: true }
+    );
+
     console.log(
       "========== FLOOR CONFIRMATION =========="
     );
@@ -380,6 +388,9 @@ export function NavigationProvider({ children }) {
   // ==========================================
 
   const cancelNavigation = useCallback(() => {
+    // Stop ongoing speech and clear cached instruction
+    resetVoiceGuidance();
+
     // Clear active navigation route and targets
     setRoute([]);
     setDestination(null);

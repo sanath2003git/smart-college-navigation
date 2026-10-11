@@ -38,10 +38,14 @@ export function useNavigationStage() {
   } = useNavigation();
 
   const handoffInProgressRef = useRef(false);
+  const hasAnnouncedEntranceRef = useRef(false);
 
   useEffect(() => {
     if (navigationStage !== NAVIGATION_STAGE.OUTDOOR) {
       handoffInProgressRef.current = false;
+    } else {
+      handoffInProgressRef.current = false;
+      hasAnnouncedEntranceRef.current = false;
     }
   }, [navigationStage, destination]);
 
@@ -175,9 +179,15 @@ export function useNavigationStage() {
       // Entrance reached
       // -----------------------------------
 
-      speak(
-        `You have reached the entrance. Enter ${building}.`
-      );
+      if (!hasAnnouncedEntranceRef.current) {
+        hasAnnouncedEntranceRef.current = true;
+        const buildingName =
+          BUILDING_CONFIGS[building]?.name || building || "building";
+        speak(
+          `You have reached the ${buildingName} entrance. Indoor navigation is starting.`,
+          { milestone: true }
+        );
+      }
 
       console.log(
         "✅ Building entrance reached. Calculating Ground Floor route..."
@@ -368,10 +378,6 @@ export function useNavigationStage() {
       // ===================================
       // Voice guidance
       // ===================================
-
-      speak(
-        `You have reached the entrance. Enter ${building}.`
-      );
 
       if (
         destinationFloor > 0 &&

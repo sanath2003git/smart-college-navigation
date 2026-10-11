@@ -143,12 +143,15 @@ export function useDestinationArrival() {
       destination.properties?.room_no ??
       destination.properties?.room ??
       destination.properties?.name ??
-      destination.properties?.id ??
-      "Destination";
+      destination.properties?.id;
+
+    const destinationLabel = room ? `, ${room}` : "";
 
     const isIndoor = Boolean(building);
 
-    speak(`You have reached destination ${room}.`);
+    speak(`You have arrived at your destination${destinationLabel}.`, {
+      milestone: true,
+    });
 
     // End active navigation session while preserving indoor building and floor
     if (typeof completeNavigation === "function") {
