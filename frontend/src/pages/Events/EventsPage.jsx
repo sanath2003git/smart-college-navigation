@@ -210,22 +210,22 @@ export default function EventsPage() {
       {/* ── Demo Notice Banner ──────────────────────────────────────── */}
       {noticeVisible && (
         <div className="smartnav-events-demo-banner" role="alert">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-500 shrink-0" />
-            <span>
-              <strong>Demonstration Mode:</strong> Displaying sample campus events mapped to verified TKM College venues.
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Sparkles size={15} className="text-amber-500 shrink-0" />
+            <span className="smartnav-events-demo-text truncate">
+              <strong>Demo:</strong> Sample campus events mapped to TKM College venues
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               className="smartnav-events-reset-btn"
               onClick={handleResetDemo}
               title="Reset demonstration data"
             >
-              <RotateCcw size={13} />
-              <span>Reset Demo Data</span>
+              <RotateCcw size={12} />
+              <span className="smartnav-reset-label">Reset Data</span>
             </button>
 
             <button
@@ -234,7 +234,7 @@ export default function EventsPage() {
               onClick={() => setNoticeVisible(false)}
               aria-label="Dismiss notice"
             >
-              <X size={15} />
+              <X size={14} />
             </button>
           </div>
         </div>

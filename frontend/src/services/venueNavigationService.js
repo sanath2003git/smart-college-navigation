@@ -9,7 +9,6 @@ import { findStairById } from "./stairService";
 import { selectBestTransition } from "../navigation/transitionSelector";
 import { getBuildingFromRoom } from "./buildingRoomLookup";
 import { getVenueById } from "../data/campusVenues";
-import { speak } from "./voiceService";
 
 /**
  * Validates and starts navigation to a campus venue (indoor room or outdoor facility).
@@ -152,7 +151,6 @@ export async function startNavigationToVenue(
       navContext.setTargetEntrance(null);
       navContext.setTargetStair(null);
 
-      speak(`Starting navigation to ${venue.name}.`, { milestone: true });
       const buildingRoute =
         destinationBuilding === "Mechanical Block" ? "/mechanical" : "/chemical";
       if (typeof routerNavigate === "function") {
@@ -209,9 +207,6 @@ export async function startNavigationToVenue(
       navContext.setRoute(result.route);
       navContext.setNavigationStage(NAVIGATION_STAGE.GROUND_FLOOR);
 
-      speak(`Starting navigation to ${venue.name}. Head to the stairs.`, {
-        milestone: true,
-      });
       const buildingRoute =
         destinationBuilding === "Mechanical Block" ? "/mechanical" : "/chemical";
       if (typeof routerNavigate === "function") {
@@ -241,11 +236,6 @@ export async function startNavigationToVenue(
     navContext.setDestination(result.destination || destinationFeature);
     navContext.setTargetEntrance(result.entrance);
     navContext.setSelectedBuilding(destinationBuilding);
-
-    speak(
-      `Starting navigation to ${venue.name}. Head towards the ${destinationBuilding} entrance.`,
-      { milestone: true }
-    );
 
     if (typeof routerNavigate === "function") {
       routerNavigate("/");
@@ -312,10 +302,6 @@ export async function startNavigationToVenue(
   navContext.setSelectedBuilding(venue.building);
   navContext.setCurrentFloor(0);
   navContext.setNavigationStage(NAVIGATION_STAGE.OUTDOOR);
-
-  speak(`Starting navigation to ${venue.name}. Follow the highlighted walkway path.`, {
-    milestone: true,
-  });
 
   if (typeof routerNavigate === "function") {
     routerNavigate("/");

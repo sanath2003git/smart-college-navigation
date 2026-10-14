@@ -1917,7 +1917,7 @@ button {
 
     box-shadow:
       0 -10px 28px rgba(20, 33, 55, 0.16),
-      0 5px 16px rgba(20, 33, 55, 0.10);  
+      0 5px 16px rgba(20, 33, 55, 0.10);
   }
 
   .smartnav-destination-room {
@@ -2171,6 +2171,7 @@ button {
 
 /* Mobile Active Navigation elements (hidden by default on desktop) */
 .smartnav-m-navbar,
+.smartnav-m-guidance-card,
 .smartnav-m-sheet {
   display: none;
 }
@@ -2193,10 +2194,10 @@ button {
     background: var(--sn-navy);
     color: #fff;
     z-index: 1200;
-    padding: 12px 14px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     pointer-events: auto;
     box-shadow: 0 4px 14px rgba(20, 33, 55, 0.2);
   }
@@ -2226,7 +2227,7 @@ button {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
   }
 
   .smartnav-m-icon-btn {
@@ -2241,11 +2242,16 @@ button {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
   }
 
   .smartnav-m-icon-btn:hover {
     background: rgba(255, 255, 255, 0.24);
+  }
+
+  .smartnav-m-icon-btn.active {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.45);
   }
 
   .smartnav-m-icon-btn.muted {
@@ -2259,27 +2265,69 @@ button {
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #fff;
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     font-size: 10px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     cursor: pointer;
   }
 
-  .smartnav-m-sheet {
+  /* Sleek Floating Guidance Card (Auto-hiding, manual dismissible) */
+  .smartnav-m-guidance-card {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #fff;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -10px 26px rgba(20, 33, 55, 0.16);
-    padding: 14px 18px 20px;
-    z-index: 1200;
+    top: 56px;
+    left: 12px;
+    right: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(20, 33, 55, 0.18), 0 2px 6px rgba(20, 33, 55, 0.08);
+    border: 1px solid rgba(20, 33, 55, 0.08);
+    padding: 12px 14px;
+    z-index: 1210;
     display: block;
     pointer-events: auto;
+    animation: smartnav-slide-down 0.25s ease-out;
+  }
+
+  @keyframes smartnav-slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .smartnav-m-guidance-close {
+    background: transparent;
+    border: none;
+    color: var(--sn-muted);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    margin-left: 4px;
+    transition: background-color 0.15s ease;
+  }
+
+  .smartnav-m-guidance-close:hover {
+    background: #f1f5f9;
+    color: var(--sn-navy);
+  }
+
+  .smartnav-m-sheet {
+    display: none;
   }
 
   .smartnav-m-handle {
@@ -2297,9 +2345,9 @@ button {
   }
 
   .smartnav-m-instr-ic {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     background: var(--sn-navy);
     display: flex;
     align-items: center;
@@ -2330,33 +2378,16 @@ button {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 10px;
-    padding: 6px 10px;
+    margin-top: 9px;
+    padding: 5px 9px;
     background: #f1f5f9;
-    border-radius: 8px;
+    border-radius: 7px;
     font-size: 10.5px;
     color: var(--sn-muted);
   }
 
   .smartnav-m-cancel-btn {
-    margin-top: 14px;
-    width: 100%;
-    height: 40px;
-    border-radius: 11px;
-    background: var(--sn-paper);
-    color: var(--sn-ink);
-    border: 1px solid var(--sn-line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 11.5px;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-  }
-
-  .smartnav-m-cancel-btn:hover {
-    background: #e8efee;
+    display: none;
   }
 }
 
@@ -3956,25 +3987,105 @@ button {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .smartnav-events-page {
-    padding: 16px 14px 48px;
-    gap: 18px;
+    padding: 12px 12px 40px;
+    gap: 14px;
+  }
+  .smartnav-events-demo-banner {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 8px;
+    border-radius: 8px;
+  }
+  .smartnav-events-demo-text {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .smartnav-events-reset-btn {
+    padding: 3px 8px;
+    font-size: 10.5px;
+    gap: 4px;
+  }
+  .smartnav-events-header {
+    gap: 8px;
   }
   .smartnav-events-header__title {
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .smartnav-events-header__subtitle {
+    font-size: 11.5px;
+    line-height: 1.35;
+    margin-top: 1px;
   }
   .smartnav-events-tabs {
     width: 100%;
+    padding: 3px;
+    gap: 4px;
   }
   .smartnav-events-tab {
     flex: 1;
     justify-content: center;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+  .smartnav-events-controls {
+    gap: 10px;
+  }
+  .smartnav-events-search-wrapper {
+    height: 38px;
+  }
+  .smartnav-events-search-input {
+    font-size: 12px;
+    padding: 6px 32px 6px 36px;
+  }
+  .smartnav-filter-chips-container {
+    padding-bottom: 2px;
+    gap: 6px;
+  }
+  .smartnav-filter-chip {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .smartnav-event-card {
+    padding: 12px 14px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+  .smartnav-event-card__title {
+    font-size: 14.5px;
+  }
+  .smartnav-event-card__organizer {
+    font-size: 11px;
+  }
+  .smartnav-event-card__status-banner {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  .smartnav-event-card__meta-list {
+    gap: 4px;
+    font-size: 11.5px;
+  }
+  .smartnav-event-card__desc {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .smartnav-event-card__footer {
+    padding-top: 8px;
+  }
+  .smartnav-event-nav-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .smartnav-event-venue-link {
+    font-size: 11px;
   }
   .smartnav-events-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   .smartnav-venue-details-grid {
     grid-template-columns: 1fr;
   }
 }
 
-
+
