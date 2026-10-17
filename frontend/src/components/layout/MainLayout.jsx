@@ -10,6 +10,8 @@ export default function MainLayout({ children }) {
   const location = useLocation();
   const isNavigating = Boolean(route && route.length > 0 && destination);
   const isEventsPage = location.pathname.startsWith("/events");
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isScrollableContent = isEventsPage || isAdminPage;
 
   return (
     <div className="smartnav-app">
@@ -19,7 +21,7 @@ export default function MainLayout({ children }) {
       <main className="smartnav-content">
         <div
           className={`smartnav-map-area ${
-            isEventsPage ? "smartnav-events-scrollable" : ""
+            isScrollableContent ? "smartnav-events-scrollable" : ""
           }`}
         >
           {children}
@@ -27,10 +29,11 @@ export default function MainLayout({ children }) {
 
         {isNavigating ? (
           <ActiveNavigationPanel />
-        ) : !isEventsPage ? (
+        ) : !isScrollableContent ? (
           <SearchBar />
         ) : null}
       </main>
     </div>
   );
+
 }

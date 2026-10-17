@@ -7,13 +7,16 @@ import ChemicalPage from "../pages/Chemical/ChemicalPage";
 import MainBlockPage from "../pages/Main/MainBlockPage";
 import LibraryPage from "../pages/Library/LibraryPage";
 import BuildingFloorExplorer from "../components/building/BuildingFloorExplorer";
+import AdminLandingPage from "../pages/Admin/AdminLandingPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<CampusPage />} />
       <Route path="/events" element={<EventsPage />} />
+      <Route path="/admin" element={<AdminLandingPage />} />
       <Route path="/chemical" element={<ChemicalPage />} />
+
       <Route path="/mechanical" element={<MechanicalPage />} />
       <Route path="/main" element={<MainBlockPage />} />
       <Route path="/library" element={<LibraryPage />} />

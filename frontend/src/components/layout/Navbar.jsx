@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useUser, SignOutButton } from "@clerk/react";
 import {
   Compass,
   Map,
@@ -8,7 +9,10 @@ import {
   FlaskConical,
   Landmark,
   BookOpen,
+  Shield,
+  LogOut,
 } from "lucide-react";
+
 
 const NAV_ITEMS = [
   { to: "/", label: "Campus", icon: Compass, exact: true },
@@ -24,6 +28,7 @@ export default function Navbar() {
   const menuRef = useRef(null);
   const userButtonRef = useRef(null);
   const location = useLocation();
+  const { isSignedIn, user } = useUser();
 
   const navLinkClass = ({ isActive }) =>
     `smartnav-navbar-link ${
@@ -122,7 +127,7 @@ export default function Navbar() {
               type="button"
               className={`smartnav-user-button ${
                 isMenuOpen ? "smartnav-user-button--active" : ""
-              }`}
+              } ${isSignedIn ? "smartnav-user-button--signed-in" : ""}`}
               onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-label="Campus navigation and account menu"
               aria-expanded={isMenuOpen}
@@ -130,7 +135,17 @@ export default function Navbar() {
               aria-controls="smartnav-mobile-dropdown"
               id="smartnav-user-menu-trigger"
             >
-              S
+              {isSignedIn && user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt={user.fullName || "User"}
+                  className="smartnav-user-button-avatar"
+                />
+              ) : isSignedIn && user?.firstName ? (
+                user.firstName[0].toUpperCase()
+              ) : (
+                "S"
+              )}
             </button>
 
             {isMenuOpen && (
@@ -147,14 +162,28 @@ export default function Navbar() {
                     className="smartnav-mobile-menu__avatar"
                     aria-hidden="true"
                   >
-                    S
+                    {isSignedIn && user?.imageUrl ? (
+                      <img
+                        src={user.imageUrl}
+                        alt="Avatar"
+                        className="smartnav-user-button-avatar"
+                      />
+                    ) : isSignedIn && user?.firstName ? (
+                      user.firstName[0].toUpperCase()
+                    ) : (
+                      "S"
+                    )}
                   </div>
                   <div className="smartnav-mobile-menu__user-info">
                     <p className="smartnav-mobile-menu__user-title">
-                      Student Portal
+                      {isSignedIn
+                        ? user.fullName || "Administrator"
+                        : "Student Portal"}
                     </p>
                     <p className="smartnav-mobile-menu__user-sub">
-                      TKM College of Engineering
+                      {isSignedIn
+                        ? user.primaryEmailAddress?.emailAddress || "Admin Session"
+                        : "TKM College of Engineering"}
                     </p>
                   </div>
                 </div>
@@ -205,12 +234,52 @@ export default function Navbar() {
                   </nav>
                 </div>
 
-                {/* Extensible Admin Slot (structured for future administration integration) */}
-                <div
-                  className="smartnav-mobile-menu__admin-slot"
-                  aria-hidden="true"
-                >
-                  {/* Future admin portal items will mount here */}
+                {/* Extensible Admin Slot (Reused for Clerk Admin Portal) */}
+                <div className="smartnav-mobile-menu__admin-slot">
+                  <div className="smartnav-mobile-menu__section-header">
+                    <span>Administration</span>
+                  </div>
+
+                  <NavLink
+                    to="/admin"
+                    role="menuitem"
+                    className={({ isActive }) =>
+                      `smartnav-mobile-menu__link ${
+                        isActive
+                          ? "smartnav-mobile-menu__link--active"
+                          : ""
+                      }`
+                    }
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span
+                      className="smartnav-mobile-menu__link-icon text-teal-600"
+                      aria-hidden="true"
+                    >
+                      <Shield size={17} />
+                    </span>
+                    <span className="smartnav-mobile-menu__link-text font-medium">
+                      Admin Portal
+                    </span>
+                    <span className="smartnav-mobile-menu__admin-badge">
+                      {isSignedIn ? "Signed In" : "Sign In"}
+                    </span>
+                  </NavLink>
+
+                  {isSignedIn && (
+                    <div className="smartnav-mobile-menu__signout-wrap">
+                      <SignOutButton>
+                        <button
+                          type="button"
+                          className="smartnav-mobile-menu__signout-btn"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <LogOut size={15} />
+                          <span>Sign Out</span>
+                        </button>
+                      </SignOutButton>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
