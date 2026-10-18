@@ -2,11 +2,12 @@ const DATA_BASE = "/data";
 
 /**
  * Chemical Block
- * Ground Floor + First Floor
+ * Ground Floor, First Floor, and Second Floor
  */
 const CHEMICAL_FLOORS = [
   "ground_floor",
   "first_floor",
+  "second_floor",
 ];
 
 /**
@@ -28,6 +29,13 @@ const FLOOR_LABELS = {
   first_floor: "First Floor",
   second_floor: "Second Floor",
   top_floor: "Top Floor",
+};
+
+const FLOOR_NUMBERS = {
+  ground_floor: 0,
+  first_floor: 1,
+  second_floor: 2,
+  top_floor: 3,
 };
 
 /**
@@ -191,13 +199,15 @@ function normalizeRoomFeature(
     ).trim(),
 
     floor:
-      properties.floor ?? null,
+      properties.floor !== null && properties.floor !== undefined
+        ? Number(properties.floor)
+        : (FLOOR_NUMBERS[floorFolder] ?? null),
 
     floorLabel:
       FLOOR_LABELS[floorFolder] ??
-      String(
-        properties.floor ?? ""
-      ),
+      (properties.floor !== null && properties.floor !== undefined
+        ? `Floor ${properties.floor}`
+        : ""),
 
     department: String(
       properties.department ?? ""

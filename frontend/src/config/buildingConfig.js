@@ -32,6 +32,10 @@ export const BUILDING_CONFIG = {
       1: {
         folder: "first_floor",
       },
+
+      2: {
+        folder: "second_floor",
+      },
     },
   },
 };

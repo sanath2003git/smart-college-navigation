@@ -7,6 +7,8 @@ import {
   useNavigation,
 } from "./useNavigation";
 
+import { BUILDING_CONFIGS } from "../constants/buildingConfigs";
+
 export default function useIndoorEntry() {
   const {
     currentBuilding,
@@ -86,6 +88,13 @@ export default function useIndoorEntry() {
     // ========================================
 
     if (!currentBuilding) {
+
+      if (initialFloorSelection?.open) {
+        setInitialFloorSelection({
+          open: false,
+          building: null,
+        });
+      }
 
       const exitedBuilding =
         previousBuilding.current !==
@@ -221,17 +230,26 @@ export default function useIndoorEntry() {
       );
 
       /*
-       * Open floor selection immediately.
+       * Open floor selection if building has indoor floor data.
        */
 
-      setInitialFloorSelection({
-        open: true,
-        building: currentBuilding,
-      });
+      const buildingConfig = currentBuilding ? BUILDING_CONFIGS[currentBuilding] : null;
+      if (buildingConfig?.hasFloorData) {
+        setInitialFloorSelection({
+          open: true,
+          building: currentBuilding,
+        });
 
-      console.log(
-        "Floor selection prompt opened."
-      );
+        console.log(
+          "Floor selection prompt opened for:",
+          currentBuilding
+        );
+      } else {
+        console.log(
+          "Building has no indoor floor data. Skipping prompt for:",
+          currentBuilding
+        );
+      }
 
       console.log(
         "=============================================="
@@ -287,17 +305,25 @@ export default function useIndoorEntry() {
         currentBuilding
       );
 
-      console.log(
-        "Automatically loading Ground Floor."
-      );
-
       setSelectedBuilding(
         currentBuilding
       );
 
-      setNavigationStage(
-        "GROUND_FLOOR"
-      );
+      const buildingConfig = currentBuilding ? BUILDING_CONFIGS[currentBuilding] : null;
+      if (buildingConfig?.hasFloorData) {
+        console.log(
+          "Prompting user for current floor in:",
+          currentBuilding
+        );
+        setInitialFloorSelection({
+          open: true,
+          building: currentBuilding,
+        });
+      } else {
+        console.log(
+          "Building has no indoor floor data. Preserving outdoor view."
+        );
+      }
 
       console.log(
         "======================================="

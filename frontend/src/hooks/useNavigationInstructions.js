@@ -138,19 +138,14 @@ export function useNavigationInstructions() {
             : "";
         speak(
           `${prefix}${firstManeuver.spokenExecText || firstManeuver.primaryText}`,
-          { queue: true }
+          { queue: false }
         );
       }
       return;
     }
 
-    // B. Maneuver approach announcement (15m to 30m before turn)
-    if (
-      activeInstruction.type !== "STRAIGHT" &&
-      activeInstruction.type !== "ARRIVE" &&
-      activeInstruction.type !== "ENTER_BUILDING" &&
-      activeInstruction.type !== "PROCEED_TO_STAIRS"
-    ) {
+    // B. Maneuver approach announcement (12m to 30m before waypoint)
+    if (activeInstruction.type !== "STRAIGHT") {
       const approachKey = `${activeInstruction.id}_approach`;
       if (
         distanceToNextAction !== null &&
@@ -159,22 +154,29 @@ export function useNavigationInstructions() {
         !announcedSet.has(approachKey)
       ) {
         announcedSet.add(approachKey);
-        speak(
-          `In ${Math.round(distanceToNextAction)} meters, ${activeInstruction.actionTitle.toLowerCase()}.`
-        );
+        const speechText =
+          activeInstruction.spokenApproachText ||
+          `In about ${Math.round(distanceToNextAction)} meters, ${activeInstruction.actionTitle.toLowerCase()}.`;
+        speak(speechText);
         return;
       }
 
-      // C. Turn execution announcement (within 8 meters of vertex)
-      const execKey = `${activeInstruction.id}_exec`;
+      // C. Maneuver execution announcement (within 8 meters of vertex)
+      // Note: ENTER_BUILDING is handled by useNavigationStage, and ARRIVE is handled by useDestinationArrival
       if (
-        distanceToNextAction !== null &&
-        distanceToNextAction <= 8 &&
-        !announcedSet.has(execKey)
+        activeInstruction.type !== "ENTER_BUILDING" &&
+        activeInstruction.type !== "ARRIVE"
       ) {
-        announcedSet.add(execKey);
-        speak(activeInstruction.spokenExecText || activeInstruction.primaryText);
-        return;
+        const execKey = `${activeInstruction.id}_exec`;
+        if (
+          distanceToNextAction !== null &&
+          distanceToNextAction <= 8 &&
+          !announcedSet.has(execKey)
+        ) {
+          announcedSet.add(execKey);
+          speak(activeInstruction.spokenExecText || activeInstruction.primaryText);
+          return;
+        }
       }
     }
   }, [
@@ -183,6 +185,7 @@ export function useNavigationInstructions() {
     instructions,
     route,
     currentRouteKey,
+    navigationStage,
   ]);
 
   // Clean up when navigation stops

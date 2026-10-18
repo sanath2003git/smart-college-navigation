@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, MapPin } from "lucide-react";
 
 import { useNavigation } from "../../hooks/useNavigation";
+import { BUILDING_CONFIGS } from "../../constants/buildingConfigs";
 
 import { navigate } from "../../navigation/navigationRouter";
 import { NAVIGATION_STAGE } from "../../constants/navigationStages";
@@ -16,6 +18,9 @@ import DestinationPanel from "./DestinationPanel";
 import { speak } from "../../services/voiceService";
 
 export default function SearchBar() {
+  const routerNavigate = useNavigate();
+  const location = useLocation();
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -667,6 +672,29 @@ export default function SearchBar() {
       console.log(
         "============================================"
       );
+
+      // -----------------------------------
+      // Page Navigation Handoff
+      // -----------------------------------
+      const isIndoorSameBuilding =
+        sameBuilding &&
+        alreadyOnGroundFloor &&
+        (destinationFloor === 0 || destinationFloor === 1);
+
+      if (isIndoorSameBuilding) {
+        const config = destinationBuilding ? BUILDING_CONFIGS[destinationBuilding] : null;
+        if (config?.route && location.pathname !== config.route) {
+          routerNavigate(config.route, {
+            state: { floor: currentFloor ?? 0 },
+          });
+        }
+      } else {
+        // Outdoor route: if user started search from a building page, return to campus map
+        if (location.pathname !== "/") {
+          routerNavigate("/");
+        }
+      }
+
       setSelectedDestination(null);
       setQuery("");
     } catch (err) {

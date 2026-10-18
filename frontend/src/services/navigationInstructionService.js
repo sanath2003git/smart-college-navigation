@@ -164,6 +164,26 @@ function classifyTurn(angle) {
 }
 
 /**
+ * Formats internal stair/lift identifiers into natural spoken names.
+ */
+export function formatHumanStairName(rawName) {
+  if (!rawName || typeof rawName !== "string") return "the stairs";
+  // If already clean like "Main Staircase"
+  if (!rawName.includes("_")) return rawName;
+
+  const upper = rawName.toUpperCase();
+  if (upper.includes("LIFT") || upper.includes("ELEVATOR")) {
+    return "the elevator";
+  }
+  const stairMatch = upper.match(/STAIR(?:CASE)?_?0?(\d+)/i);
+  if (stairMatch) {
+    const num = stairMatch[1];
+    return `staircase ${num}`;
+  }
+  return "the stairs";
+}
+
+/**
  * Generates structured navigation instructions from route coordinates and active context.
  */
 export function generateRouteInstructions({
@@ -178,6 +198,11 @@ export function generateRouteInstructions({
   if (points.length < 2) return [];
 
   const isOutdoor = navigationStage === NAVIGATION_STAGE.OUTDOOR;
+  const isOutdoorVenue = Boolean(
+    destination?.properties?.isOutdoorVenue ||
+      (!targetEntrance && !destination?.properties?.room_no && isOutdoor)
+  );
+
   const destinationBuilding =
     destination?.properties?.building ?? "destination building";
   const roomCode =
@@ -190,15 +215,17 @@ export function generateRouteInstructions({
     destination?.properties?.name && destination.properties.name !== roomCode
       ? destination.properties.name
       : null;
+  const destTitle = destination?.properties?.name || roomCode;
   const destinationFloor =
     destination?.properties?.floor ??
     destination?.properties?.level ??
     0;
   const hasStairTransition = Boolean(targetStair);
-  const stairName =
+  const rawStairName =
     targetStair?.properties?.name ||
     targetStair?.properties?.id ||
-    "stairs or lift";
+    "stairs";
+  const stairName = formatHumanStairName(rawStairName);
 
   // Calculate segment lengths and bearings
   const segmentDistances = [];
@@ -254,9 +281,12 @@ export function generateRouteInstructions({
       if (currentManeuverNodeIndex === 0) {
         let initialText = "";
         let initialSpoken = "";
-        if (isOutdoor) {
-          initialText = `Head straight toward ${destinationBuilding} entrance`;
-          initialSpoken = `Head toward ${destinationBuilding} entrance. Continue straight for ${roundedDist} meters.`;
+        if (isOutdoorVenue) {
+          initialText = `Head straight toward ${destTitle}`;
+          initialSpoken = `Head toward ${destTitle}. Continue straight for ${roundedDist} meters.`;
+        } else if (isOutdoor) {
+          initialText = `Head toward ${destinationBuilding} entrance`;
+          initialSpoken = `Head toward the ${destinationBuilding} entrance for ${roomCode}. Continue straight for ${roundedDist} meters.`;
         } else if (hasStairTransition) {
           initialText = `Proceed straight toward ${stairName}`;
           initialSpoken = `Proceed straight toward ${stairName} for ${roundedDist} meters.`;
@@ -273,7 +303,7 @@ export function generateRouteInstructions({
           primaryText: initialText,
           secondaryText: `Continue for ${roundedDist} m`,
           spokenApproachText: `Continue straight for ${roundedDist} meters.`,
-          spokenExecText: `Continue straight for ${roundedDist} meters.`,
+          spokenExecText: initialSpoken,
           distance: accumulatedDist,
           iconName: "arrow-up",
           lat: points[currentManeuverNodeIndex].lat,
@@ -285,6 +315,12 @@ export function generateRouteInstructions({
       currentManeuverNodeIndex = i + 1;
       accumulatedDist = 0;
 
+      const turnTarget = isOutdoorVenue
+        ? destTitle
+        : isOutdoor
+        ? destinationBuilding
+        : roomCode;
+
       maneuvers.push({
         id: `step_${maneuvers.length}`,
         nodeIndex: currentManeuverNodeIndex,
@@ -293,7 +329,7 @@ export function generateRouteInstructions({
         primaryText: isOutdoor
           ? `${turnClassification.actionTitle} onto walkway`
           : `${turnClassification.actionTitle} along corridor`,
-        secondaryText: `Toward ${isOutdoor ? destinationBuilding : roomCode}`,
+        secondaryText: `Toward ${turnTarget}`,
         spokenApproachText: `In about 20 meters, ${turnClassification.spokenTurn}.`,
         spokenExecText: `${turnClassification.actionTitle}, then continue straight.`,
         distance: 0, // will be updated as following segment accumulates
@@ -309,9 +345,12 @@ export function generateRouteInstructions({
     const roundedDist = Math.max(1, Math.round(accumulatedDist));
     let initialText = "";
     let initialSpoken = "";
-    if (isOutdoor) {
+    if (isOutdoorVenue) {
+      initialText = `Walk toward ${destTitle}`;
+      initialSpoken = `Head toward ${destTitle}. Continue straight for ${roundedDist} meters.`;
+    } else if (isOutdoor) {
       initialText = `Walk toward ${destinationBuilding} entrance`;
-      initialSpoken = `Head toward ${destinationBuilding} entrance. Continue straight for ${roundedDist} meters.`;
+      initialSpoken = `Head toward the ${destinationBuilding} entrance for ${roomCode}. Continue straight for ${roundedDist} meters.`;
     } else if (hasStairTransition) {
       initialText = `Walk toward ${stairName}`;
       initialSpoken = `Walk toward ${stairName} for ${roundedDist} meters.`;
@@ -349,7 +388,22 @@ export function generateRouteInstructions({
   const lastPoint = points[points.length - 1];
   let finalStep = null;
 
-  if (isOutdoor) {
+  if (isOutdoorVenue) {
+    finalStep = {
+      id: `step_${maneuvers.length}`,
+      nodeIndex: points.length - 1,
+      type: "ARRIVE",
+      actionTitle: "Destination ahead",
+      primaryText: `Arrive at ${destTitle}`,
+      secondaryText: destination?.properties?.building || destination?.properties?.landmark || "Campus Venue",
+      spokenApproachText: `In about 25 meters, your destination, ${destTitle}, will be ahead.`,
+      spokenExecText: `You have arrived at ${destTitle}.`,
+      distance: 0,
+      iconName: "map-pin",
+      lat: lastPoint.lat,
+      lng: lastPoint.lng,
+    };
+  } else if (isOutdoor) {
     const entranceLabel =
       targetEntrance?.properties?.name ||
       `${destinationBuilding} Entrance`;
@@ -360,7 +414,7 @@ export function generateRouteInstructions({
       actionTitle: "Enter building",
       primaryText: `Approach ${entranceLabel}`,
       secondaryText: `Enter ${destinationBuilding} for ${roomCode}`,
-      spokenApproachText: `Approaching ${destinationBuilding} entrance. Prepare to enter the building.`,
+      spokenApproachText: `In about 25 meters, approach the ${destinationBuilding} entrance.`,
       spokenExecText: `You have reached the entrance. Enter ${destinationBuilding}.`,
       distance: 0,
       iconName: "log-in",
@@ -375,8 +429,8 @@ export function generateRouteInstructions({
       actionTitle: "Take stairs / lift",
       primaryText: `Proceed to ${stairName}`,
       secondaryText: `Take to ${getFloorLabel(destinationFloor)} for ${roomCode}`,
-      spokenApproachText: `Approaching ${stairName}. Take it to ${getFloorLabel(destinationFloor)}.`,
-      spokenExecText: `You have reached the ${stairName}. Proceed to ${getFloorLabel(destinationFloor)}.`,
+      spokenApproachText: `In about 20 meters, approach ${stairName}. Take it to ${getFloorLabel(destinationFloor)}.`,
+      spokenExecText: `You have reached ${stairName}. Proceed to ${getFloorLabel(destinationFloor)}.`,
       distance: 0,
       iconName: "footprints",
       lat: lastPoint.lat,
@@ -390,7 +444,7 @@ export function generateRouteInstructions({
       actionTitle: "Destination ahead",
       primaryText: `Arrive at ${roomCode}`,
       secondaryText: `${destinationBuilding}${roomName ? ` · ${roomName}` : ""} (${getFloorLabel(destinationFloor)})`,
-      spokenApproachText: `Your destination ${roomCode} will be ahead on this floor.`,
+      spokenApproachText: `In about 20 meters, your destination ${roomCode} will be ahead on this floor.`,
       spokenExecText: `You have arrived at destination ${roomCode}.`,
       distance: 0,
       iconName: "map-pin",

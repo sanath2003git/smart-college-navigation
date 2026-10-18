@@ -18,24 +18,6 @@ import PermanentLayers
 import OutdoorLayers
   from "../../components/layers/OutdoorLayers";
 
-import GroundFloorLayers
-  from "../../components/layers/GroundFloorLayers";
-
-import FirstFloorLayers
-  from "../../components/layers/FirstFloorLayers";
-
-import SecondFloorLayers
-  from "../../components/layers/SecondFloorLayers";
-
-import ThirdFloorLayers
-  from "../../components/layers/ThirdFloorLayers";
-
-import FloorTransitionPrompt
-  from "../../components/navigation/FloorTransitionPrompt";
-
-import FloorSelector
-  from "../../components/navigation/FloorSelector";
-
 import RouteLayer
   from "../../components/map/RouteLayer";
 
@@ -44,12 +26,6 @@ import { loadGraphs }
 
 import { useNavigation }
   from "../../hooks/useNavigation";
-
-import { NAVIGATION_STAGE }
-  from "../../constants/navigationStages";
-
-import MapRotation
-  from "../../components/map/MapRotation";  
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -60,21 +36,15 @@ export default function CampusPage() {
   const navigate = useNavigate();
 
   const {
-    navigationStage,
     selectedBuilding,
     currentBuilding,
-    currentFloor,
     route,
-
-    floorTransition,
-    confirmFloorTransition,
-    cancelFloorTransition,
   } = useNavigation();
 
-  const activeIndoorBuilding =
+  const activeBuilding =
     selectedBuilding ||
     currentBuilding ||
-    (navigationStage !== NAVIGATION_STAGE.OUTDOOR ? "Mechanical Block" : null);
+    null;
 
   const center = [
     8.9138,
@@ -300,151 +270,40 @@ export default function CampusPage() {
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
-
       {/* =====================================
-          Floor Transition Prompt
+          Leaflet Campus Map (Strictly Outdoor)
           ===================================== */}
-
-      {floorTransition.open && (
-        <FloorTransitionPrompt
-          currentFloor={
-            floorTransition.currentFloor ?? currentFloor
-          }
-          nextFloor={
-            floorTransition.nextFloor
-          }
-          transitionType={
-            floorTransition.transitionType
-          }
-          onConfirm={
-            confirmFloorTransition
-          }
-          onCancel={
-            cancelFloorTransition
-          }
-        />
-      )}
-
-      {/* =====================================
-          Indoor Floor Navigation UI
-          ===================================== */}
-
-      <FloorSelector />
-
-      {/* =====================================
-          Leaflet Campus Map
-          ===================================== */}
-
       <MapContainer
-  center={center}
-  zoom={18}
-  minZoom={17}
-  maxZoom={22}
-  maxBounds={CAMPUS_BOUNDS}
-  maxBoundsViscosity={1.0}
-
-  rotate={true}
-  bearing={0}
-  touchRotate={false}
-  dragRotate={false}
-  shiftKeyRotate={false}
-
-  className="min-h-0 flex-1 w-full"
->
-
-        {/* ===================================
-            OpenStreetMap Base Layer
-            =================================== */}
-
+        center={center}
+        zoom={18}
+        minZoom={17}
+        maxZoom={22}
+        maxBounds={CAMPUS_BOUNDS}
+        maxBoundsViscosity={1.0}
+        rotate={true}
+        bearing={0}
+        touchRotate={false}
+        dragRotate={false}
+        shiftKeyRotate={false}
+        className="min-h-0 flex-1 w-full"
+      >
+        {/* OpenStreetMap Base Layer */}
         <TileLayer
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* ===================================
-            Permanent Campus Layers
-            =================================== */}
-
+        {/* Permanent Campus Layers (Boundary, Areas, Building Footprints) */}
         <PermanentLayers
-          handleBuildingClick={
-            handleBuildingClick
-          }
-          activeBuilding={
-            navigationStage !== NAVIGATION_STAGE.OUTDOOR
-              ? activeIndoorBuilding
-              : null
-          }
+          handleBuildingClick={handleBuildingClick}
+          activeBuilding={activeBuilding}
         />
 
-        {/* ===================================
-            Outdoor Layers
-            =================================== */}
+        {/* Outdoor Walkways and Entrances (Always visible on Campus Map) */}
+        <OutdoorLayers />
 
-        {navigationStage ===
-          NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers />
-        )}
-
-        {/* ===================================
-            Ground Floor
-            =================================== */}
-
-        {navigationStage ===
-          NAVIGATION_STAGE.GROUND_FLOOR && (
-          <GroundFloorLayers
-            building={
-              activeIndoorBuilding
-            }
-          />
-        )}
-
-        {/* ===================================
-            First Floor
-            =================================== */}
-
-        {navigationStage ===
-          NAVIGATION_STAGE.FIRST_FLOOR && (
-          <FirstFloorLayers
-            building={
-              activeIndoorBuilding
-            }
-          />
-        )}
-
-        {/* ===================================
-            Second Floor
-            =================================== */}
-
-        {navigationStage ===
-          NAVIGATION_STAGE.SECOND_FLOOR && (
-          <SecondFloorLayers
-            building={
-              activeIndoorBuilding
-            }
-          />
-        )}
-
-        {/* ===================================
-            Third Floor
-            =================================== */}
-
-        {navigationStage ===
-          NAVIGATION_STAGE.THIRD_FLOOR && (
-          <ThirdFloorLayers
-            building={
-              activeIndoorBuilding
-            }
-          />
-        )}
-
-        {/* ===================================
-            Navigation Route
-            =================================== */}
-
-        <RouteLayer
-          path={route}
-        />
-
+        {/* Outdoor Navigation Route */}
+        <RouteLayer path={route} />
       </MapContainer>
     </div>
   );

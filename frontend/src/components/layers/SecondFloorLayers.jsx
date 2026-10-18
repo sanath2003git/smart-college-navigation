@@ -6,6 +6,28 @@ export default function SecondFloorLayers({
   return (
     <>
       {/* ===================================
+          Chemical Block - Second Floor
+          =================================== */}
+
+      {building === "Chemical Block" && (
+        <>
+          {/* Rooms */}
+          <GeoJsonLayer
+            url="/data/chemical/second_floor/rooms.geojson"
+            interactive={false}
+            labelProperty="room_no"
+            labelClassName="smartnav-room-label"
+            style={{
+              color: "#00acc1",
+              weight: 1,
+              fillColor: "#80deea",
+              fillOpacity: 0.35,
+            }}
+          />
+        </>
+      )}
+
+      {/* ===================================
           Mechanical Block - Second Floor
           =================================== */}
 

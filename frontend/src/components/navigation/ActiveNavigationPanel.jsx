@@ -1,8 +1,11 @@
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowUp,
   ArrowUpLeft,
   ArrowUpRight,
   Check,
+  ChevronDown,
+  ChevronUp,
   CornerUpLeft,
   CornerUpRight,
   DoorOpen,
@@ -79,6 +82,66 @@ export default function ActiveNavigationPanel() {
     toggleMute,
     repeatInstruction,
   } = useNavigationInstructions();
+
+  // Temporary mobile guidance panel mechanics:
+  // Shows updated card upon new meaningful instruction, auto-hides after ~4s,
+  // supports manual expand/collapse and manual dismiss.
+  const [isGuidanceExpanded, setIsGuidanceExpanded] = useState(true);
+  const hideTimerRef = useRef(null);
+  const lastInstructionKeyRef = useRef(null);
+  const AUTO_HIDE_DELAY_MS = 4000;
+
+  const instructionKey = currentInstruction
+    ? `${navigationStage}_${currentFloor}_${currentInstruction.id}`
+    : null;
+
+  useEffect(() => {
+    if (!instructionKey) return;
+
+    if (instructionKey !== lastInstructionKeyRef.current) {
+      lastInstructionKeyRef.current = instructionKey;
+      setIsGuidanceExpanded(true);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+      hideTimerRef.current = setTimeout(() => {
+        setIsGuidanceExpanded(false);
+      }, AUTO_HIDE_DELAY_MS);
+    }
+  }, [instructionKey]);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
+  }, []);
+
+  const toggleGuidance = useCallback(() => {
+    setIsGuidanceExpanded((prev) => {
+      const next = !prev;
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+      if (next) {
+        hideTimerRef.current = setTimeout(() => {
+          setIsGuidanceExpanded(false);
+        }, AUTO_HIDE_DELAY_MS);
+      }
+      return next;
+    });
+  }, []);
+
+  const dismissGuidance = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    setIsGuidanceExpanded(false);
+  }, []);
 
   // If no active navigation session exists, do not render
   if (!route || route.length === 0 || !destination) {
@@ -332,6 +395,21 @@ export default function ActiveNavigationPanel() {
         </div>
 
         <div className="smartnav-m-controls-row">
+          {/* Toggle Turn Guidance Card */}
+          <button
+            type="button"
+            onClick={toggleGuidance}
+            className={`smartnav-m-icon-btn ${isGuidanceExpanded ? "active" : ""}`}
+            title={isGuidanceExpanded ? "Hide turn guidance" : "Show turn guidance"}
+            aria-label={isGuidanceExpanded ? "Hide turn guidance" : "Show turn guidance"}
+          >
+            {isGuidanceExpanded ? (
+              <ChevronUp size={15} strokeWidth={2.4} />
+            ) : (
+              <ChevronDown size={15} strokeWidth={2.4} />
+            )}
+          </button>
+
           {/* Mobile Voice Repeat */}
           <button
             type="button"
@@ -371,40 +449,47 @@ export default function ActiveNavigationPanel() {
         </div>
       </div>
 
-      <div className="smartnav-m-sheet">
-        <div className="smartnav-m-handle" aria-hidden="true" />
-        <div className="smartnav-m-instr-row">
-          <div className="smartnav-m-instr-ic" aria-hidden="true">
-            <InstructionIcon size={17} strokeWidth={2.4} />
-          </div>
-          <div className="smartnav-m-instr-content">
-            {distanceBadgeText && (
-              <div className="smartnav-instr-dist-badge">
-                {distanceBadgeText}
-              </div>
-            )}
-            <div className="smartnav-m-instr-title">{displayTitle}</div>
-            <div className="smartnav-m-instr-sub">{displayMeta}</div>
-          </div>
-        </div>
-
-        {nextInstruction && (
-          <div className="smartnav-m-next-row">
-            <span className="smartnav-instr-next-label">Next:</span>
-            <span className="truncate">
-              {nextInstruction.actionTitle} · {nextInstruction.primaryText}
-            </span>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="smartnav-m-cancel-btn"
+      {/* Floating Temporary Guidance Card */}
+      {isGuidanceExpanded && (
+        <div
+          className="smartnav-m-guidance-card"
+          role="region"
+          aria-label="Turn guidance notification"
         >
-          Cancel Navigation
-        </button>
-      </div>
+          <div className="smartnav-m-instr-row">
+            <div className="smartnav-m-instr-ic" aria-hidden="true">
+              <InstructionIcon size={17} strokeWidth={2.4} />
+            </div>
+            <div className="smartnav-m-instr-content">
+              {distanceBadgeText && (
+                <div className="smartnav-instr-dist-badge">
+                  {distanceBadgeText}
+                </div>
+              )}
+              <div className="smartnav-m-instr-title">{displayTitle}</div>
+              <div className="smartnav-m-instr-sub">{displayMeta}</div>
+            </div>
+            <button
+              type="button"
+              onClick={dismissGuidance}
+              className="smartnav-m-guidance-close"
+              title="Dismiss guidance banner"
+              aria-label="Dismiss guidance banner"
+            >
+              <X size={13} strokeWidth={2.4} />
+            </button>
+          </div>
+
+          {nextInstruction && (
+            <div className="smartnav-m-next-row">
+              <span className="smartnav-instr-next-label">Next:</span>
+              <span className="truncate">
+                {nextInstruction.actionTitle} · {nextInstruction.primaryText}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
