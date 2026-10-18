@@ -267,6 +267,31 @@ export default function Navbar() {
                   </NavLink>
 
                   {isSignedIn && (
+                    <NavLink
+                      to="/admin/events"
+                      role="menuitem"
+                      className={({ isActive }) =>
+                        `smartnav-mobile-menu__link ${
+                          isActive
+                            ? "smartnav-mobile-menu__link--active"
+                            : ""
+                        }`
+                      }
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span
+                        className="smartnav-mobile-menu__link-icon text-teal-600"
+                        aria-hidden="true"
+                      >
+                        <Calendar size={17} />
+                      </span>
+                      <span className="smartnav-mobile-menu__link-text font-medium">
+                        Event Dashboard
+                      </span>
+                    </NavLink>
+                  )}
+
+                  {isSignedIn && (
                     <div className="smartnav-mobile-menu__signout-wrap">
                       <SignOutButton>
                         <button

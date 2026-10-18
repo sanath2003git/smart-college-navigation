@@ -117,6 +117,7 @@ CLERK_ISSUER = os.environ.get('CLERK_ISSUER', '').strip()
 CLERK_JWKS_URL = os.environ.get('CLERK_JWKS_URL', '').strip()
 _clerk_admin_ids = os.environ.get('CLERK_ADMIN_USER_IDS', '')
 CLERK_ADMIN_USER_IDS = [uid.strip() for uid in _clerk_admin_ids.split(',') if uid.strip()]
+CLERK_JWT_LEEWAY = int(os.environ.get('CLERK_JWT_LEEWAY', 10))
 
 # Cache configuration for rate limiting / throttling
 # LocMemCache is standard for local development and single-process servers.

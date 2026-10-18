@@ -441,6 +441,34 @@ class ClerkAuthenticationTestCase(ClerkAuthTestBase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("iat", str(res.data).lower())
 
+    def test_token_immature_rejected(self):
+        """Token with future nbf beyond leeway is rejected with 401."""
+        now_ts = int(time.time())
+        payload = {
+            "sub": TEST_ADMIN_USER_ID,
+            "iss": TEST_ISSUER,
+            "exp": now_ts + 3600,
+            "iat": now_ts + 30,
+            "nbf": now_ts + 30,
+        }
+        token = self.make_token(custom_payload=payload)
+        res = self.client.get('/api/admin/events/', HTTP_AUTHORIZATION=f"Bearer {token}")
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("not yet valid", str(res.data).lower())
+
+    def test_token_within_leeway_accepted(self):
+        """Token expired by 5 seconds is accepted when CLERK_JWT_LEEWAY=10."""
+        headers = self.auth_headers(sub=TEST_ADMIN_USER_ID, exp_offset=-5)
+        res = self.client.get('/api/admin/events/', **headers)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_token_beyond_leeway_rejected(self):
+        """Token expired by 15 seconds is rejected when CLERK_JWT_LEEWAY=10."""
+        headers = self.auth_headers(sub=TEST_ADMIN_USER_ID, exp_offset=-15)
+        res = self.client.get('/api/admin/events/', **headers)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("expired", str(res.data).lower())
+
 
 
 # =====================================================================

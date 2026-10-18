@@ -8,6 +8,7 @@ import MainBlockPage from "../pages/Main/MainBlockPage";
 import LibraryPage from "../pages/Library/LibraryPage";
 import BuildingFloorExplorer from "../components/building/BuildingFloorExplorer";
 import AdminLandingPage from "../pages/Admin/AdminLandingPage";
+import AdminEventsDashboard from "../pages/Admin/AdminEventsDashboard";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
       <Route path="/" element={<CampusPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/admin" element={<AdminLandingPage />} />
+      <Route path="/admin/events" element={<AdminEventsDashboard />} />
       <Route path="/chemical" element={<ChemicalPage />} />
 
       <Route path="/mechanical" element={<MechanicalPage />} />

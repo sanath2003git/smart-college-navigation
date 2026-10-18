@@ -23,6 +23,8 @@ import {
   toggleSavedEvent,
   resetDemoEvents,
   getVenueById,
+  fetchPublicEvents,
+  fetchPublicVenues,
 } from "../../services/eventService.js";
 import { getStatus, statusPriority } from "../../utils/eventTime.js";
 import { useNavigation } from "../../hooks/useNavigation.js";
@@ -56,9 +58,30 @@ export default function EventsPage() {
   const [events, setEvents] = useState(() => getEvents());
   const [savedIds, setSavedIds] = useState(() => getSavedEventIds());
   const [noticeVisible, setNoticeVisible] = useState(true);
+  const [isLiveApi, setIsLiveApi] = useState(false);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   // Periodic clock tick (30s) to refresh live statuses & countdowns
   const [now, setNow] = useState(() => Date.now());
+
+  const loadEvents = useCallback(async () => {
+    setIsLoadingEvents(true);
+    try {
+      const res = await fetchPublicEvents({ all: true });
+      if (res && Array.isArray(res.results) && !res.isFallback) {
+        setEvents(res.results);
+        setIsLiveApi(true);
+      }
+    } catch (err) {
+      console.warn("[EventsPage] Live API load error, using cached/demo events:", err);
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -101,11 +124,7 @@ export default function EventsPage() {
 
   const handleNavigateToEvent = useCallback(
     async (event) => {
-      if (!event?.venueId) {
-        alert("This event has no associated campus venue.");
-        return;
-      }
-      const venue = getVenueById(event.venueId);
+      const venue = event.venue || (event?.venueId ? getVenueById(event.venueId) : null);
       if (!venue) {
         alert("Unable to locate venue information for this event.");
         return;
@@ -132,7 +151,7 @@ export default function EventsPage() {
 
       // 3. Search query filter
       if (q) {
-        const venue = event.venueId ? getVenueById(event.venueId) : null;
+        const venue = event.venue || (event.venueId ? getVenueById(event.venueId) : null);
         const titleMatch = Boolean(
           event.title && event.title.toLowerCase().includes(q)
         );
@@ -207,26 +226,50 @@ export default function EventsPage() {
 
   return (
     <div className="smartnav-events-page">
-      {/* ── Demo Notice Banner ──────────────────────────────────────── */}
+      {/* ── Demo / Live Notice Banner ─────────────────────────────────── */}
       {noticeVisible && (
         <div className="smartnav-events-demo-banner" role="alert">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Sparkles size={15} className="text-amber-500 shrink-0" />
+            <Sparkles
+              size={15}
+              className={isLiveApi ? "text-teal-600 shrink-0" : "text-amber-500 shrink-0"}
+            />
             <span className="smartnav-events-demo-text truncate">
-              <strong>Demo:</strong> Sample campus events mapped to TKM College venues
+              {isLiveApi ? (
+                <>
+                  <strong>Campus Events:</strong> Synchronized with SmartNav live database
+                </>
+              ) : (
+                <>
+                  <strong>Demo:</strong> Sample campus events mapped to TKM College venues
+                </>
+              )}
             </span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              className="smartnav-events-reset-btn"
-              onClick={handleResetDemo}
-              title="Reset demonstration data"
-            >
-              <RotateCcw size={12} />
-              <span className="smartnav-reset-label">Reset Data</span>
-            </button>
+            {isLiveApi ? (
+              <button
+                type="button"
+                className="smartnav-events-reset-btn"
+                onClick={loadEvents}
+                disabled={isLoadingEvents}
+                title="Refresh events from server"
+              >
+                <RotateCcw size={12} className={isLoadingEvents ? "animate-spin" : ""} />
+                <span className="smartnav-reset-label">Refresh</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="smartnav-events-reset-btn"
+                onClick={handleResetDemo}
+                title="Reset demonstration data"
+              >
+                <RotateCcw size={12} />
+                <span className="smartnav-reset-label">Reset Data</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -335,11 +378,15 @@ export default function EventsPage() {
             <h3 className="smartnav-events-empty-title">
               {activeTab === "saved"
                 ? "No saved events yet"
+                : events.length === 0
+                ? "No events scheduled"
                 : "No matching events found"}
             </h3>
             <p className="smartnav-events-empty-text">
               {activeTab === "saved"
                 ? "Bookmark events by clicking the bookmark icon on any event card to view them here."
+                : events.length === 0
+                ? "There are currently no events scheduled on campus. Check back soon for upcoming campus activities."
                 : "Try adjusting your search query or selecting a different category filter."}
             </p>
             {activeTab === "all" && (searchQuery || selectedCategory !== "All") && (

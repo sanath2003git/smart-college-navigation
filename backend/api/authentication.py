@@ -115,9 +115,11 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             "require": ["exp", "sub", "iat"],
         }
 
+        leeway = int(getattr(settings, 'CLERK_JWT_LEEWAY', 10))
         decode_kwargs = {
             "algorithms": ["RS256"],
             "options": decode_options,
+            "leeway": leeway,
         }
         if issuer:
             decode_kwargs["issuer"] = issuer
@@ -129,20 +131,29 @@ class ClerkAuthentication(authentication.BaseAuthentication):
                 **decode_kwargs
             )
         except jwt.ExpiredSignatureError:
+            logger.warning("Clerk JWT rejected: Token has expired.")
             raise exceptions.AuthenticationFailed("Token has expired.")
+        except jwt.ImmatureSignatureError:
+            logger.warning("Clerk JWT rejected: Token is not yet valid (nbf/iat in future).")
+            raise exceptions.AuthenticationFailed("Token is not yet valid.")
         except jwt.MissingRequiredClaimError as e:
             claim_name = getattr(e, 'claim', str(e))
+            logger.warning("Clerk JWT rejected: Missing required claim: %s", claim_name)
             raise exceptions.AuthenticationFailed(f"Token is missing required claim: {claim_name}.")
         except jwt.InvalidIssuerError:
+            logger.warning("Clerk JWT rejected: Token issuer is invalid.")
             raise exceptions.AuthenticationFailed("Token issuer is invalid.")
         except jwt.InvalidAlgorithmError:
+            logger.warning("Clerk JWT rejected: Invalid signing algorithm.")
             raise exceptions.AuthenticationFailed("Invalid signing algorithm. Only RS256 is supported.")
         except jwt.InvalidSignatureError:
+            logger.warning("Clerk JWT rejected: Token signature verification failed.")
             raise exceptions.AuthenticationFailed("Token signature verification failed.")
         except jwt.DecodeError:
+            logger.warning("Clerk JWT rejected: Token is malformed or unparseable.")
             raise exceptions.AuthenticationFailed("Token is malformed.")
         except jwt.PyJWTError as e:
-            logger.warning("JWT verification error: %s", str(e))
+            logger.warning("Clerk JWT verification error: %s", str(e))
             raise exceptions.AuthenticationFailed("Token verification failed.")
 
 
