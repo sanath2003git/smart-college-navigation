@@ -10,7 +10,6 @@ import {
 import L from "leaflet";
 
 import { useLocation } from "../../hooks/useLocation";
-import { useNavigation } from "../../hooks/useNavigation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
 
 // ==========================================
@@ -222,12 +221,7 @@ const createUserIcon = (heading, zoom) => {
 export default function CurrentLocation() {
   const {
     location,
-    rawLocation,
   } = useLocation();
-
-  const {
-    setCurrentLocation,
-  } = useNavigation();
 
   const heading = useDeviceHeading();
 
@@ -253,20 +247,6 @@ export default function CurrentLocation() {
       map.off("zoomend", handleZoomChange);
     };
   }, [map]);
-
-
-  // ========================================
-  // Navigation continues using RAW GPS
-  // ========================================
-
-  useEffect(() => {
-    if (rawLocation) {
-      setCurrentLocation(rawLocation);
-    }
-  }, [
-    rawLocation,
-    setCurrentLocation,
-  ]);
 
 
   if (!location) {

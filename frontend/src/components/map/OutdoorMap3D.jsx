@@ -40,7 +40,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
     currentBuilding,
   } = useNavigation();
 
-  const { location, rawLocation } = useLocation();
+  const { location } = useLocation();
   const heading = useDeviceHeading();
 
   const routeRef = useRef(route);

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {
   MapContainer,
@@ -21,6 +21,9 @@ import OutdoorLayers
 import RouteLayer
   from "../../components/map/RouteLayer";
 
+import OutdoorMap3D
+  from "../../components/map/OutdoorMap3D";
+
 import { loadGraphs }
   from "../../navigation/loadGraphs";
 
@@ -34,6 +37,7 @@ const CAMPUS_BOUNDS = [
 
 export default function CampusPage() {
   const navigate = useNavigate();
+  const [is3DMode, setIs3DMode] = useState(true);
 
   const {
     selectedBuilding,
@@ -268,8 +272,30 @@ export default function CampusPage() {
   // Render
   // ==========================================
 
+  if (is3DMode) {
+    return (
+      <div className="relative flex h-full w-full flex-col overflow-hidden">
+        <OutdoorMap3D onToggle2D={() => setIs3DMode(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
+      {/* 2D to 3D View Toggle */}
+      <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIs3DMode(true)}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-slate-50 active:scale-95"
+          title="Switch to 3D MapLibre Map"
+        >
+          <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
+          <span>2D View (Leaflet)</span>
+          <span className="text-slate-400">· Switch to 3D</span>
+        </button>
+      </div>
+
       {/* =====================================
           Leaflet Campus Map (Strictly Outdoor)
           ===================================== */}

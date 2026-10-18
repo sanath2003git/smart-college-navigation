@@ -16,19 +16,23 @@ import { useNavigation } from "../../hooks/useNavigation";
  */
 export default function NavigationLifecycleController() {
   const { rawLocation } = useLocation();
-  const { setCurrentLocation, currentLocation } = useNavigation();
+  const { setCurrentLocation } = useNavigation();
 
   // Continuously sync raw GPS location into navigation context across all pages
   useEffect(() => {
-    if (
-      rawLocation &&
-      (!currentLocation ||
-        currentLocation.lat !== rawLocation.lat ||
-        currentLocation.lng !== rawLocation.lng)
-    ) {
-      setCurrentLocation(rawLocation);
-    }
-  }, [rawLocation, currentLocation, setCurrentLocation]);
+    if (!rawLocation || !setCurrentLocation) return;
+    setCurrentLocation((prev) => {
+      if (
+        prev &&
+        prev.lat === rawLocation.lat &&
+        prev.lng === rawLocation.lng &&
+        prev.accuracy === rawLocation.accuracy
+      ) {
+        return prev;
+      }
+      return rawLocation;
+    });
+  }, [rawLocation, setCurrentLocation]);
 
   useCurrentBuilding();
   useIndoorEntry();

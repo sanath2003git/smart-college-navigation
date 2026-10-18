@@ -155,8 +155,32 @@ export const transitionMap = {
   // ============================================================
 
   "Chemical Block": {
-    candidateTransitions: {},
+    candidateTransitions: {
+      1: [
+        "CHEM_STAIR_01_GF",
+        "CHEM_STAIR_02_GF",
+        "CHEM_STAIR_03_GF",
+      ],
+    },
 
-    transitions: {},
+    transitions: {
+      CHEM_STAIR_01_GF: {
+        next: "CHEM_STAIR_01_F1",
+        floor: 1,
+        type: "STAIR",
+      },
+
+      CHEM_STAIR_02_GF: {
+        next: "CHEM_STAIR_02_F1",
+        floor: 1,
+        type: "STAIR",
+      },
+
+      CHEM_STAIR_03_GF: {
+        next: "CHEM_STAIR_03_F1",
+        floor: 1,
+        type: "STAIR",
+      },
+    },
   },
 };

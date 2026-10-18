@@ -39,20 +39,29 @@ async function loadStairs() {
 
   const responses = await Promise.all(
     stairSources.map(async (source) => {
-      const response = await fetch(source.path);
+      try {
+        const response = await fetch(source.path);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to load stair GeoJSON: ${source.path}`
-        );
+        if (!response.ok) {
+          return {
+            ...source,
+            data: { features: [] },
+          };
+        }
+
+        const data = await response.json();
+
+        return {
+          ...source,
+          data,
+        };
+      } catch (err) {
+        console.warn(`Failed to load stair GeoJSON: ${source.path}`, err);
+        return {
+          ...source,
+          data: { features: [] },
+        };
       }
-
-      const data = await response.json();
-
-      return {
-        ...source,
-        data,
-      };
     })
   );
 
