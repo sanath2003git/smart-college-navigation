@@ -1,5 +1,5 @@
 import { BUILDING_CONFIG } from "../config/buildingConfig";
-import { getRoomsPath } from "../utils/dataPaths";
+import { getRoomsPath, getFloorRoomsPath } from "../utils/dataPaths";
 
 const roomCache = {};
 
@@ -14,25 +14,34 @@ export async function findRooms(building, roomNo) {
     const floors = Object.keys(BUILDING_CONFIG[building].floors)
       .map(Number);
 
-    const responses = await Promise.all(
-      floors.map((floor) =>
-        fetch(getRoomsPath(building, floor))
-      )
-    );
-
     const datasets = await Promise.all(
-      responses.map((response) => response.json())
+      floors.map(async (floor) => {
+        try {
+          const res = await fetch(getRoomsPath(building, floor));
+          if (res.ok) {
+            return await res.json();
+          }
+          const roomsRes = await fetch(getFloorRoomsPath(building, floor));
+          if (roomsRes.ok) {
+            return await roomsRes.json();
+          }
+          return { features: [] };
+        } catch {
+          return { features: [] };
+        }
+      })
     );
 
     roomCache[building] = datasets.flatMap(
-      (data) => data.features
+      (data) => data.features ?? []
     );
   }
 
   const query = roomNo.trim().toUpperCase();
 
-  return roomCache[building].filter(
+  return (roomCache[building] || []).filter(
     (feature) =>
-      feature.properties.room_no.toUpperCase() === query
+      feature?.properties?.room_no &&
+      String(feature.properties.room_no).trim().toUpperCase() === query
   );
 }

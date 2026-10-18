@@ -38,7 +38,7 @@ export const BUILDING_CONFIGS = {
     zoom: 20,
     minZoom: 19.5,
     maxZoom: 22,
-    availableFloors: [0, 1],
+    availableFloors: [0, 1, 2],
     defaultFloor: 0,
     hasFloorData: true,
   },
