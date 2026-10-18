@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -96,6 +96,7 @@ function StrictBoundsController({ bounds, minZoom, maxZoom, center, zoom }) {
 
 export default function BuildingFloorExplorer({ buildingName }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const config = BUILDING_CONFIGS[buildingName] || {
     name: buildingName,
@@ -131,11 +132,27 @@ export default function BuildingFloorExplorer({ buildingName }) {
   } = useNavigation();
 
   // Local exploration floor selection (used when not actively navigating this building)
-  const [selectedFloor, setSelectedFloor] = useState(config.defaultFloor ?? 0);
+  const getInitialFloor = () => {
+    if (location.state?.floor !== undefined && location.state?.floor !== null) {
+      return Number(location.state.floor);
+    }
+    if (selectedBuilding === config.name && navFloor !== undefined && navFloor !== null) {
+      return Number(navFloor);
+    }
+    return config.defaultFloor ?? 0;
+  };
+
+  const [selectedFloor, setSelectedFloor] = useState(getInitialFloor);
 
   useEffect(() => {
-    setSelectedFloor(config.defaultFloor ?? 0);
-  }, [buildingName, config.defaultFloor]);
+    if (location.state?.floor !== undefined && location.state?.floor !== null) {
+      setSelectedFloor(Number(location.state.floor));
+    } else if (selectedBuilding === config.name && navFloor !== undefined && navFloor !== null) {
+      setSelectedFloor(Number(navFloor));
+    } else {
+      setSelectedFloor(config.defaultFloor ?? 0);
+    }
+  }, [buildingName, config.defaultFloor, location.key]);
 
   const isNavigatingThisBuilding = Boolean(
     route &&
@@ -164,16 +181,14 @@ export default function BuildingFloorExplorer({ buildingName }) {
 
   const handleFloorChange = (newFloor) => {
     setSelectedFloor(newFloor);
-    if (isNavigatingThisBuilding) {
-      if (typeof setCurrentFloor === "function") {
-        setCurrentFloor(newFloor);
-      }
-      if (
-        typeof setNavigationStage === "function" &&
-        typeof getNavigationStageForFloor === "function"
-      ) {
-        setNavigationStage(getNavigationStageForFloor(newFloor));
-      }
+    if (typeof setCurrentFloor === "function") {
+      setCurrentFloor(newFloor);
+    }
+    if (
+      typeof setNavigationStage === "function" &&
+      typeof getNavigationStageForFloor === "function"
+    ) {
+      setNavigationStage(getNavigationStageForFloor(newFloor));
     }
   };
 

@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import SearchBar from "../controls/SearchBar";
 import ActiveNavigationPanel from "../navigation/ActiveNavigationPanel";
 import NavigationLifecycleController from "../navigation/NavigationLifecycleController";
+import InitialFloorSelectionPrompt from "../navigation/InitialFloorSelectionPrompt";
 import { useNavigation } from "../../hooks/useNavigation";
 
 export default function MainLayout({ children }) {
@@ -17,6 +18,7 @@ export default function MainLayout({ children }) {
     <div className="smartnav-app">
       <NavigationLifecycleController />
       <Navbar />
+      <InitialFloorSelectionPrompt />
 
       <main className="smartnav-content">
         <div
