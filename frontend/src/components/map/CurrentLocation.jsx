@@ -275,29 +275,12 @@ export default function CurrentLocation() {
 
 
   // ========================================
-  // Adaptive visual accuracy radius
+  // Visual accuracy radius
   // ========================================
 
-  let displayAccuracyRadius;
-  let accuracyOpacity;
-  let accuracyWeight;
-
-  if (zoom >= 19) {
-    // High zoom
-    displayAccuracyRadius = 4;
-    accuracyOpacity = 0.10;
-    accuracyWeight = 1.5;
-  } else if (zoom >= 17) {
-    // Medium zoom
-    displayAccuracyRadius = 3;
-    accuracyOpacity = 0.075;
-    accuracyWeight = 1.2;
-  } else {
-    // Low zoom
-    displayAccuracyRadius = 2;
-    accuracyOpacity = 0.05;
-    accuracyWeight = 1;
-  }
+  const displayAccuracyRadius = 4;
+  const accuracyOpacity = 0.10;
+  const accuracyWeight = 1.5;
 
 
   return (
