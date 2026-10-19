@@ -1402,6 +1402,70 @@ button {
 }
 
 /* =========================================================
+   2D / 3D VIEW MODE TOGGLE BUTTON
+   Positioned top-right below zoom and compass controls
+========================================================= */
+
+.smartnav-view-mode-toggle {
+  position: absolute;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+/* In 2D Leaflet: Leaflet zoom is at right: 18px, top: 10px, height ~75px */
+.smartnav-view-mode-toggle-2d {
+  top: 96px;
+  right: 18px;
+}
+
+/* In 3D MapLibre: NavigationControl is at right: 10px, top: 10px, height ~95px */
+.smartnav-view-mode-toggle-3d {
+  top: 118px;
+  right: 10px;
+}
+
+.smartnav-mode-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  border-radius: 9px;
+  box-shadow: 0 4px 14px rgba(20, 33, 55, 0.16);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.smartnav-mode-toggle-btn:hover {
+  background: #ffffff;
+  border-color: #94a3b8;
+  box-shadow: 0 6px 18px rgba(20, 33, 55, 0.22);
+  transform: translateY(-1px);
+}
+
+.smartnav-mode-toggle-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(20, 33, 55, 0.14);
+}
+
+.smartnav-mode-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* =========================================================
    MOBILE / TABLET
 ========================================================= */
 
@@ -1580,6 +1644,37 @@ button {
 
   .leaflet-container .absolute.right-5 {
     right: 16px !important;
+  }
+
+  /* ---------------------------------------------
+     Mobile MapLibre 3D top-right controls
+     Offset below mobile search bar (search is top: 12px, height: 50px)
+  --------------------------------------------- */
+
+  .maplibregl-ctrl-top-right {
+    top: 76px !important;
+    right: 10px !important;
+  }
+
+  /* ---------------------------------------------
+     Mobile 2D / 3D View Mode Toggle
+     Offset below respective zoom/compass controls
+  --------------------------------------------- */
+
+  .smartnav-view-mode-toggle-2d {
+    top: 156px !important;
+    right: 10px !important;
+  }
+
+  .smartnav-view-mode-toggle-3d {
+    top: 180px !important;
+    right: 10px !important;
+  }
+
+  .smartnav-mode-toggle-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 8px;
   }
 }
 

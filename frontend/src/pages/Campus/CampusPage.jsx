@@ -283,16 +283,17 @@ export default function CampusPage() {
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       {/* 2D to 3D View Toggle */}
-      <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2">
+      <div className="smartnav-view-mode-toggle smartnav-view-mode-toggle-2d">
         <button
           type="button"
           onClick={() => setIs3DMode(true)}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-slate-50 active:scale-95"
+          className="smartnav-mode-toggle-btn"
           title="Switch to 3D MapLibre Map"
+          aria-label="Switch to 3D Map"
         >
-          <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
-          <span>2D View (Leaflet)</span>
-          <span className="text-slate-400">· Switch to 3D</span>
+          <span className="smartnav-mode-indicator bg-blue-500" />
+          <span>Switch to 3D</span>
+          <span className="hidden sm:inline text-slate-400 font-normal">· 2D Active</span>
         </button>
       </div>
 

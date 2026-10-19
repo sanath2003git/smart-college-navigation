@@ -12,7 +12,12 @@ setWorkerUrl(workerUrl);
 import { useNavigation } from "../../hooks/useNavigation";
 import { useLocation } from "../../hooks/useLocation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
-import { BUILDING_3D_CONFIG } from "../../config/building3DConfig";
+import {
+  BUILDING_3D_CONFIG,
+  NON_EXTRUDED_SURFACES,
+  buildBuildingHeightExpression,
+  buildBuildingColorExpression,
+} from "../../config/building3DConfig";
 import { BUILDING_CONFIGS } from "../../constants/buildingConfigs";
 
 // Campus geographic bounds clamped to campus area
@@ -38,6 +43,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
     route,
     selectedBuilding,
     currentBuilding,
+    setSelectedBuilding,
   } = useNavigation();
 
   const { location } = useLocation();
@@ -85,6 +91,10 @@ export default function OutdoorMap3D({ onToggle2D }) {
 
       console.log("3D Map: Building clicked:", buildingName);
 
+      if (typeof setSelectedBuilding === "function") {
+        setSelectedBuilding(buildingName);
+      }
+
       const targetRoute = BUILDING_CONFIGS[buildingName]?.route;
       if (targetRoute) {
         navigate(targetRoute);
@@ -120,7 +130,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
           console.warn("No route configured for building:", buildingName);
       }
     },
-    [navigate]
+    [navigate, setSelectedBuilding]
   );
 
   // ============================================================
@@ -130,10 +140,6 @@ export default function OutdoorMap3D({ onToggle2D }) {
     if (!mapContainerRef.current) return;
 
     let isMounted = true;
-
-    const mech3D = BUILDING_3D_CONFIG["Mechanical Block"];
-    const mechHeight = mech3D?.height || 15.6;
-    const mechColor = mech3D?.wallColor || "#5A948B";
 
     const map = new Map({
       container: mapContainerRef.current,
@@ -283,52 +289,63 @@ export default function OutdoorMap3D({ onToggle2D }) {
         data: "/data/campus/buildings.geojson",
       });
 
-      // 5A. 2D Footprints for all buildings EXCEPT Mechanical Block
+      // Filters separating non-extruded 2D surfaces (e.g. Badminton Court) from 3D extruded buildings
+      const nonExtrudedFilter =
+        NON_EXTRUDED_SURFACES.length === 1
+          ? ["==", ["get", "name"], NON_EXTRUDED_SURFACES[0]]
+          : ["in", ["get", "name"], ["literal", NON_EXTRUDED_SURFACES]];
+
+      const extrudedFilter =
+        NON_EXTRUDED_SURFACES.length === 1
+          ? ["!=", ["get", "name"], NON_EXTRUDED_SURFACES[0]]
+          : ["!", ["in", ["get", "name"], ["literal", NON_EXTRUDED_SURFACES]]];
+
+      // 5A. 2D Footprints for open-air ground surfaces (e.g. Badminton Court)
       map.addLayer({
         id: "buildings-2d-fill",
         type: "fill",
         source: "campus-buildings",
-        filter: ["!=", ["get", "name"], "Mechanical Block"],
+        filter: nonExtrudedFilter,
         paint: {
           "fill-color": "#A9CEC6",
-          "fill-opacity": 1,
+          "fill-opacity": 0.85,
         },
       });
       map.addLayer({
         id: "buildings-2d-line",
         type: "line",
         source: "campus-buildings",
-        filter: ["!=", ["get", "name"], "Mechanical Block"],
+        filter: nonExtrudedFilter,
         paint: {
           "line-color": "#4F8F8A",
           "line-width": 2,
         },
       });
 
-      // 5B. TRUE 3D Extruded Layer for Mechanical Block Only
+      // 5B. TRUE 3D Extrusion Layer for All Campus Buildings
       map.addLayer({
-        id: "mechanical-block-3d",
+        id: "campus-buildings-3d",
         type: "fill-extrusion",
         source: "campus-buildings",
-        filter: ["==", ["get", "name"], "Mechanical Block"],
+        filter: extrudedFilter,
         paint: {
-          // Visual estimate height from separate 3D config
-          "fill-extrusion-height": mechHeight,
+          "fill-extrusion-height": buildBuildingHeightExpression(),
           "fill-extrusion-base": 0,
-          "fill-extrusion-color": mechColor,
+          "fill-extrusion-color": buildBuildingColorExpression(activeBuilding),
           "fill-extrusion-opacity": 0.92,
         },
       });
 
-      // 5C. Building Footprint Base Outline for Mechanical Block
+      // 5C. Footprint Base Outline for Extruded Campus Buildings
       map.addLayer({
-        id: "mechanical-block-base-line",
+        id: "buildings-base-line",
         type: "line",
         source: "campus-buildings",
-        filter: ["==", ["get", "name"], "Mechanical Block"],
+        filter: extrudedFilter,
         paint: {
           "line-color": "#0E4F63",
-          "line-width": 2.5,
+          "line-width": 2,
+          "line-opacity": 0.75,
         },
       });
 
@@ -395,22 +412,22 @@ export default function OutdoorMap3D({ onToggle2D }) {
       // Interactive Click & Hover Listeners
       // ============================================================
 
-      // Click on 3D Mechanical Block
-      map.on("click", "mechanical-block-3d", (e) => {
+      // Click & Hover on 3D Campus Buildings
+      map.on("click", "campus-buildings-3d", (e) => {
         const feature = e.features?.[0];
         const name = feature?.properties?.name;
-        handleBuildingClick(name || "Mechanical Block");
+        handleBuildingClick(name);
       });
 
-      map.on("mouseenter", "mechanical-block-3d", () => {
+      map.on("mouseenter", "campus-buildings-3d", () => {
         map.getCanvas().style.cursor = "pointer";
       });
 
-      map.on("mouseleave", "mechanical-block-3d", () => {
+      map.on("mouseleave", "campus-buildings-3d", () => {
         map.getCanvas().style.cursor = "";
       });
 
-      // Click on 2D Buildings
+      // Click & Hover on 2D Buildings / Ground Surfaces
       map.on("click", "buildings-2d-fill", (e) => {
         const feature = e.features?.[0];
         const name = feature?.properties?.name;
@@ -425,7 +442,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
         map.getCanvas().style.cursor = "";
       });
 
-      console.log("MapLibre 3D: Style loaded. Mechanical Block 3D extrusion layer active.");
+      console.log("MapLibre 3D: Style loaded. All campus building 3D extrusions active.");
     });
 
     return () => {
@@ -458,6 +475,22 @@ export default function OutdoorMap3D({ onToggle2D }) {
       },
     });
   }, [route, getRouteCoordinates]);
+
+  // ============================================================
+  // Sync Selected/Active Building 3D Extrusion Highlight
+  // ============================================================
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    if (map.getLayer("campus-buildings-3d")) {
+      map.setPaintProperty(
+        "campus-buildings-3d",
+        "fill-extrusion-color",
+        buildBuildingColorExpression(activeBuilding)
+      );
+    }
+  }, [activeBuilding]);
 
   // ============================================================
   // Sync GPS Marker & Accuracy Circle
@@ -545,16 +578,17 @@ export default function OutdoorMap3D({ onToggle2D }) {
       <div ref={mapContainerRef} className="h-full w-full" />
 
       {/* View Mode Toggle (3D / 2D) */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+      <div className="smartnav-view-mode-toggle smartnav-view-mode-toggle-3d">
         <button
           type="button"
           onClick={onToggle2D}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-slate-50 active:scale-95"
+          className="smartnav-mode-toggle-btn"
           title="Switch to 2D Leaflet Map"
+          aria-label="Switch to 2D Map"
         >
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-          <span>3D View (MapLibre)</span>
-          <span className="text-slate-400">· Switch to 2D</span>
+          <span className="smartnav-mode-indicator bg-emerald-500" />
+          <span>Switch to 2D</span>
+          <span className="hidden sm:inline text-slate-400 font-normal">· 3D Active</span>
         </button>
       </div>
 
@@ -571,7 +605,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
 
       {/* 3D Extrusion Badge */}
       <div className="pointer-events-none absolute bottom-5 left-5 z-10 rounded-md bg-slate-900/75 px-2.5 py-1 text-[11px] font-medium text-slate-100 shadow backdrop-blur-sm">
-        Mechanical Block: 3D Extruded (~15.6m visual estimate)
+        Campus 3D View · Building Extrusions Active (5m / floor)
       </div>
     </div>
   );
