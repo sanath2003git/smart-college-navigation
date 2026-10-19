@@ -1342,6 +1342,7 @@ button {
 .leaflet-top.leaflet-left {
   left: auto !important;
   right: 18px !important;
+  top: 18px;
 }
 
 /*
@@ -1414,30 +1415,33 @@ button {
   pointer-events: auto;
 }
 
-/* In 2D Leaflet: Leaflet zoom is at right: 18px, top: 10px, height ~75px */
+/* In 2D Leaflet: Leaflet zoom is at right: 18px, top: 18px, height 75px (ends at 93px) */
 .smartnav-view-mode-toggle-2d {
-  top: 96px;
+  top: 104px;
   right: 18px;
 }
 
-/* In 3D MapLibre: NavigationControl is at right: 10px, top: 10px, height ~95px */
+/* In 3D MapLibre: NavigationControl is at right: 10px, top: 10px, height 89px (ends at 99px) */
 .smartnav-view-mode-toggle-3d {
-  top: 118px;
+  top: 110px;
   right: 10px;
 }
 
 .smartnav-mode-toggle-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  font-size: 12px;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 11px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e293b;
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   border: 1px solid rgba(203, 213, 225, 0.95);
-  border-radius: 9px;
-  box-shadow: 0 4px 14px rgba(20, 33, 55, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(20, 33, 55, 0.14);
   backdrop-filter: blur(8px);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1445,24 +1449,31 @@ button {
   white-space: nowrap;
 }
 
+/* Extended invisible hit area for comfortable touch targets (44px) */
+.smartnav-mode-toggle-btn::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+}
+
 .smartnav-mode-toggle-btn:hover {
-  background: #ffffff;
+  background: #f8fafc;
   border-color: #94a3b8;
-  box-shadow: 0 6px 18px rgba(20, 33, 55, 0.22);
+  box-shadow: 0 4px 14px rgba(20, 33, 55, 0.18);
   transform: translateY(-1px);
 }
 
 .smartnav-mode-toggle-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 2px 6px rgba(20, 33, 55, 0.14);
+  transform: scale(0.97);
+  box-shadow: 0 1px 4px rgba(20, 33, 55, 0.12);
 }
 
-.smartnav-mode-indicator {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.smartnav-mode-toggle-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb, 0 3px 10px rgba(20, 33, 55, 0.14);
 }
 
 /* =========================================================
@@ -1656,25 +1667,33 @@ button {
     right: 10px !important;
   }
 
+  .maplibregl-ctrl-top-right .maplibregl-ctrl {
+    margin: 0 !important;
+  }
+
   /* ---------------------------------------------
      Mobile 2D / 3D View Mode Toggle
-     Offset below respective zoom/compass controls
+     Positioned 11px below zoom/navigation controls
+     2D: zoom bottom 147px + 11px = 158px
+     3D: navigation bottom 165px + 11px = 176px
   --------------------------------------------- */
 
   .smartnav-view-mode-toggle-2d {
-    top: 156px !important;
+    top: 158px !important;
     right: 10px !important;
   }
 
   .smartnav-view-mode-toggle-3d {
-    top: 180px !important;
+    top: 176px !important;
     right: 10px !important;
   }
 
   .smartnav-mode-toggle-btn {
-    padding: 5px 10px;
-    font-size: 11px;
-    border-radius: 8px;
+    height: 36px;
+    padding: 0 9px;
+    gap: 5px;
+    font-size: 13px;
+    border-radius: 9px;
   }
 }
 
@@ -3265,7 +3284,7 @@ button {
 }
 
 @media (min-width: 768px) {
-  .leaflet-top.leaflet-left {
+  .building-explorer-topbar ~ * .leaflet-top.leaflet-left {
     top: 74px;
   }
 }
