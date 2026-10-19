@@ -4,7 +4,7 @@ import { Map, NavigationControl, Marker, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as turf from "@turf/turf";
-import { Crosshair } from "lucide-react";
+import { Crosshair, Map as MapIcon } from "lucide-react";
 
 // Configure MapLibre Web Worker explicitly for Vite
 setWorkerUrl(workerUrl);
@@ -145,6 +145,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
       container: mapContainerRef.current,
       style: {
         version: 8,
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
         sources: {
           "osm-tiles": {
             type: "raster",
@@ -250,6 +251,43 @@ export default function OutdoorMap3D({ onToggle2D }) {
         },
       });
 
+      // 2B. Campus Area Labels (Parks, Grounds, Courts)
+      map.addLayer({
+        id: "campus-area-labels",
+        type: "symbol",
+        source: "campus-areas",
+        minzoom: 16.5,
+        filter: ["!=", ["get", "name"], ""],
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["Open Sans Semibold"],
+          "text-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            16.5, 9.5,
+            18, 11,
+            20, 12.5,
+          ],
+          "text-max-width": 9,
+          "text-line-height": 1.15,
+          "text-justify": "center",
+          "text-anchor": "center",
+          "symbol-placement": "point",
+          "text-pitch-alignment": "viewport",
+          "text-rotation-alignment": "viewport",
+          "text-allow-overlap": false,
+          "text-ignore-placement": false,
+          "text-padding": 3,
+        },
+        paint: {
+          "text-color": "#164E63",
+          "text-halo-color": "#FFFFFF",
+          "text-halo-width": 1.75,
+          "text-halo-blur": 0.5,
+        },
+      });
+
       // 3. Outdoor Walkways
       map.addSource("campus-walkways", {
         type: "geojson",
@@ -322,7 +360,20 @@ export default function OutdoorMap3D({ onToggle2D }) {
         },
       });
 
-      // 5B. TRUE 3D Extrusion Layer for All Campus Buildings
+      // 5B. Footprint Base Outline for Extruded Campus Buildings (rendered at ground level)
+      map.addLayer({
+        id: "buildings-base-line",
+        type: "line",
+        source: "campus-buildings",
+        filter: extrudedFilter,
+        paint: {
+          "line-color": "#0E4F63",
+          "line-width": 2,
+          "line-opacity": 0.85,
+        },
+      });
+
+      // 5C. TRUE 3D Extrusion Layer for All Campus Buildings (100% Solid Opaque Walls & Roofs)
       map.addLayer({
         id: "campus-buildings-3d",
         type: "fill-extrusion",
@@ -332,20 +383,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
           "fill-extrusion-height": buildBuildingHeightExpression(),
           "fill-extrusion-base": 0,
           "fill-extrusion-color": buildBuildingColorExpression(activeBuilding),
-          "fill-extrusion-opacity": 0.92,
-        },
-      });
-
-      // 5C. Footprint Base Outline for Extruded Campus Buildings
-      map.addLayer({
-        id: "buildings-base-line",
-        type: "line",
-        source: "campus-buildings",
-        filter: extrudedFilter,
-        paint: {
-          "line-color": "#0E4F63",
-          "line-width": 2,
-          "line-opacity": 0.75,
+          "fill-extrusion-opacity": 1.0,
         },
       });
 
@@ -408,6 +446,43 @@ export default function OutdoorMap3D({ onToggle2D }) {
         },
       });
 
+      // 8. Campus Building Labels (Screen-oriented readable 3D symbol layer)
+      map.addLayer({
+        id: "campus-building-labels",
+        type: "symbol",
+        source: "campus-buildings",
+        minzoom: 17.2,
+        filter: ["!=", ["get", "name"], ""],
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["Open Sans Semibold"],
+          "text-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            17.2, 10,
+            18.5, 11.5,
+            20, 13,
+          ],
+          "text-max-width": 8,
+          "text-line-height": 1.15,
+          "text-justify": "center",
+          "text-anchor": "center",
+          "symbol-placement": "point",
+          "text-pitch-alignment": "viewport",
+          "text-rotation-alignment": "viewport",
+          "text-allow-overlap": false,
+          "text-ignore-placement": false,
+          "text-padding": 3,
+        },
+        paint: {
+          "text-color": "#0E4F63",
+          "text-halo-color": "#FFFFFF",
+          "text-halo-width": 2,
+          "text-halo-blur": 0.5,
+        },
+      });
+
       // ============================================================
       // Interactive Click & Hover Listeners
       // ============================================================
@@ -439,6 +514,21 @@ export default function OutdoorMap3D({ onToggle2D }) {
       });
 
       map.on("mouseleave", "buildings-2d-fill", () => {
+        map.getCanvas().style.cursor = "";
+      });
+
+      // Click & Hover on Campus Building Labels
+      map.on("click", "campus-building-labels", (e) => {
+        const feature = e.features?.[0];
+        const name = feature?.properties?.name;
+        handleBuildingClick(name);
+      });
+
+      map.on("mouseenter", "campus-building-labels", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+
+      map.on("mouseleave", "campus-building-labels", () => {
         map.getCanvas().style.cursor = "";
       });
 
@@ -586,9 +676,7 @@ export default function OutdoorMap3D({ onToggle2D }) {
           title="Switch to 2D Leaflet Map"
           aria-label="Switch to 2D Map"
         >
-          <span className="smartnav-mode-indicator bg-emerald-500" />
-          <span>Switch to 2D</span>
-          <span className="hidden sm:inline text-slate-400 font-normal">· 3D Active</span>
+          <MapIcon size={14} strokeWidth={2.2} className="text-emerald-700 shrink-0" />
         </button>
       </div>
 

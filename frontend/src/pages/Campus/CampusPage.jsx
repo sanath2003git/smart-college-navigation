@@ -6,6 +6,7 @@ import {
 } from "react-leaflet";
 
 import { useNavigate } from "react-router-dom";
+import { Box } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 
@@ -291,9 +292,7 @@ export default function CampusPage() {
           title="Switch to 3D MapLibre Map"
           aria-label="Switch to 3D Map"
         >
-          <span className="smartnav-mode-indicator bg-blue-500" />
-          <span>Switch to 3D</span>
-          <span className="hidden sm:inline text-slate-400 font-normal">· 2D Active</span>
+          <Box size={14} strokeWidth={2.2} className="text-blue-600 shrink-0" />
         </button>
       </div>
 
