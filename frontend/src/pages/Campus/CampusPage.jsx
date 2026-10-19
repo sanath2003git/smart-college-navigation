@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {
   MapContainer,
@@ -6,6 +6,7 @@ import {
 } from "react-leaflet";
 
 import { useNavigate } from "react-router-dom";
+import { Box } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 
@@ -21,6 +22,9 @@ import OutdoorLayers
 import RouteLayer
   from "../../components/map/RouteLayer";
 
+import OutdoorMap3D
+  from "../../components/map/OutdoorMap3D";
+
 import { loadGraphs }
   from "../../navigation/loadGraphs";
 
@@ -34,6 +38,7 @@ const CAMPUS_BOUNDS = [
 
 export default function CampusPage() {
   const navigate = useNavigate();
+  const [is3DMode, setIs3DMode] = useState(true);
 
   const {
     selectedBuilding,
@@ -268,8 +273,29 @@ export default function CampusPage() {
   // Render
   // ==========================================
 
+  if (is3DMode) {
+    return (
+      <div className="relative flex h-full w-full flex-col overflow-hidden">
+        <OutdoorMap3D onToggle2D={() => setIs3DMode(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
+      {/* 2D to 3D View Toggle */}
+      <div className="smartnav-view-mode-toggle smartnav-view-mode-toggle-2d">
+        <button
+          type="button"
+          onClick={() => setIs3DMode(true)}
+          className="smartnav-mode-toggle-btn"
+          title="Switch to 3D MapLibre Map"
+          aria-label="Switch to 3D Map"
+        >
+          <Box size={14} strokeWidth={2.2} className="text-blue-600 shrink-0" />
+        </button>
+      </div>
+
       {/* =====================================
           Leaflet Campus Map (Strictly Outdoor)
           ===================================== */}

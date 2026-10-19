@@ -10,7 +10,6 @@ import {
 import L from "leaflet";
 
 import { useLocation } from "../../hooks/useLocation";
-import { useNavigation } from "../../hooks/useNavigation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
 
 // ==========================================
@@ -222,12 +221,7 @@ const createUserIcon = (heading, zoom) => {
 export default function CurrentLocation() {
   const {
     location,
-    rawLocation,
   } = useLocation();
-
-  const {
-    setCurrentLocation,
-  } = useNavigation();
 
   const heading = useDeviceHeading();
 
@@ -255,49 +249,18 @@ export default function CurrentLocation() {
   }, [map]);
 
 
-  // ========================================
-  // Navigation continues using RAW GPS
-  // ========================================
-
-  useEffect(() => {
-    if (rawLocation) {
-      setCurrentLocation(rawLocation);
-    }
-  }, [
-    rawLocation,
-    setCurrentLocation,
-  ]);
-
-
   if (!location) {
     return null;
   }
 
 
   // ========================================
-  // Adaptive visual accuracy radius
+  // Visual accuracy radius
   // ========================================
 
-  let displayAccuracyRadius;
-  let accuracyOpacity;
-  let accuracyWeight;
-
-  if (zoom >= 19) {
-    // High zoom
-    displayAccuracyRadius = 4;
-    accuracyOpacity = 0.10;
-    accuracyWeight = 1.5;
-  } else if (zoom >= 17) {
-    // Medium zoom
-    displayAccuracyRadius = 3;
-    accuracyOpacity = 0.075;
-    accuracyWeight = 1.2;
-  } else {
-    // Low zoom
-    displayAccuracyRadius = 2;
-    accuracyOpacity = 0.05;
-    accuracyWeight = 1;
-  }
+  const displayAccuracyRadius = 4;
+  const accuracyOpacity = 0.10;
+  const accuracyWeight = 1.5;
 
 
   return (
