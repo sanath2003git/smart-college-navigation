@@ -16,7 +16,8 @@ import { getStatus } from "../utils/eventTime.js";
 
 // ── API Configuration ──────────────────────────────────────────────
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
+  "http://127.0.0.1:8000";
 
 // ── Storage Keys (Namespaced to SmartNav) ──────────────────────────
 export const STORAGE_KEYS = {
@@ -971,8 +972,37 @@ export function deleteEvent(id) {
  */
 export function getSavedEventIds() {
   ensureSeeded();
-  const saved = readStorage(STORAGE_KEYS.SAVED, []);
-  return Array.isArray(saved) ? saved : [];
+  const rawSaved = readStorage(STORAGE_KEYS.SAVED, []);
+  if (!Array.isArray(rawSaved)) return [];
+  return Array.from(
+    new Set(rawSaved.filter((id) => typeof id === "string" && id.trim().length > 0))
+  );
+}
+
+/**
+ * Prunes stale, deleted, or orphaned event IDs from the saved list.
+ * Only validates against known events when a non-empty collection is provided.
+ * Preserves all legitimate saved events that exist in the provided list.
+ *
+ * @param {Array<Object>|Array<string>} availableEvents - Valid events or event IDs
+ * @returns {Array<string>} Cleaned array of valid saved event IDs
+ */
+export function reconcileSavedEventIds(availableEvents) {
+  if (!Array.isArray(availableEvents) || availableEvents.length === 0) {
+    return getSavedEventIds();
+  }
+  const validIdSet = new Set(
+    availableEvents
+      .map((e) => (typeof e === "string" ? e.trim() : e?.id?.trim()))
+      .filter(Boolean)
+  );
+  const currentSaved = getSavedEventIds();
+  const pruned = currentSaved.filter((id) => validIdSet.has(id));
+
+  if (pruned.length !== currentSaved.length) {
+    writeStorage(STORAGE_KEYS.SAVED, pruned);
+  }
+  return pruned;
 }
 
 /**
@@ -994,15 +1024,18 @@ export function isEventSaved(id) {
  * @returns {Array<string>} Updated array of saved event IDs.
  */
 export function toggleSavedEvent(id) {
-  if (!id) return getSavedEventIds();
+  if (!id || typeof id !== "string") return getSavedEventIds();
+  const trimmedId = id.trim();
+  if (!trimmedId) return getSavedEventIds();
+
   const saved = getSavedEventIds();
-  const index = saved.indexOf(id);
+  const index = saved.indexOf(trimmedId);
 
   let updated;
   if (index === -1) {
-    updated = [...saved, id];
+    updated = [...saved, trimmedId];
   } else {
-    updated = saved.filter((savedId) => savedId !== id);
+    updated = saved.filter((savedId) => savedId !== trimmedId);
   }
 
   writeStorage(STORAGE_KEYS.SAVED, updated);

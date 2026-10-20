@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import {
   MapContainer,
@@ -31,6 +31,18 @@ import { loadGraphs }
 import { useNavigation }
   from "../../hooks/useNavigation";
 
+import { useLocation }
+  from "../../hooks/useLocation";
+
+import { useLiveCampusEvents }
+  from "../../hooks/useLiveCampusEvents";
+
+import EventMapMarkersLayer
+  from "../../components/map/EventMapMarkersLayer";
+
+import { startNavigationToVenue }
+  from "../../services/venueNavigationService";
+
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
   [8.9162, 76.6352],
@@ -40,11 +52,26 @@ export default function CampusPage() {
   const navigate = useNavigate();
   const [is3DMode, setIs3DMode] = useState(true);
 
+  const navContext = useNavigation();
+  const locationContext = useLocation();
   const {
     selectedBuilding,
     currentBuilding,
     route,
-  } = useNavigation();
+  } = navContext;
+
+  const { groupedVenues, now } = useLiveCampusEvents();
+
+  const handleNavigateToVenue = useCallback(
+    async (venue) => {
+      if (!venue) return;
+      await startNavigationToVenue(venue, navContext, navigate, {
+        fallbackLocation:
+          locationContext?.rawLocation || locationContext?.location,
+      });
+    },
+    [navContext, navigate, locationContext]
+  );
 
   const activeBuilding =
     selectedBuilding ||
@@ -276,7 +303,12 @@ export default function CampusPage() {
   if (is3DMode) {
     return (
       <div className="relative flex h-full w-full flex-col overflow-hidden">
-        <OutdoorMap3D onToggle2D={() => setIs3DMode(false)} />
+        <OutdoorMap3D
+          onToggle2D={() => setIs3DMode(false)}
+          liveVenues={groupedVenues}
+          onNavigateToVenue={handleNavigateToVenue}
+          now={now}
+        />
       </div>
     );
   }
@@ -330,6 +362,13 @@ export default function CampusPage() {
 
         {/* Outdoor Navigation Route */}
         <RouteLayer path={route} />
+
+        {/* Live Campus Event Markers */}
+        <EventMapMarkersLayer
+          groupedVenues={groupedVenues}
+          onNavigateToVenue={handleNavigateToVenue}
+          now={now}
+        />
       </MapContainer>
     </div>
   );

@@ -3679,9 +3679,110 @@ button {
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
 }
 
+/* Ended Event Card Grayscale Appearance */
 .smartnav-event-card--ended {
-  opacity: 0.75;
-  background: #fcfcfc;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.smartnav-event-card--ended:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  border-color: #cbd5e1;
+}
+
+.smartnav-event-card--ended .smartnav-event-category-badge {
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+}
+
+.smartnav-event-card--ended .smartnav-event-demo-tag {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__title {
+  color: #334155;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__organizer {
+  color: #64748b;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__status-banner {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.smartnav-event-card--ended .smartnav-event-status-pill--ended {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.smartnav-event-card--ended .smartnav-event-countdown {
+  color: #94a3b8;
+}
+
+.smartnav-event-card--ended .smartnav-event-meta-icon {
+  color: #94a3b8;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__meta-item {
+  color: #475569;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__desc {
+  color: #64748b;
+}
+
+.smartnav-event-card--ended .smartnav-event-card__footer {
+  border-top-color: #e2e8f0;
+}
+
+.smartnav-event-card--ended .smartnav-event-nav-btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+  box-shadow: none;
+}
+
+.smartnav-event-card--ended .smartnav-event-nav-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.smartnav-event-card--ended .smartnav-event-nav-icon {
+  color: #64748b;
+}
+
+.smartnav-event-card--ended .smartnav-event-venue-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.smartnav-event-card--ended .smartnav-event-venue-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.smartnav-event-card--ended .smartnav-event-save-btn {
+  color: #94a3b8;
+}
+
+.smartnav-event-card--ended .smartnav-event-save-btn--saved {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.smartnav-event-card--ended .smartnav-event-save-btn--saved svg {
+  color: #64748b !important;
 }
 
 .smartnav-event-card__header {
@@ -4165,101 +4266,213 @@ button {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .smartnav-events-page {
-    padding: 12px 12px 40px;
-    gap: 14px;
+    padding: 16px 16px 48px;
+    gap: 18px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
   .smartnav-events-demo-banner {
-    padding: 6px 10px;
-    font-size: 11px;
-    gap: 8px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 10px;
+    border-radius: 9px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .smartnav-events-demo-text {
-    font-size: 11px;
-    line-height: 1.25;
+    font-size: 11.5px;
+    line-height: 1.35;
   }
   .smartnav-events-reset-btn {
-    padding: 3px 8px;
-    font-size: 10.5px;
-    gap: 4px;
+    padding: 4px 9px;
+    font-size: 11px;
+    gap: 5px;
   }
   .smartnav-events-header {
-    gap: 8px;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .smartnav-events-header__title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
   }
   .smartnav-events-header__subtitle {
-    font-size: 11.5px;
-    line-height: 1.35;
-    margin-top: 1px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    margin-top: 3px;
   }
   .smartnav-events-tabs {
     width: 100%;
-    padding: 3px;
+    padding: 4px;
     gap: 4px;
+    box-sizing: border-box;
   }
   .smartnav-events-tab {
     flex: 1;
     justify-content: center;
-    padding: 7px 10px;
-    font-size: 12px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
   }
   .smartnav-events-controls {
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
   .smartnav-events-search-wrapper {
-    height: 38px;
+    height: 42px;
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
   }
   .smartnav-events-search-input {
-    font-size: 12px;
-    padding: 6px 32px 6px 36px;
+    height: 42px;
+    font-size: 13px;
+    padding: 0 36px 0 40px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .smartnav-events-search-icon {
+    left: 14px;
+    width: 16px;
+    height: 16px;
   }
   .smartnav-filter-chips-container {
-    padding-bottom: 2px;
-    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    gap: 8px;
+    box-sizing: border-box;
   }
   .smartnav-filter-chip {
-    padding: 4px 10px;
-    font-size: 11px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 12px;
   }
-  .smartnav-event-card {
-    padding: 12px 14px;
-    gap: 8px;
-    border-radius: 12px;
+  .smartnav-events-main-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
-  .smartnav-event-card__title {
-    font-size: 14.5px;
+  .smartnav-events-sections-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
-  .smartnav-event-card__organizer {
-    font-size: 11px;
-  }
-  .smartnav-event-card__status-banner {
-    padding: 5px 8px;
-    font-size: 11px;
-  }
-  .smartnav-event-card__meta-list {
-    gap: 4px;
-    font-size: 11.5px;
-  }
-  .smartnav-event-card__desc {
-    font-size: 11.5px;
-    line-height: 1.35;
-  }
-  .smartnav-event-card__footer {
-    padding-top: 8px;
-  }
-  .smartnav-event-nav-btn {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-  .smartnav-event-venue-link {
-    font-size: 11px;
+  .smartnav-event-section {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
   .smartnav-events-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .smartnav-event-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    gap: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .smartnav-event-card__header {
+    width: 100%;
+    min-width: 0;
+  }
+  .smartnav-event-card__badges {
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .smartnav-event-card__title {
+    font-size: 15px;
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .smartnav-event-card__organizer {
+    font-size: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .smartnav-event-card__status-banner {
+    padding: 6px 10px;
+    font-size: 11.5px;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .smartnav-event-card__meta-list {
+    gap: 5px;
+    font-size: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+  .smartnav-event-card__meta-item {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+  .smartnav-event-card__desc {
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .smartnav-event-card__footer {
+    padding-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .smartnav-event-card__actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .smartnav-event-nav-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .smartnav-event-venue-btn {
+    flex: 0 0 auto;
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .smartnav-events-empty-state {
+    padding: 36px 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .smartnav-venue-details-grid {
     grid-template-columns: 1fr;
@@ -5785,4 +5998,367 @@ button {
   .smartnav-admin-subtitle {
     font-size: 12px;
   }
+}
+
+/* =========================================================
+   CAMPUS MAP LIVE EVENT MARKERS & POPUPS (2D & 3D)
+========================================================= */
+
+.smartnav-event-marker-leaflet-container {
+  background: transparent;
+  border: none;
+}
+
+.smartnav-event-marker-maplibre-container {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  pointer-events: auto !important;
+  user-select: none;
+  z-index: 25;
+}
+
+.smartnav-map-event-marker {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+  pointer-events: auto;
+}
+
+.smartnav-map-event-marker:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+.smartnav-event-marker-pulse {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: rgba(234, 88, 12, 0.38);
+  animation: smartnav-event-pulse-anim 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  pointer-events: none;
+}
+
+@keyframes smartnav-event-pulse-anim {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.95;
+  }
+  65% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+.smartnav-event-marker-core {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border: 2.5px solid #FFFFFF;
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.45), 0 1px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  z-index: 2;
+}
+
+.smartnav-map-event-marker--demo .smartnav-event-marker-core {
+  background: linear-gradient(135deg, #FB923C 0%, #D97706 100%);
+  box-shadow: 0 3px 10px rgba(217, 119, 6, 0.45), 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.smartnav-map-event-marker--demo .smartnav-event-marker-pulse {
+  background: rgba(217, 119, 6, 0.35);
+}
+
+.smartnav-event-marker-icon {
+  width: 15px;
+  height: 15px;
+  stroke: #FFFFFF;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.smartnav-event-marker-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #0F172A;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Popup Card & Content ────────────────────────────────────────── */
+
+.smartnav-leaflet-event-popup {
+  width: min(320px, calc(100vw - 32px));
+  max-width: min(320px, calc(100vw - 32px)) !important;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.2), 0 4px 12px -2px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  overflow: hidden;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
+  font-family: inherit;
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #64748B;
+  background: #F8FAFC;
+  border-radius: 6px;
+  border: 1px solid #E2E8F0;
+  padding: 0;
+  line-height: 1;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  z-index: 20;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-close-button:hover {
+  color: #0F172A;
+  background: #EEF2F6;
+  border-color: #CBD5E1;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-tip-container {
+  overflow: visible;
+}
+
+.smartnav-leaflet-event-popup .leaflet-popup-tip {
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.15);
+}
+
+.smartnav-leaflet-event-popup .smartnav-event-popup-header,
+.smartnav-maplibre-event-popup .smartnav-event-popup-header {
+  padding-right: 28px;
+}
+
+.smartnav-maplibre-event-popup {
+  max-width: min(320px, calc(100vw - 32px)) !important;
+  z-index: 50;
+}
+
+.smartnav-maplibre-event-popup .maplibregl-popup-content {
+  padding: 0;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.2), 0 4px 12px -2px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  font-family: inherit;
+  overflow: hidden;
+  max-width: min(320px, calc(100vw - 32px));
+  box-sizing: border-box;
+}
+
+.smartnav-maplibre-event-popup .maplibregl-popup-close-button {
+  top: 8px;
+  right: 8px;
+  font-size: 18px;
+  color: #64748B;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.smartnav-event-popup-container {
+  padding: 12px 14px;
+  width: 100%;
+  max-width: min(320px, calc(100vw - 32px));
+  max-height: min(340px, calc(100vh - 180px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .smartnav-leaflet-event-popup {
+    width: min(300px, calc(100vw - 28px));
+    max-width: min(300px, calc(100vw - 28px)) !important;
+  }
+  .smartnav-leaflet-event-popup .leaflet-popup-content-wrapper {
+    max-width: min(300px, calc(100vw - 28px));
+  }
+  .smartnav-maplibre-event-popup {
+    max-width: min(300px, calc(100vw - 28px)) !important;
+  }
+  .smartnav-maplibre-event-popup .maplibregl-popup-content {
+    max-width: min(300px, calc(100vw - 28px));
+  }
+  .smartnav-event-popup-container {
+    padding: 10px 12px;
+    max-width: min(300px, calc(100vw - 28px));
+    max-height: min(300px, calc(100vh - 160px));
+  }
+}
+
+.smartnav-event-popup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.smartnav-event-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.smartnav-event-popup-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  line-height: 1;
+}
+
+.smartnav-event-popup-live-dot {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  background: #DC2626;
+  animation: smartnav-event-pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes smartnav-event-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.smartnav-event-popup-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1.2;
+}
+
+.smartnav-event-popup-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 6px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.smartnav-event-popup-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #0F172A;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.smartnav-event-popup-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5px;
+  padding: 6px 8px;
+  background: #F8FAFC;
+  border-radius: 8px;
+  border: 1px solid #F1F5F9;
+}
+
+.smartnav-event-popup-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #334155;
+  line-height: 1.3;
+}
+
+.smartnav-event-popup-footer {
+  margin-top: 2px;
+}
+
+.smartnav-event-popup-nav-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
+}
+
+.smartnav-event-popup-nav-btn:hover {
+  background: linear-gradient(135deg, #0F766E 0%, #115E59 100%);
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.4);
+  transform: translateY(-0.5px);
+}
+
+.smartnav-event-popup-nav-btn:active {
+  transform: translateY(0);
 }
