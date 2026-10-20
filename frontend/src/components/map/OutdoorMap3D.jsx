@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Map, NavigationControl, Marker, setWorkerUrl } from "maplibre-gl";
+import { Map, NavigationControl, Marker, Popup, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as turf from "@turf/turf";
@@ -12,6 +12,7 @@ setWorkerUrl(workerUrl);
 import { useNavigation } from "../../hooks/useNavigation";
 import { useLocation } from "../../hooks/useLocation";
 import useDeviceHeading from "../../hooks/useDeviceHeading";
+import { formatDuration } from "../../utils/eventTime";
 import {
   BUILDING_3D_CONFIG,
   NON_EXTRUDED_SURFACES,
@@ -32,10 +33,17 @@ const INITIAL_PITCH = 45; // Angled to showcase 3D extrusion
 const INITIAL_BEARING = -15; // Oriented towards Mechanical Block
 const DISPLAY_ACCURACY_RADIUS_METRES = 4; // Fixed 4-metre visual radius matching CurrentLocation.jsx
 
-export default function OutdoorMap3D({ onToggle2D }) {
+export default function OutdoorMap3D({
+  onToggle2D,
+  liveVenues = [],
+  onNavigateToVenue,
+  now = Date.now(),
+}) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const gpsMarkerRef = useRef(null);
+  const eventMarkersRef = useRef([]);
+  const activePopupRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -537,6 +545,15 @@ export default function OutdoorMap3D({ onToggle2D }) {
 
     return () => {
       isMounted = false;
+      eventMarkersRef.current.forEach(({ marker, cleanup }) => {
+        if (typeof cleanup === "function") cleanup();
+        marker.remove();
+      });
+      eventMarkersRef.current = [];
+      if (activePopupRef.current) {
+        activePopupRef.current.remove();
+        activePopupRef.current = null;
+      }
       if (gpsMarkerRef.current) {
         gpsMarkerRef.current.remove();
         gpsMarkerRef.current = null;
@@ -647,6 +664,132 @@ export default function OutdoorMap3D({ onToggle2D }) {
   }, [location, heading]);
 
   // ============================================================
+  // Sync Ongoing Event Markers & Popups on 3D Map
+  // ============================================================
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Clean up previous event markers and active popups
+    eventMarkersRef.current.forEach(({ marker, cleanup }) => {
+      if (typeof cleanup === "function") cleanup();
+      marker.remove();
+    });
+    eventMarkersRef.current = [];
+
+    if (activePopupRef.current) {
+      activePopupRef.current.remove();
+      activePopupRef.current = null;
+    }
+
+    if (!Array.isArray(liveVenues) || liveVenues.length === 0) return;
+
+    liveVenues.forEach((group) => {
+      const { lat, lng, events, venue, hasDemo } = group;
+      if (typeof lat !== "number" || typeof lng !== "number") return;
+
+      // 1. Create custom DOM element for MapLibre Marker
+      const el = document.createElement("div");
+      el.className = "smartnav-event-marker-maplibre-container";
+      el.innerHTML = `
+        <div class="smartnav-map-event-marker ${hasDemo ? "smartnav-map-event-marker--demo" : ""}">
+          <span class="smartnav-event-marker-pulse"></span>
+          <div class="smartnav-event-marker-core">
+            <svg class="smartnav-event-marker-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/>
+              <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/>
+              <circle cx="12" cy="12" r="2"/>
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/>
+              <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>
+            </svg>
+            ${events.length > 1 ? `<span class="smartnav-event-marker-count">${events.length}</span>` : ""}
+          </div>
+        </div>
+      `;
+
+      // 2. Safe DOM-built popup content avoiding innerHTML injection
+      const popupContainer = createSafeEventPopupDOM(group, now, (targetVenue) => {
+        if (activePopupRef.current) {
+          activePopupRef.current.remove();
+          activePopupRef.current = null;
+        }
+        if (typeof onNavigateToVenue === "function") {
+          onNavigateToVenue(targetVenue);
+        }
+      });
+
+      const mapContainer = map.getContainer();
+      const containerWidth = mapContainer?.clientWidth || window.innerWidth;
+      const responsiveMaxWidth = Math.min(320, Math.max(240, containerWidth - 32));
+
+      const popup = new Popup({
+        offset: 20,
+        closeButton: true,
+        closeOnClick: true,
+        className: "smartnav-maplibre-event-popup",
+        maxWidth: `${responsiveMaxWidth}px`,
+      }).setDOMContent(popupContainer);
+
+      popup.on("open", () => {
+        activePopupRef.current = popup;
+
+        // Keep popup entirely within visible map container bounds
+        requestAnimationFrame(() => {
+          const popupEl = popup.getElement();
+          const container = map.getContainer();
+          if (!popupEl || !container) return;
+
+          const pRect = popupEl.getBoundingClientRect();
+          const cRect = container.getBoundingClientRect();
+
+          let dx = 0;
+          let dy = 0;
+          const pad = 16;
+          const topPad = 64; // Account for top search / 2D-3D toggle
+          const bottomPad = 24;
+
+          if (pRect.right > cRect.right - pad) {
+            dx = pRect.right - (cRect.right - pad);
+          } else if (pRect.left < cRect.left + pad) {
+            dx = pRect.left - (cRect.left + pad);
+          }
+
+          if (pRect.bottom > cRect.bottom - bottomPad) {
+            dy = pRect.bottom - (cRect.bottom - bottomPad);
+          } else if (pRect.top < cRect.top + topPad) {
+            dy = pRect.top - (cRect.top + topPad);
+          }
+
+          if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+            map.panBy([dx, dy], { duration: 250 });
+          }
+        });
+      });
+      popup.on("close", () => {
+        if (activePopupRef.current === popup) {
+          activePopupRef.current = null;
+        }
+      });
+
+      const marker = new Marker({
+        element: el,
+        anchor: "center",
+      })
+        .setLngLat([lng, lat])
+        .setPopup(popup)
+        .addTo(map);
+
+      eventMarkersRef.current.push({
+        marker,
+        popup,
+        cleanup: () => {
+          popup.remove();
+        },
+      });
+    });
+  }, [liveVenues, onNavigateToVenue, now]);
+
+  // ============================================================
   // Re-center / Locate Button Action
   // ============================================================
   const handleLocateMe = useCallback(() => {
@@ -697,4 +840,145 @@ export default function OutdoorMap3D({ onToggle2D }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Safely constructs a DOM element for the MapLibre Event Popup without innerHTML interpolation of user content.
+ */
+function createSafeEventPopupDOM(group, now, onNavigate) {
+  const container = document.createElement("div");
+  container.className = "smartnav-event-popup-container";
+
+  const { venue, events } = group;
+  const floorLabel =
+    venue.floor !== null && venue.floor !== undefined
+      ? venue.floor === 0
+        ? "Ground Floor"
+        : venue.floor === 1
+        ? "First Floor"
+        : venue.floor === 2
+        ? "Second Floor"
+        : `Floor ${venue.floor}`
+      : null;
+
+  events.forEach((event, idx) => {
+    const card = document.createElement("div");
+    card.className = "smartnav-event-popup-card";
+    if (idx > 0) {
+      card.style.marginTop = "10px";
+      card.style.paddingTop = "10px";
+      card.style.borderTop = "1px solid #E2E8F0";
+    }
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "smartnav-event-popup-header";
+    const badgeWrap = document.createElement("div");
+    badgeWrap.className = "flex items-center gap-1.5 flex-wrap";
+
+    const liveBadge = document.createElement("span");
+    liveBadge.className = "smartnav-event-popup-live-badge";
+    const liveDot = document.createElement("span");
+    liveDot.className = "smartnav-event-popup-live-dot";
+    liveBadge.appendChild(liveDot);
+    liveBadge.appendChild(document.createTextNode("LIVE NOW"));
+    badgeWrap.appendChild(liveBadge);
+
+    if (event.category) {
+      const catBadge = document.createElement("span");
+      catBadge.className = "smartnav-event-popup-cat-badge";
+      catBadge.textContent = event.category;
+      badgeWrap.appendChild(catBadge);
+    }
+
+    if (event.isDemo) {
+      const demoBadge = document.createElement("span");
+      demoBadge.className = "smartnav-event-popup-demo-badge";
+      demoBadge.textContent = "Demo";
+      demoBadge.title = "Demonstration Event";
+      badgeWrap.appendChild(demoBadge);
+    }
+    header.appendChild(badgeWrap);
+    card.appendChild(header);
+
+    // Title
+    const title = document.createElement("h4");
+    title.className = "smartnav-event-popup-title";
+    title.textContent = event.title || "Untitled Event";
+    card.appendChild(title);
+
+    // Meta
+    const meta = document.createElement("div");
+    meta.className = "smartnav-event-popup-meta";
+
+    const venueRow = document.createElement("div");
+    venueRow.className = "smartnav-event-popup-meta-row";
+    const venueIcon = document.createElement("span");
+    venueIcon.className = "shrink-0 text-slate-500 inline-flex items-center";
+    venueIcon.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>`;
+    venueRow.appendChild(venueIcon);
+
+    const venueText = document.createElement("span");
+    venueText.className = "ml-1.5 leading-snug break-words";
+    const strongName = document.createElement("strong");
+    strongName.textContent = venue.name || "Campus Venue";
+    venueText.appendChild(strongName);
+    if (venue.building && venue.building !== venue.name) {
+      const bldgText = document.createTextNode(` (${venue.building})`);
+      venueText.appendChild(bldgText);
+    }
+    venueRow.appendChild(venueText);
+    meta.appendChild(venueRow);
+
+    if (floorLabel || venue.roomNo) {
+      const subRow = document.createElement("div");
+      subRow.className = "smartnav-event-popup-meta-row text-xs text-slate-600 pl-4 break-words";
+      subRow.textContent = `${floorLabel || ""}${venue.roomNo ? ` · Room ${venue.roomNo}` : ""}`;
+      meta.appendChild(subRow);
+    }
+
+    const timeRow = document.createElement("div");
+    timeRow.className = "smartnav-event-popup-meta-row text-xs text-slate-600";
+    const timeIcon = document.createElement("span");
+    timeIcon.className = "shrink-0 text-amber-600 inline-flex items-center";
+    timeIcon.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    timeRow.appendChild(timeIcon);
+
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "ml-1.5";
+    const endTimeStr = new Date(event.end).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const remainingMs = event.end - now;
+    const durationStr = remainingMs > 0 ? ` (in ${formatDuration(remainingMs)})` : "";
+    timeSpan.textContent = `Ends ${endTimeStr}${durationStr}`;
+    timeRow.appendChild(timeSpan);
+    meta.appendChild(timeRow);
+
+    card.appendChild(meta);
+
+    // Footer with action button
+    const footer = document.createElement("div");
+    footer.className = "smartnav-event-popup-footer";
+
+    const navBtn = document.createElement("button");
+    navBtn.type = "button";
+    navBtn.className = "smartnav-event-popup-nav-btn";
+    navBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+      </svg>
+      <span>Navigate to Venue</span>
+    `;
+    navBtn.addEventListener("click", () => {
+      onNavigate(venue);
+    });
+    footer.appendChild(navBtn);
+    card.appendChild(footer);
+
+    container.appendChild(card);
+  });
+
+  return container;
 }

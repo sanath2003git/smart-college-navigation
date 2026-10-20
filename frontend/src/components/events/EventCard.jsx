@@ -40,7 +40,7 @@ export default function EventCard({
   const countdownText = countdown(event, now);
   const timeFormatted = formatEventDateTime(event.start, event.end, now);
 
-  const venue = event.venueId ? getVenueById(event.venueId) : null;
+  const venue = event.venue || (event.venueId ? getVenueById(event.venueId) : null);
   const venueDisplay = venue
     ? `${venue.name}${venue.building ? ` (${venue.building})` : ""}`
     : "Campus Venue";

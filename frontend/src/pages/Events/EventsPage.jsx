@@ -20,6 +20,7 @@ import VenueModal from "../../components/events/VenueModal.jsx";
 import {
   getEvents,
   getSavedEventIds,
+  reconcileSavedEventIds,
   toggleSavedEvent,
   resetDemoEvents,
   getVenueById,
@@ -71,9 +72,20 @@ export default function EventsPage() {
       if (res && Array.isArray(res.results) && !res.isFallback) {
         setEvents(res.results);
         setIsLiveApi(true);
+        const reconciled = reconcileSavedEventIds(res.results);
+        setSavedIds(reconciled);
+      } else {
+        const local = getEvents();
+        setEvents(local);
+        const reconciled = reconcileSavedEventIds(local);
+        setSavedIds(reconciled);
       }
     } catch (err) {
       console.warn("[EventsPage] Live API load error, using cached/demo events:", err);
+      const local = getEvents();
+      setEvents(local);
+      const reconciled = reconcileSavedEventIds(local);
+      setSavedIds(reconciled);
     } finally {
       setIsLoadingEvents(false);
     }
@@ -203,11 +215,22 @@ export default function EventsPage() {
     return filteredEvents.filter((e) => getStatus(e, now) === "ended");
   }, [filteredEvents, now]);
 
+  // ── Single Source of Truth for Valid Saved Events ────────────────
+  const validSavedEvents = useMemo(() => {
+    if (!Array.isArray(events) || events.length === 0 || !Array.isArray(savedIds)) {
+      return [];
+    }
+    const savedSet = new Set(savedIds);
+    return events.filter((e) => e && e.id && savedSet.has(e.id));
+  }, [events, savedIds]);
+
+  const validSavedCount = validSavedEvents.length;
+
   // ── Dynamic Category Counts (for non-ended events in active tab) ───
   const categoryCounts = useMemo(() => {
     const baseList =
       activeTab === "saved"
-        ? events.filter((e) => savedIds.includes(e.id))
+        ? validSavedEvents
         : events;
 
     const counts = { All: 0 };
@@ -218,7 +241,7 @@ export default function EventsPage() {
       }
     }
     return counts;
-  }, [events, activeTab, savedIds, now]);
+  }, [events, activeTab, validSavedEvents, now]);
 
   const liveTotalCount = useMemo(() => {
     return events.filter((e) => getStatus(e, now) === "live").length;
@@ -321,10 +344,10 @@ export default function EventsPage() {
             }`}
             onClick={() => setActiveTab("saved")}
           >
-            <Bookmark size={14} className={savedIds.length > 0 ? "fill-current" : ""} />
+            <Bookmark size={14} className={validSavedCount > 0 ? "fill-current" : ""} />
             <span>Saved Events</span>
             <span className="smartnav-events-tab__badge">
-              {savedIds.length}
+              {validSavedCount}
             </span>
           </button>
         </div>
