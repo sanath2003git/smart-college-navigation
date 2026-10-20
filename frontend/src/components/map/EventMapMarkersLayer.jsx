@@ -80,6 +80,11 @@ export default function EventMapMarkersLayer({
     [onNavigateToVenue, map]
   );
 
+  const mapSize = map?.getSize?.();
+  const mapWidth = mapSize?.x || (typeof window !== "undefined" ? window.innerWidth : 360);
+  const popupMaxWidth = Math.min(320, Math.max(260, mapWidth - 32));
+  const popupMinWidth = Math.min(260, Math.max(200, mapWidth - 48));
+
   if (!isPaneReady || !Array.isArray(groupedVenues) || groupedVenues.length === 0) {
     return null;
   }
@@ -113,10 +118,12 @@ export default function EventMapMarkersLayer({
             <Popup
               pane="popupPane"
               className="smartnav-leaflet-event-popup"
-              maxWidth={320}
-              minWidth={240}
+              maxWidth={popupMaxWidth}
+              minWidth={popupMinWidth}
               autoPan={true}
               autoPanPadding={[16, 16]}
+              autoPanPaddingTopLeft={[16, 74]}
+              autoPanPaddingBottomRight={[16, 24]}
               closeButton={true}
               closeOnClick={true}
             >

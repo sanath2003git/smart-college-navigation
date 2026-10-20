@@ -45,7 +45,10 @@ export default function EventCard({
     ? `${venue.name}${venue.building ? ` (${venue.building})` : ""}`
     : "Campus Venue";
 
-  const catStyle = CATEGORY_COLORS[event.category] || CATEGORY_COLORS.Other;
+  const catStyle =
+    status === "ended"
+      ? { bg: "#f1f5f9", text: "#64748b", border: "#cbd5e1" }
+      : CATEGORY_COLORS[event.category] || CATEGORY_COLORS.Other;
 
   return (
     <article

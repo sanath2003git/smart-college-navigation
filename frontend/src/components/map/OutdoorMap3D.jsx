@@ -44,6 +44,9 @@ export default function OutdoorMap3D({
   const gpsMarkerRef = useRef(null);
   const eventMarkersRef = useRef([]);
   const activePopupRef = useRef(null);
+  const activeVenueKeyRef = useRef(null);
+  const onNavigateRef = useRef(onNavigateToVenue);
+  onNavigateRef.current = onNavigateToVenue;
 
   const navigate = useNavigate();
 
@@ -553,6 +556,7 @@ export default function OutdoorMap3D({
       if (activePopupRef.current) {
         activePopupRef.current.remove();
         activePopupRef.current = null;
+        activeVenueKeyRef.current = null;
       }
       if (gpsMarkerRef.current) {
         gpsMarkerRef.current.remove();
@@ -677,6 +681,9 @@ export default function OutdoorMap3D({
     });
     eventMarkersRef.current = [];
 
+    // Note: if a popup is open for a venue, we preserve activeVenueKeyRef
+    // so we can re-open it seamlessly on the newly attached marker
+    const previousActiveVenueKey = activeVenueKeyRef.current;
     if (activePopupRef.current) {
       activePopupRef.current.remove();
       activePopupRef.current = null;
@@ -688,9 +695,14 @@ export default function OutdoorMap3D({
       const { lat, lng, events, venue, hasDemo } = group;
       if (typeof lat !== "number" || typeof lng !== "number") return;
 
+      const groupKey = group.key || venue?.id || `${lat},${lng}`;
+
       // 1. Create custom DOM element for MapLibre Marker
       const el = document.createElement("div");
       el.className = "smartnav-event-marker-maplibre-container";
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", `${events.length} live event${events.length > 1 ? "s" : ""} at ${venue?.name || "campus venue"}`);
       el.innerHTML = `
         <div class="smartnav-map-event-marker ${hasDemo ? "smartnav-map-event-marker--demo" : ""}">
           <span class="smartnav-event-marker-pulse"></span>
@@ -712,9 +724,10 @@ export default function OutdoorMap3D({
         if (activePopupRef.current) {
           activePopupRef.current.remove();
           activePopupRef.current = null;
+          activeVenueKeyRef.current = null;
         }
-        if (typeof onNavigateToVenue === "function") {
-          onNavigateToVenue(targetVenue);
+        if (typeof onNavigateRef.current === "function") {
+          onNavigateRef.current(targetVenue);
         }
       });
 
@@ -732,6 +745,7 @@ export default function OutdoorMap3D({
 
       popup.on("open", () => {
         activePopupRef.current = popup;
+        activeVenueKeyRef.current = groupKey;
 
         // Keep popup entirely within visible map container bounds
         requestAnimationFrame(() => {
@@ -765,10 +779,46 @@ export default function OutdoorMap3D({
           }
         });
       });
+
       popup.on("close", () => {
         if (activePopupRef.current === popup) {
           activePopupRef.current = null;
+          activeVenueKeyRef.current = null;
         }
+      });
+
+      // 3. Direct, resilient click & tap handler on the marker element
+      // e.stopPropagation() prevents bubbling to MapLibre canvas and building click listeners
+      const handleMarkerClick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (activePopupRef.current && activePopupRef.current !== popup) {
+          activePopupRef.current.remove();
+        }
+
+        if (popup.isOpen()) {
+          popup.remove();
+          activePopupRef.current = null;
+          activeVenueKeyRef.current = null;
+        } else {
+          popup.setLngLat([lng, lat]).addTo(map);
+          activePopupRef.current = popup;
+          activeVenueKeyRef.current = groupKey;
+        }
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleMarkerClick(e);
+        }
+      };
+
+      el.addEventListener("click", handleMarkerClick);
+      el.addEventListener("keydown", handleKeyDown);
+      el.addEventListener("touchend", (e) => {
+        e.stopPropagation();
       });
 
       const marker = new Marker({
@@ -779,15 +829,24 @@ export default function OutdoorMap3D({
         .setPopup(popup)
         .addTo(map);
 
+      // Restore active popup if this venue was already open before refresh
+      if (previousActiveVenueKey && previousActiveVenueKey === groupKey) {
+        popup.setLngLat([lng, lat]).addTo(map);
+        activePopupRef.current = popup;
+        activeVenueKeyRef.current = groupKey;
+      }
+
       eventMarkersRef.current.push({
         marker,
         popup,
         cleanup: () => {
+          el.removeEventListener("click", handleMarkerClick);
+          el.removeEventListener("keydown", handleKeyDown);
           popup.remove();
         },
       });
     });
-  }, [liveVenues, onNavigateToVenue, now]);
+  }, [liveVenues, now]);
 
   // ============================================================
   // Re-center / Locate Button Action
