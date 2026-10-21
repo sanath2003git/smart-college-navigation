@@ -12,3 +12,5 @@ class IsClerkAdmin(permissions.BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
         return bool(getattr(request.user, 'is_admin', False))
+
+# Defines access permissions for campus API resources.
