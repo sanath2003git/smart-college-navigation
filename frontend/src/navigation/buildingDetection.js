@@ -1,6 +1,12 @@
-import { point, booleanPointInPolygon } from "@turf/turf";
+import {
+  point,
+  booleanPointInPolygon,
+} from "@turf/turf";
 
-export function detectCurrentBuilding(location, buildings) {
+export function detectCurrentBuilding(
+  location,
+  buildings
+) {
   if (!location || !buildings) {
     return null;
   }
@@ -11,10 +17,27 @@ export function detectCurrentBuilding(location, buildings) {
   ]);
 
   for (const building of buildings.features) {
-    if (booleanPointInPolygon(userPoint, building)) {
+    if (
+      booleanPointInPolygon(
+        userPoint,
+        building
+      )
+    ) {
       return building;
     }
   }
 
   return null;
+}
+
+export function isInsideBuilding(
+  location,
+  buildings
+) {
+  return Boolean(
+    detectCurrentBuilding(
+      location,
+      buildings
+    )
+  );
 }

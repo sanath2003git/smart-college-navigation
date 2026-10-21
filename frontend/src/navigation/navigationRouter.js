@@ -2,12 +2,17 @@ import {
   getOutdoorGraph,
   getGroundFloorGraph,
   getFirstFloorGraph,
+  getSecondFloorGraph,
+  getThirdFloorGraph,
 } from "./graphManager";
 
 import { NAVIGATION_STAGE } from "../constants/navigationStages";
 
 import { aStar } from "./astar";
-import { findNearestNode } from "./findNearestNode";
+import {
+  findNearestNode,
+  findGoalNodeForFeature,
+} from "./findNearestNode";
 
 import { findRooms } from "../services/roomService";
 
@@ -19,6 +24,10 @@ import {
 import { findNearestEntrance } from "../services/entranceService";
 
 import { getBuildingFromRoom } from "../services/buildingRoomLookup";
+
+// ======================================================
+// MAIN NAVIGATION ENTRY
+// ======================================================
 
 export async function navigate(options) {
   const { stage } = options;
@@ -33,11 +42,18 @@ export async function navigate(options) {
     case NAVIGATION_STAGE.FIRST_FLOOR:
       return navigateFirstFloor(options);
 
+    case NAVIGATION_STAGE.SECOND_FLOOR:
+      return navigateSecondFloor(options);
+
+    case NAVIGATION_STAGE.THIRD_FLOOR:
+      return navigateThirdFloor(options);
+
     default:
       console.error(
         "Unknown navigation stage:",
         stage
       );
+
       return null;
   }
 }
@@ -81,7 +97,8 @@ async function navigateOutdoor(options) {
     return null;
   }
 
-  const graph = getOutdoorGraph();
+  const graph =
+    getOutdoorGraph();
 
   if (!graph) {
     console.error(
@@ -95,22 +112,29 @@ async function navigateOutdoor(options) {
   // Find actual destination
   // -----------------------------------
 
-  let destinations = await findRooms(
-    building,
-    destinationName
-  );
+  let destinations =
+    await findRooms(
+      building,
+      destinationName
+    );
 
   console.log(
     "Rooms Found:",
     destinations.length
   );
 
-  if (destinations.length === 0) {
+  if (
+    destinations.length === 0
+  ) {
     destinations =
-      await findStairs(destinationName);
+      await findStairs(
+        destinationName
+      );
   }
 
-  if (destinations.length === 0) {
+  if (
+    destinations.length === 0
+  ) {
     console.error(
       "Destination not found."
     );
@@ -119,16 +143,14 @@ async function navigateOutdoor(options) {
   }
 
   /*
-   * For now select the first matching destination.
+   * Outdoor navigation ends at the
+   * destination building entrance.
    *
-   * The outdoor route should NOT route to the
-   * room coordinate because that room may be
-   * inside the building or on another floor.
-   *
-   * Outdoor navigation ends at the entrance
-   * of the destination building.
+   * The actual room is handled by
+   * indoor navigation.
    */
-  const destination = destinations[0];
+  const destination =
+    destinations[0];
 
   // -----------------------------------
   // Find building entrance
@@ -198,8 +220,10 @@ async function navigateOutdoor(options) {
   // Entrance → outdoor graph node
   // -----------------------------------
 
-  const [entranceLng, entranceLat] =
-    entrance.geometry.coordinates;
+  const [
+    entranceLng,
+    entranceLat,
+  ] = entrance.geometry.coordinates;
 
   const goalNode =
     findNearestNode(
@@ -237,7 +261,10 @@ async function navigateOutdoor(options) {
     route
   );
 
-  if (!route || route.length === 0) {
+  if (
+    !route ||
+    route.length === 0
+  ) {
     console.error(
       "No outdoor route found."
     );
@@ -257,13 +284,106 @@ async function navigateOutdoor(options) {
 }
 
 // ======================================================
+// SMART TRANSITION ROUTE
+// ======================================================
+
+async function findBestTransitionRoute({
+  graph,
+  startNode,
+  candidateIds,
+}) {
+  let best = null;
+
+  if (
+    !candidateIds ||
+    candidateIds.length === 0
+  ) {
+    return null;
+  }
+
+  for (
+    const candidateId of candidateIds
+  ) {
+    const feature =
+      await findStairById(
+        candidateId
+      );
+
+    if (!feature) {
+      console.warn(
+        "Transition feature not found:",
+        candidateId
+      );
+
+      continue;
+    }
+
+    const goalNode =
+      findGoalNodeForFeature(
+        graph,
+        feature
+      );
+
+    if (!goalNode) {
+      console.warn(
+        "Transition has no graph node:",
+        candidateId
+      );
+
+      continue;
+    }
+
+    const route =
+      aStar(
+        graph,
+        startNode,
+        goalNode
+      );
+
+    if (
+      !route ||
+      route.length === 0
+    ) {
+      console.warn(
+        "No route to transition:",
+        candidateId
+      );
+
+      continue;
+    }
+
+    console.log(
+      `${candidateId} → ${route.length} nodes`
+    );
+
+    if (
+      !best ||
+      route.length <
+        best.route.length
+    ) {
+      best = {
+        id: candidateId,
+        feature,
+        route,
+      };
+    }
+  }
+
+  return best;
+}
+
+// ======================================================
 // GROUND FLOOR NAVIGATION
 // ======================================================
 
-async function navigateGroundFloor(options) {
+async function navigateGroundFloor(
+  options
+) {
   const {
     start,
     stairId,
+    transitionCandidates,
+    transitionStrategy,
     destination,
     building,
   } = options;
@@ -278,11 +398,21 @@ async function navigateGroundFloor(options) {
   );
 
   const graph =
-    getGroundFloorGraph(building);
+    getGroundFloorGraph(
+      building
+    );
 
   if (!graph) {
     console.error(
       "Ground Floor graph not loaded."
+    );
+
+    return null;
+  }
+
+  if (!start) {
+    console.error(
+      "Ground Floor start missing."
     );
 
     return null;
@@ -311,7 +441,7 @@ async function navigateGroundFloor(options) {
   let targetFeature = null;
 
   // -----------------------------------
-  // Ground Floor Room Navigation
+  // Room navigation
   // -----------------------------------
 
   if (destination) {
@@ -319,29 +449,93 @@ async function navigateGroundFloor(options) {
       "Routing to Ground Floor room..."
     );
 
-    targetFeature = destination;
+    targetFeature =
+      destination;
   }
 
   // -----------------------------------
-  // Stair Navigation
+  // Stair / Lift navigation
   // -----------------------------------
 
   else {
     console.log(
-      "Routing to Stair:",
+      "Routing to Transition:",
       stairId
     );
 
-    targetFeature =
-      await findStairById(stairId);
-
-    if (!targetFeature) {
-      console.error(
-        "Target stair not found."
+    if (
+      transitionCandidates &&
+      transitionCandidates.length > 0
+    ) {
+      console.log(
+        "========== SMART TRANSITION =========="
       );
 
-      return null;
+      console.log(
+        "Strategy:",
+        transitionStrategy
+      );
+
+      console.log(
+        "Candidates:",
+        transitionCandidates
+      );
+
+      const best =
+        await findBestTransitionRoute({
+          graph,
+          startNode,
+          candidateIds:
+            transitionCandidates,
+        });
+
+      if (!best) {
+        console.error(
+          "No valid transition route found."
+        );
+
+        return null;
+      }
+
+      console.log(
+        "Best Transition:",
+        best.id
+      );
+
+      console.log(
+        "======================================"
+      );
+
+      targetFeature =
+        best.feature;
     }
+
+    // -----------------------------------
+    // Backward compatibility
+    // -----------------------------------
+
+    else {
+      targetFeature =
+        await findStairById(
+          stairId
+        );
+
+      if (!targetFeature) {
+        console.error(
+          "Target transition not found."
+        );
+
+        return null;
+      }
+    }
+  }
+
+  if (!targetFeature) {
+    console.error(
+      "Ground Floor target missing."
+    );
+
+    return null;
   }
 
   console.log(
@@ -349,14 +543,10 @@ async function navigateGroundFloor(options) {
     targetFeature
   );
 
-  const [goalLng, goalLat] =
-    targetFeature.geometry.coordinates;
-
   const goalNode =
-    findNearestNode(
+    findGoalNodeForFeature(
       graph,
-      goalLat,
-      goalLng
+      targetFeature
     );
 
   console.log(
@@ -384,7 +574,10 @@ async function navigateGroundFloor(options) {
     route
   );
 
-  if (!route || route.length === 0) {
+  if (
+    !route ||
+    route.length === 0
+  ) {
     console.error(
       "No Ground Floor route found."
     );
@@ -398,23 +591,31 @@ async function navigateGroundFloor(options) {
 
   return {
     route,
-    destination: targetFeature,
+
+    destination:
+      targetFeature,
+
+    selectedTransitionId:
+      targetFeature.properties.id,
+
+    selectedTransition:
+      targetFeature,
   };
 }
 
 // ======================================================
-// FIRST FLOOR NAVIGATION
+// GENERIC UPPER FLOOR NAVIGATION
 // ======================================================
 
-async function navigateFirstFloor(options) {
-  const {
-    start,
-    destination,
-    building,
-  } = options;
-
+async function navigateFloor({
+  floorName,
+  graph,
+  start,
+  destination,
+  building,
+}) {
   console.log(
-    "========== FIRST FLOOR ROUTING =========="
+    `========== ${floorName.toUpperCase()} ROUTING ==========`
   );
 
   console.log(
@@ -432,29 +633,38 @@ async function navigateFirstFloor(options) {
     destination
   );
 
-  const graph =
-    getFirstFloorGraph(building);
+  // -----------------------------------
+  // Graph
+  // -----------------------------------
 
   if (!graph) {
     console.error(
-      "First Floor graph not loaded for:",
+      `${floorName} graph not loaded for:`,
       building
     );
 
     return null;
   }
 
+  // -----------------------------------
+  // Start
+  // -----------------------------------
+
   if (!start) {
     console.error(
-      "First Floor start location missing."
+      `${floorName} start location missing.`
     );
 
     return null;
   }
 
+  // -----------------------------------
+  // Destination
+  // -----------------------------------
+
   if (!destination) {
     console.error(
-      "First Floor destination missing."
+      `${floorName} destination missing.`
     );
 
     return null;
@@ -472,13 +682,13 @@ async function navigateFirstFloor(options) {
     );
 
   console.log(
-    "Start Node:",
+    `${floorName} Start Node:`,
     startNode
   );
 
   if (!startNode) {
     console.error(
-      "Unable to locate First Floor start node."
+      `Unable to locate ${floorName} start node.`
     );
 
     return null;
@@ -488,24 +698,31 @@ async function navigateFirstFloor(options) {
   // Destination node
   // -----------------------------------
 
-  const [goalLng, goalLat] =
-    destination.geometry.coordinates;
+  if (
+    !destination.geometry ||
+    !destination.geometry.coordinates
+  ) {
+    console.error(
+      `${floorName} destination geometry missing.`
+    );
+
+    return null;
+  }
 
   const goalNode =
-    findNearestNode(
+    findGoalNodeForFeature(
       graph,
-      goalLat,
-      goalLng
+      destination
     );
 
   console.log(
-    "Goal Node:",
+    `${floorName} Goal Node:`,
     goalNode
   );
 
   if (!goalNode) {
     console.error(
-      "Unable to locate First Floor destination node."
+      `Unable to locate ${floorName} destination node.`
     );
 
     return null;
@@ -523,24 +740,123 @@ async function navigateFirstFloor(options) {
     );
 
   console.log(
-    "First Floor Route:",
+    `${floorName} Route:`,
     route
   );
 
-  if (!route || route.length === 0) {
+  if (
+    !route ||
+    route.length === 0
+  ) {
     console.error(
-      "No First Floor route found."
+      `No ${floorName} route found.`
     );
 
     return null;
   }
 
   console.log(
-    "First Floor routing successful."
+    `${floorName} routing successful.`
   );
 
   return {
     route,
     destination,
   };
+}
+
+// ======================================================
+// FIRST FLOOR NAVIGATION
+// ======================================================
+
+async function navigateFirstFloor(
+  options
+) {
+  const {
+    start,
+    destination,
+    building,
+  } = options;
+
+  const graph =
+    getFirstFloorGraph(
+      building
+    );
+
+  return navigateFloor({
+    floorName:
+      "First Floor",
+
+    graph,
+
+    start,
+
+    destination,
+
+    building,
+  });
+}
+
+// ======================================================
+// SECOND FLOOR NAVIGATION
+// ======================================================
+
+async function navigateSecondFloor(
+  options
+) {
+  const {
+    start,
+    destination,
+    building,
+  } = options;
+
+  const graph =
+    getSecondFloorGraph(
+      building
+    );
+
+  return navigateFloor({
+    floorName:
+      "Second Floor",
+
+    graph,
+
+    start,
+
+    destination,
+
+    building,
+  });
+}
+
+// ======================================================
+// THIRD FLOOR NAVIGATION
+// ======================================================
+
+async function navigateThirdFloor(
+  options
+) {
+  const {
+    start,
+    destination,
+    building,
+  } = options;
+
+  const graph =
+    getThirdFloorGraph(
+      building
+    );
+
+  return navigateFloor({
+    floorName:
+      "Third Floor",
+
+    graph,
+
+    start,
+
+    destination,
+
+    building,
+  });
 }

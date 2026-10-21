@@ -1,3 +1,5 @@
+import BuildingFloorExplorer from "../../components/building/BuildingFloorExplorer";
+
 export default function LibraryPage() {
-  return <h1>Library</h1>;
+  return <BuildingFloorExplorer buildingName="Central Library" />;
 }

@@ -1,3 +1,6 @@
+import { BUILDING_CONFIG } from "../config/buildingConfig";
+import { getStairsPath } from "../utils/dataPaths";
+
 let stairs = [];
 
 // ======================================================
@@ -5,73 +8,94 @@ let stairs = [];
 // ======================================================
 
 async function loadStairs() {
-  if (stairs.length === 0) {
-    const [
-      chemicalGfResponse,
-      chemicalFfResponse,
-      mechanicalGfResponse,
-      mechanicalFfResponse,
-    ] = await Promise.all([
-      fetch(
-        "/data/chemical/ground_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/chemical/first_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/ground_floor/stairs.geojson"
-      ),
-
-      fetch(
-        "/data/mechanical/first_floor/stairs.geojson"
-      ),
-    ]);
-
-    if (
-      !chemicalGfResponse.ok ||
-      !chemicalFfResponse.ok ||
-      !mechanicalGfResponse.ok ||
-      !mechanicalFfResponse.ok
-    ) {
-      throw new Error(
-        "Failed to load stair GeoJSON data."
-      );
-    }
-
-    const [
-      chemicalGfData,
-      chemicalFfData,
-      mechanicalGfData,
-      mechanicalFfData,
-    ] = await Promise.all([
-      chemicalGfResponse.json(),
-      chemicalFfResponse.json(),
-      mechanicalGfResponse.json(),
-      mechanicalFfResponse.json(),
-    ]);
-
-    stairs = [
-      ...chemicalGfData.features,
-      ...chemicalFfData.features,
-      ...mechanicalGfData.features,
-      ...mechanicalFfData.features,
-    ];
-
-    console.log(
-      "========== STAIRS LOADED =========="
-    );
-
-    console.log(
-      "Total Stair/Lift Features:",
-      stairs.length
-    );
-
-    console.log(
-      "==================================="
-    );
+  if (stairs.length > 0) {
+    return stairs;
   }
+
+  const stairSources = [];
+
+  // -----------------------------------
+  // Build stair data sources dynamically
+  // -----------------------------------
+
+  for (const [building, buildingConfig] of Object.entries(
+    BUILDING_CONFIG
+  )) {
+    const floors = Object.keys(buildingConfig.floors)
+      .map(Number);
+
+    for (const floor of floors) {
+      stairSources.push({
+        building,
+        floor,
+        path: getStairsPath(building, floor),
+      });
+    }
+  }
+
+  // -----------------------------------
+  // Load all configured stair files
+  // -----------------------------------
+
+  const responses = await Promise.all(
+    stairSources.map(async (source) => {
+      try {
+        const response = await fetch(source.path);
+
+        if (!response.ok) {
+          return {
+            ...source,
+            data: { features: [] },
+          };
+        }
+
+        const data = await response.json();
+
+        return {
+          ...source,
+          data,
+        };
+      } catch (err) {
+        console.warn(`Failed to load stair GeoJSON: ${source.path}`, err);
+        return {
+          ...source,
+          data: { features: [] },
+        };
+      }
+    })
+  );
+
+  // -----------------------------------
+  // Merge all stair/lift features
+  // -----------------------------------
+
+  stairs = responses.flatMap(
+    ({ data }) => data.features ?? []
+  );
+
+  // -----------------------------------
+  // Debug information
+  // -----------------------------------
+
+  console.log(
+    "========== STAIRS LOADED =========="
+  );
+
+  console.log(
+    "Total Stair/Lift Features:",
+    stairs.length
+  );
+
+  responses.forEach(({ building, floor, data }) => {
+    console.log(
+      `${building} - Floor ${floor}:`,
+      data.features?.length ?? 0
+    );
+  });
+
+  console.log(
+    "==================================="
+  );
 
   return stairs;
 }
@@ -101,58 +125,6 @@ export async function findStairs(search) {
       name.includes(query)
     );
   });
-}
-
-// ======================================================
-// DEFAULT FLOOR TRANSITION
-// ======================================================
-
-const STAIR_MAPPING = {
-  "Chemical Block": {
-    1: "CHEM_STAIR_02_GF",
-  },
-
-  "Mechanical Block": {
-    1: "MECH_STAIR_01_GF",
-  },
-};
-
-// ======================================================
-// GET TARGET STAIR
-// ======================================================
-
-export function getTargetStair(
-  building,
-  floor
-) {
-  const stairId =
-    STAIR_MAPPING[building]?.[floor] ??
-    null;
-
-  console.log(
-    "========== TARGET STAIR LOOKUP =========="
-  );
-
-  console.log(
-    "Building:",
-    building
-  );
-
-  console.log(
-    "Destination Floor:",
-    floor
-  );
-
-  console.log(
-    "Target Stair ID:",
-    stairId
-  );
-
-  console.log(
-    "========================================="
-  );
-
-  return stairId;
 }
 
 // ======================================================

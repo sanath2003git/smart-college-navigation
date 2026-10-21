@@ -1,28 +1,41 @@
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
-import Footer from "./Footer";
 import SearchBar from "../controls/SearchBar";
-import Sidebar from "../sidebar/Sidebar";
+import ActiveNavigationPanel from "../navigation/ActiveNavigationPanel";
+import NavigationLifecycleController from "../navigation/NavigationLifecycleController";
+import InitialFloorSelectionPrompt from "../navigation/InitialFloorSelectionPrompt";
+import { useNavigation } from "../../hooks/useNavigation";
 
 export default function MainLayout({ children }) {
+  const { route, destination } = useNavigation();
+  const location = useLocation();
+  const isNavigating = Boolean(route && route.length > 0 && destination);
+  const isEventsPage = location.pathname.startsWith("/events");
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isScrollableContent = isEventsPage || isAdminPage;
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100">
-
+    <div className="smartnav-app">
+      <NavigationLifecycleController />
       <Navbar />
+      <InitialFloorSelectionPrompt />
 
-      <SearchBar />
-
-      <div className="flex flex-1">
-
-        <Sidebar />
-
-        <main className="flex-1">
+      <main className="smartnav-content">
+        <div
+          className={`smartnav-map-area ${
+            isScrollableContent ? "smartnav-events-scrollable" : ""
+          }`}
+        >
           {children}
-        </main>
+        </div>
 
-      </div>
-
-      <Footer />
-
+        {isNavigating ? (
+          <ActiveNavigationPanel />
+        ) : !isScrollableContent ? (
+          <SearchBar />
+        ) : null}
+      </main>
     </div>
   );
+
 }
