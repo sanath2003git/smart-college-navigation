@@ -31,3 +31,5 @@ urlpatterns = [
     # Admin endpoints: /api/admin/events/, /api/admin/buildings/, /api/admin/floors/, /api/admin/rooms/, /api/admin/venues/
     path('admin/', include(admin_router.urls)),
 ]
+
+# Defines URL routes for the campus API endpoints.
