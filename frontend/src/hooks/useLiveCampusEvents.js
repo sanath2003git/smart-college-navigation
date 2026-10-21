@@ -176,3 +176,5 @@ export function useLiveCampusEvents() {
     refresh: loadEvents,
   };
 }
+
+// Manages live campus event data for map and event views.
