@@ -49,3 +49,5 @@ export default function FilterChips({
     </div>
   );
 }
+
+// Provides category and status filters for campus events.
