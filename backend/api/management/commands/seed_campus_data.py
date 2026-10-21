@@ -565,3 +565,5 @@ class Command(BaseCommand):
                     venue.has_indoor_map = v_data['has_indoor_map']
                     venue.save()
                     stats['venues_updated'] += 1
+
+# Populates the database with initial campus buildings, floors, rooms, and venues.
