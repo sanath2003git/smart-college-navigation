@@ -239,3 +239,5 @@ class AdminEventSerializer(serializers.ModelSerializer):
         if not validated_data.get('id'):
             validated_data['id'] = f"evt-{uuid.uuid4().hex[:12]}"
         return super().create(validated_data)
+
+# Serializes campus models for API responses and validates incoming data.
