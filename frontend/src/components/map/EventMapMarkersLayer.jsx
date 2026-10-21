@@ -225,3 +225,5 @@ export default function EventMapMarkersLayer({
     </>
   );
 }
+
+// Renders map markers for campus events and their venues.
