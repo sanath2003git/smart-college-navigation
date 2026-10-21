@@ -643,3 +643,5 @@ class AdminCrudValidationTestCase(ClerkAuthTestBase):
         res_del_b = self.client.delete(f'/api/admin/buildings/{b_id}/', **self.auth_headers())
         self.assertEqual(res_del_b.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(res_del_b.data.get('error'), "PROTECTED_RECORD")
+
+# Tests the campus API endpoints and their expected behavior.
