@@ -258,3 +258,5 @@ export function searchVenues(query) {
     );
   });
 }
+
+// Defines campus venues used by event and navigation features.
