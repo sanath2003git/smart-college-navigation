@@ -36,3 +36,5 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ('title', 'organizer', 'description')
     list_filter = ('category', 'is_demo', 'start_time')
     date_hierarchy = 'start_time'
+
+# Registers campus models in the Django admin interface.
