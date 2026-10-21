@@ -248,3 +248,5 @@ class AdminVenueViewSet(SafeDeleteAdminViewSet):
     def perform_update(self, serializer):
         with transaction.atomic():
             serializer.save()
+
+# Handles API requests for campus data and related resources.
