@@ -27,3 +27,5 @@ class SmartNavPagination(PageNumberPagination):
             'previous': self.get_previous_link(),
             'results': data
         })
+
+# Defines pagination settings for campus API responses.
