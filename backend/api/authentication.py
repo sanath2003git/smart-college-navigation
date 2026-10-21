@@ -165,3 +165,5 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         is_admin = bool(admin_user_ids and clerk_id in admin_user_ids)
 
         return ClerkUser(clerk_id=clerk_id, claims=payload, is_admin=is_admin), payload
+
+# Handles authentication for campus API requests.

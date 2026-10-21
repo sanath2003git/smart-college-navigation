@@ -253,3 +253,5 @@ export function sortEventsByStatus(events, now = Date.now()) {
     return (a.start ?? 0) - (b.start ?? 0);
   });
 }
+
+// Provides date and time utilities for campus events.

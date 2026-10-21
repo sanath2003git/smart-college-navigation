@@ -130,3 +130,5 @@ class Migration(migrations.Migration):
             },
         ),
     ]
+
+# Creates the initial database schema for campus buildings, floors, rooms, venues, and events.

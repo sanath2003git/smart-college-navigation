@@ -185,3 +185,5 @@ export default function EventCard({
     </article>
   );
 }
+
+// Renders campus event details in a reusable event card.

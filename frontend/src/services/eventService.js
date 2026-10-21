@@ -1137,3 +1137,5 @@ export function searchEvents({
 
 // Re-export venue functions for convenient consumption
 export { getVenues, getVenueById, CAMPUS_VENUES };
+
+// Provides data operations for retrieving and managing events.

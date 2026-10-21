@@ -265,3 +265,5 @@ class Event(models.Model):
         super().clean()
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError("Event end time must be after start time.")
+
+# Defines campus buildings, floors, rooms, venues, and events with their relationships and validation rules.

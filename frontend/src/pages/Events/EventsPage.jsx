@@ -553,3 +553,5 @@ export default function EventsPage() {
     </div>
   );
 }
+
+// Provides the campus events page and its event listings.

@@ -248,3 +248,5 @@ export function seedEvents() {
     },
   ];
 }
+
+// Provides seed event data for campus event features.

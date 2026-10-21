@@ -180,3 +180,5 @@ export default function VenueModal({ venue, onClose, onNavigateToVenue }) {
     </div>
   );
 }
+
+// Displays venue details for a selected campus event.

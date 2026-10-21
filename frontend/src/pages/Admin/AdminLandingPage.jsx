@@ -592,3 +592,5 @@ export default function AdminLandingPage() {
     </div>
   );
 }
+
+// Provides the landing page for campus administration.
