@@ -1333,3 +1333,5 @@ export default function AdminEventsDashboard() {
     </div>
   );
 }
+
+// Provides the dashboard for managing campus events.
