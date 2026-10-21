@@ -5,3 +5,4 @@ mysqlclient>=2.3.0,<3.0.0
 python-dotenv>=1.2.0,<2.0.0
 PyJWT[crypto]>=2.15.0,<3.0.0
 requests>=2.34.0,<3.0.0
+# Python dependencies for the SmartNav backend API.
