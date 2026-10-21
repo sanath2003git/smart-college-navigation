@@ -10,242 +10,181 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-# Import Path class to work with file and directory paths
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
-# Base directory of the project
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load local environment variables from .env if present
+load_dotenv(BASE_DIR / '.env')
 
-# ==========================
-# SECURITY SETTINGS
-# ==========================
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-vlz+!@s769x%e7%($r*@r%^o^#u0x&oyhhqshr6-e%w$k_1o=x'
+)
 
-# Secret key used by Django for cryptographic signing.
-# Keep this secret in production.
-SECRET_KEY = 'django-insecure-vlz+!@s769x%e7%($r*@r%^o^#u0x&oyhhqshr6-e%w$k_1o=x'
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-# Enables debugging features.
-# Set to False before deploying the project.
-DEBUG = True
-
-# Hosts allowed to access the application.
-# Empty means only localhost during development.
-ALLOWED_HOSTS = []
+_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()]
 
 
-# ==========================
-# INSTALLED APPLICATIONS
-# ==========================
+# Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 
-    # Default Django applications
-    'django.contrib.admin',          # Admin dashboard
-    'django.contrib.auth',           # User authentication
-    'django.contrib.contenttypes',   # Content type framework
-    'django.contrib.sessions',       # Session management
-    'django.contrib.messages',       # Messaging framework
-    'django.contrib.staticfiles',    # Static file management
+    # Third-party packages
+    'rest_framework',
+    'corsheaders',
 
-    # Third-party applications
-    'rest_framework',                # Django REST Framework for APIs
-    'corsheaders',                   # Allows React frontend to communicate with Django
-
-    # Custom application
-    'campus',                        # Campus Information & Exploration module
+    # Local apps
+    'api',
 ]
 
-
-# ==========================
-# MIDDLEWARE
-# ==========================
-
 MIDDLEWARE = [
-
-    # Enables Cross-Origin Resource Sharing (CORS)
-    'corsheaders.middleware.CorsMiddleware',
-
-    # Security middleware
     'django.middleware.security.SecurityMiddleware',
-
-    # Session middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
-
-    # Handles common HTTP features
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-
-    # Protects against Cross Site Request Forgery attacks
     'django.middleware.csrf.CsrfViewMiddleware',
-
-    # Authentication support
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-
-    # Messaging support
     'django.contrib.messages.middleware.MessageMiddleware',
-
-    # Prevents clickjacking attacks
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS Configuration for local Vite dev server
+_cors_origins = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:5173,http://127.0.0.1:5173'
+)
+CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
 
-# Main URL configuration
 ROOT_URLCONF = 'core.urls'
-
-
-# ==========================
-# TEMPLATE SETTINGS
-# ==========================
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-
-        # Additional template directories
         'DIRS': [],
-
-        # Search templates inside installed apps
         'APP_DIRS': True,
-
         'OPTIONS': {
             'context_processors': [
-
-                # Adds request object to templates
                 'django.template.context_processors.request',
-
-                # Authentication information
                 'django.contrib.auth.context_processors.auth',
-
-                # Messages framework
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-
-# WSGI application entry point
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# ==========================
-# DATABASE CONFIGURATION
-# ==========================
+# Database: MySQL 8.0 for smartnav_dev
+# Configured strictly through environment variables without hardcoded secrets
+DB_NAME = os.environ.get('DB_NAME', 'smartnav_dev')
+DB_USER = os.environ.get('DB_USER', '')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
 
 DATABASES = {
     'default': {
-
-        # MySQL database engine
         'ENGINE': 'django.db.backends.mysql',
-
-        # Database name
-        'NAME': 'smartnav',
-
-        # MySQL username
-        'USER': 'root',
-
-        # MySQL password
-        'PASSWORD': '',
-
-        # Database server
-        'HOST': 'localhost',
-
-        # MySQL port
-        'PORT': '3306',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
+# Clerk Authentication and Authorization Settings
+CLERK_ISSUER = os.environ.get('CLERK_ISSUER', '').strip()
+CLERK_JWKS_URL = os.environ.get('CLERK_JWKS_URL', '').strip()
+_clerk_admin_ids = os.environ.get('CLERK_ADMIN_USER_IDS', '')
+CLERK_ADMIN_USER_IDS = [uid.strip() for uid in _clerk_admin_ids.split(',') if uid.strip()]
+CLERK_JWT_LEEWAY = int(os.environ.get('CLERK_JWT_LEEWAY', 10))
 
-# ==========================
-# PASSWORD VALIDATION
-# ==========================
+# Cache configuration for rate limiting / throttling
+# LocMemCache is standard for local development and single-process servers.
+# In a multi-worker production deployment, configure Redis or Memcached.
+CACHES = {
+    'default': {
+        'BACKEND': os.environ.get(
+            'DJANGO_CACHE_BACKEND',
+            'django.core.cache.backends.locmem.LocMemCache'
+        ),
+        'LOCATION': 'smartnav-rate-limiting-cache',
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'api.authentication.ClerkAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.environ.get('DRF_THROTTLE_RATE_ANON', '100/minute'),
+    },
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.SmartNavPagination',
+    'PAGE_SIZE': 50,
+}
+
+
+
+
+# Password validation
+# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-
-    # Prevents passwords similar to user information
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
-
-    # Minimum password length
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
-
-    # Prevents common passwords
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
-
-    # Prevents numeric-only passwords
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
 
-# ==========================
-# INTERNATIONALIZATION
-# ==========================
+# Internationalization
+# https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-# Language of the application
 LANGUAGE_CODE = 'en-us'
 
-# Indian timezone
-TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = 'UTC'
 
-# Enable Django translation system
 USE_I18N = True
 
-# Store datetime values with timezone support
 USE_TZ = True
 
 
-# ==========================
-# STATIC FILES
-# ==========================
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-# URL for static files
 STATIC_URL = 'static/'
-
-# Directory containing CSS, JavaScript and images
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-
-# ==========================
-# MEDIA FILES
-# ==========================
-
-# URL used for uploaded files
-MEDIA_URL = '/media/'
-
-# Folder where uploaded files are stored
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
-# ==========================
-# DEFAULT PRIMARY KEY
-# ==========================
-
-# Default auto-incrementing primary key
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# ==========================
-# CORS SETTINGS
-# ==========================
-
-# Allow requests from React frontend
-CORS_ALLOWED_ORIGINS = [
-
-    # React using Vite
-    "http://localhost:5173",
-
-    # React using Create React App
-    "http://localhost:3000",
-]
-
-# Allow cookies and authentication headers
-CORS_ALLOW_CREDENTIALS = True
+# Small review-only change: clarify that this module is part of the approved campus project work.

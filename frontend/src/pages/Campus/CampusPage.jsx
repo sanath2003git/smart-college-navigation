@@ -1,28 +1,47 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+
 import {
   MapContainer,
   TileLayer,
 } from "react-leaflet";
+
 import { useNavigate } from "react-router-dom";
+import { Box } from "lucide-react";
+
 import "leaflet/dist/leaflet.css";
 
-import PermanentLayers from "../../components/layers/PermanentLayers";
-import OutdoorLayers from "../../components/layers/OutdoorLayers";
-import GroundFloorLayers from "../../components/layers/GroundFloorLayers";
-import FirstFloorLayers from "../../components/layers/FirstFloorLayers";
-import RouteLayer from "../../components/map/RouteLayer";
+import "leaflet";
+import "@tomickigrzegorz/leaflet-rotate";
 
-import { loadGraphs } from "../../navigation/loadGraphs";
+import PermanentLayers
+  from "../../components/layers/PermanentLayers";
 
-import { useNavigation } from "../../hooks/useNavigation";
-import { useNavigationStage } from "../../hooks/useNavigationStage";
-import { useFloorTransition } from "../../hooks/useFloorTransition";
-import { useDestinationArrival } from "../../hooks/useDestinationArrival";
+import OutdoorLayers
+  from "../../components/layers/OutdoorLayers";
 
-import { NAVIGATION_STAGE } from "../../constants/navigationStages";
+import RouteLayer
+  from "../../components/map/RouteLayer";
 
-import useCurrentBuilding from "../../hooks/useCurrentBuilding";
-import useIndoorEntry from "../../hooks/useIndoorEntry";
+import OutdoorMap3D
+  from "../../components/map/OutdoorMap3D";
+
+import { loadGraphs }
+  from "../../navigation/loadGraphs";
+
+import { useNavigation }
+  from "../../hooks/useNavigation";
+
+import { useLocation }
+  from "../../hooks/useLocation";
+
+import { useLiveCampusEvents }
+  from "../../hooks/useLiveCampusEvents";
+
+import EventMapMarkersLayer
+  from "../../components/map/EventMapMarkersLayer";
+
+import { startNavigationToVenue }
+  from "../../services/venueNavigationService";
 
 const CAMPUS_BOUNDS = [
   [8.9118, 76.6298],
@@ -31,48 +50,207 @@ const CAMPUS_BOUNDS = [
 
 export default function CampusPage() {
   const navigate = useNavigate();
+  const [is3DMode, setIs3DMode] = useState(true);
 
+  const navContext = useNavigation();
+  const locationContext = useLocation();
   const {
-    navigationStage,
     selectedBuilding,
+    currentBuilding,
     route,
-  } = useNavigation();
+  } = navContext;
 
-  const center = [8.9138, 76.6323];
+  const { groupedVenues, now } = useLiveCampusEvents();
 
-  // Automatic Building Detection
-  useCurrentBuilding();
+  const handleNavigateToVenue = useCallback(
+    async (venue) => {
+      if (!venue) return;
+      await startNavigationToVenue(venue, navContext, navigate, {
+        fallbackLocation:
+          locationContext?.rawLocation || locationContext?.location,
+      });
+    },
+    [navContext, navigate, locationContext]
+  );
 
-  // Automatic Indoor Entry
-  useIndoorEntry();
+  const activeBuilding =
+    selectedBuilding ||
+    currentBuilding ||
+    null;
 
-  // Automatic Outdoor → Ground Floor
-  useNavigationStage();
+  const center = [
+    8.9138,
+    76.6323,
+  ];
 
-  // Automatic Ground Floor → First Floor
-  useFloorTransition();
 
-  // Automatic Destination Arrival
-  useDestinationArrival();
+  // ==========================================
+  // Building Interaction
+  // ==========================================
 
-  const handleBuildingClick = (feature, layer) => {
+  const handleBuildingClick = (
+    feature,
+    layer
+  ) => {
+    // ----------------------------------------
+    // Normal building style
+    // ----------------------------------------
+
+    const normalStyle = {
+      color: "#4F8F8A",
+      weight: 2,
+      opacity: 1,
+      fillColor: "#A9CEC6",
+      fillOpacity: 1,
+    };
+
+    // ----------------------------------------
+    // Hovered building style
+    // ----------------------------------------
+
+    const hoverStyle = {
+      color: "#0E4F63",
+      weight: 4,
+      opacity: 1,
+      fillColor: "#82B8AE",
+      fillOpacity: 1,
+    };
+
+    // ----------------------------------------
+    // Selected building style
+    // ----------------------------------------
+
+    const selectedStyle = {
+      color: "#0E4F63",
+      weight: 4,
+      opacity: 1,
+      fillColor: "#6FB3B8",
+      fillOpacity: 1,
+    };
+
+    // ========================================
+    // Leaflet Events
+    // ========================================
+
     layer.on({
-      click: () => {
-        const slug = feature.properties.slug;
 
-        if (slug) {
-          navigate(`/${slug}`);
+      // --------------------------------------
+      // Mouse enters building
+      // --------------------------------------
+
+      mouseover: () => {
+        layer.setStyle(
+          hoverStyle
+        );
+
+        if (
+          typeof layer.bringToFront ===
+          "function"
+        ) {
+          layer.bringToFront();
+        }
+
+        const element =
+          layer.getElement?.();
+
+        if (element) {
+          element.style.cursor =
+            "pointer";
+        }
+      },
+
+      // --------------------------------------
+      // Mouse leaves building
+      // --------------------------------------
+
+      mouseout: () => {
+        layer.setStyle(
+          normalStyle
+        );
+      },
+
+      // --------------------------------------
+      // Building clicked
+      // --------------------------------------
+
+      click: () => {
+        layer.setStyle(
+          selectedStyle
+        );
+
+        const buildingName =
+          feature.properties?.name;
+
+        console.log(
+          "Building clicked:",
+          buildingName
+        );
+
+        // ====================================
+        // Building → Page Route Mapping
+        // ====================================
+
+        switch (buildingName) {
+
+          case "Mechanical Block":
+            navigate("/mechanical");
+            break;
+
+          case "Chemical Block":
+            navigate("/chemical");
+            break;
+
+          case "Main Block":
+            navigate("/main");
+            break;
+
+          case "Central Library":
+            navigate("/library");
+            break;
+
+          case "Workshop Block":
+            navigate("/workshop");
+            break;
+
+          case "Workshop (Electrical)":
+            navigate(
+              "/electrical-workshop"
+            );
+            break;
+
+          case "Architecture Block":
+            navigate(
+              "/architecture"
+            );
+            break;
+
+          case "Interdisciplinary Research Block (RUSA)":
+            navigate("/research");
+            break;
+
+          default:
+            console.warn(
+              "No route configured for building:",
+              buildingName
+            );
         }
       },
     });
   };
 
+  // ==========================================
+  // Navigation Graph Initialization
+  // ==========================================
+
   useEffect(() => {
     async function initializeNavigation() {
       try {
-        console.log("CampusPage Loaded");
+        console.log(
+          "CampusPage Loaded"
+        );
 
-        const graphs = await loadGraphs();
+        const graphs =
+          await loadGraphs();
 
         console.log(
           "========== NAVIGATION ENGINE V2 =========="
@@ -80,17 +258,23 @@ export default function CampusPage() {
 
         console.log(
           "Outdoor Graph Nodes:",
-          Object.keys(graphs.outdoor).length
+          Object.keys(
+            graphs.outdoor
+          ).length
         );
 
         console.log(
           "Ground Floor Graph Nodes:",
-          Object.keys(graphs.groundFloor).length
+          Object.keys(
+            graphs.groundFloor
+          ).length
         );
 
         console.log(
           "First Floor Graph Nodes:",
-          Object.keys(graphs.firstFloor).length
+          Object.keys(
+            graphs.firstFloor
+          ).length
         );
 
         console.log(
@@ -100,6 +284,7 @@ export default function CampusPage() {
         console.log(
           "=========================================="
         );
+
       } catch (err) {
         console.error(
           "Navigation Error:",
@@ -111,13 +296,41 @@ export default function CampusPage() {
     initializeNavigation();
   }, []);
 
+  // ==========================================
+  // Render
+  // ==========================================
+
+  if (is3DMode) {
+    return (
+      <div className="relative flex h-full w-full flex-col overflow-hidden">
+        <OutdoorMap3D
+          onToggle2D={() => setIs3DMode(false)}
+          liveVenues={groupedVenues}
+          onNavigateToVenue={handleNavigateToVenue}
+          now={now}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
+    <div className="relative flex h-full w-full flex-col overflow-hidden">
+      {/* 2D to 3D View Toggle */}
+      <div className="smartnav-view-mode-toggle smartnav-view-mode-toggle-2d">
+        <button
+          type="button"
+          onClick={() => setIs3DMode(true)}
+          className="smartnav-mode-toggle-btn"
+          title="Switch to 3D MapLibre Map"
+          aria-label="Switch to 3D Map"
+        >
+          <Box size={14} strokeWidth={2.2} className="text-blue-600 shrink-0" />
+        </button>
+      </div>
+
+      {/* =====================================
+          Leaflet Campus Map (Strictly Outdoor)
+          ===================================== */}
       <MapContainer
         center={center}
         zoom={18}
@@ -125,45 +338,37 @@ export default function CampusPage() {
         maxZoom={22}
         maxBounds={CAMPUS_BOUNDS}
         maxBoundsViscosity={1.0}
-        style={{
-          height: "calc(100vh - 170px)",
-          width: "100%",
-        }}
+        rotate={true}
+        bearing={0}
+        touchRotate={false}
+        dragRotate={false}
+        shiftKeyRotate={false}
+        className="min-h-0 flex-1 w-full"
       >
+        {/* OpenStreetMap Base Layer */}
         <TileLayer
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Always Visible */}
+        {/* Permanent Campus Layers (Boundary, Areas, Building Footprints) */}
         <PermanentLayers
           handleBuildingClick={handleBuildingClick}
+          activeBuilding={activeBuilding}
         />
 
-        {/* Outdoor Layers */}
-        {navigationStage ===
-          NAVIGATION_STAGE.OUTDOOR && (
-          <OutdoorLayers />
-        )}
+        {/* Outdoor Walkways and Entrances (Always visible on Campus Map) */}
+        <OutdoorLayers />
 
-        {/* Ground Floor Layers */}
-        {navigationStage ===
-          NAVIGATION_STAGE.GROUND_FLOOR && (
-          <GroundFloorLayers
-            building={selectedBuilding}
-          />
-        )}
-
-        {/* First Floor Layers */}
-        {navigationStage ===
-          NAVIGATION_STAGE.FIRST_FLOOR && (
-          <FirstFloorLayers
-            building={selectedBuilding}
-          />
-        )}
-
-        {/* Keep navigation route above map geometry */}
+        {/* Outdoor Navigation Route */}
         <RouteLayer path={route} />
+
+        {/* Live Campus Event Markers */}
+        <EventMapMarkersLayer
+          groupedVenues={groupedVenues}
+          onNavigateToVenue={handleNavigateToVenue}
+          now={now}
+        />
       </MapContainer>
     </div>
   );

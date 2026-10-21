@@ -4,6 +4,10 @@ let graphs = {
   groundFloor: {},
 
   firstFloor: {},
+
+  secondFloor: {},
+
+  thirdFloor: {},
 };
 
 export function setGraphs(newGraphs) {
@@ -24,4 +28,12 @@ export function getGroundFloorGraph(building) {
 
 export function getFirstFloorGraph(building) {
   return graphs.firstFloor[building] ?? null;
+}
+
+export function getSecondFloorGraph(building) {
+  return graphs.secondFloor[building] ?? null;
+}
+
+export function getThirdFloorGraph(building) {
+  return graphs.thirdFloor[building] ?? null;
 }

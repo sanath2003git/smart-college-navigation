@@ -1,9 +1,5 @@
+import BuildingFloorExplorer from "../../components/building/BuildingFloorExplorer";
+
 export default function ChemicalPage() {
-  return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold">
-        Chemical Block
-      </h1>
-    </div>
-  );
+  return <BuildingFloorExplorer buildingName="Chemical Block" />;
 }
